@@ -10,7 +10,7 @@ function renderBarGroup(title, unitFormatter, countries) {
       <div class="compare-bar-row">
         <span class="compare-bar-row__label">${c.flag} ${c.name}</span>
         <div class="compare-bar-row__track">
-          <div class="compare-bar-row__fill" style="width:${(c.value / max) * 100}%; background:${c.color}"></div>
+          <div class="compare-bar-row__fill" style="width:${(c.value / max) * 100}%"></div>
         </div>
         <span class="compare-bar-row__value">${unitFormatter(c.value)}</span>
       </div>`
@@ -23,7 +23,7 @@ export function createCompareZone(container, { onDropAlpha3, onRemove, onReorder
   container.innerHTML = `
     <div class="compare-zone">
       <div class="compare-zone__dropbox" id="compare-dropbox">
-        <p class="compare-zone__hint">Arrastrá países acá (o hacé click en el mapa / la lista) para compararlos — hasta ${MAX_COMPARE}.</p>
+        <p class="compare-zone__hint">Drag countries here (or click on the map / list) to compare them — up to ${MAX_COMPARE}.</p>
         <div class="compare-zone__chips" id="compare-chips"></div>
       </div>
       <div class="compare-zone__charts" id="compare-charts"></div>
@@ -58,11 +58,9 @@ export function createCompareZone(container, { onDropAlpha3, onRemove, onReorder
       const chip = document.createElement('div');
       chip.className = 'compare-chip';
       chip.dataset.alpha3 = country.alpha3;
-      chip.style.setProperty('--chip-color', country.color);
       chip.innerHTML = `
-        <span class="compare-chip__swatch" aria-hidden="true"></span>
         <span>${country.flag} ${country.name}</span>
-        <button type="button" class="compare-chip__remove" aria-label="Quitar ${country.name}">×</button>
+        <button type="button" class="compare-chip__remove" aria-label="Remove ${country.name}">×</button>
       `;
       makeDraggable(chip, country.alpha3);
       chip.addEventListener('dragover', (event) => {
@@ -88,16 +86,16 @@ export function createCompareZone(container, { onDropAlpha3, onRemove, onReorder
     });
 
     if (selectedCountries.length === 0) {
-      chartsEl.innerHTML = '<p class="compare-zone__empty">Todavía no elegiste países para comparar.</p>';
+      chartsEl.innerHTML = '<p class="compare-zone__empty">You haven\'t picked any countries to compare yet.</p>';
       return;
     }
 
-    const population = selectedCountries.map((c) => ({ flag: c.flag, name: c.name, value: c.population, color: c.color }));
-    const area = selectedCountries.map((c) => ({ flag: c.flag, name: c.name, value: c.area, color: c.color }));
+    const population = selectedCountries.map((c) => ({ flag: c.flag, name: c.name, value: c.population }));
+    const area = selectedCountries.map((c) => ({ flag: c.flag, name: c.name, value: c.area }));
 
     chartsEl.innerHTML =
-      renderBarGroup('Población', formatPopulation, [...population].sort((a, b) => b.value - a.value)) +
-      renderBarGroup('Superficie', formatArea, [...area].sort((a, b) => b.value - a.value));
+      renderBarGroup('Population', formatPopulation, [...population].sort((a, b) => b.value - a.value)) +
+      renderBarGroup('Area', formatArea, [...area].sort((a, b) => b.value - a.value));
   }
 
   return { render };

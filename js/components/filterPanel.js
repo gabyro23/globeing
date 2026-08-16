@@ -1,32 +1,35 @@
 const SORT_OPTIONS = [
-  { value: 'name-asc', label: 'Nombre (A-Z)' },
-  { value: 'population-desc', label: 'Población (mayor a menor)' },
-  { value: 'population-asc', label: 'Población (menor a mayor)' },
-  { value: 'area-desc', label: 'Superficie (mayor a menor)' },
-  { value: 'area-asc', label: 'Superficie (menor a mayor)' },
+  { value: 'name-asc', label: 'Name (A-Z)' },
+  { value: 'population-desc', label: 'Population (high to low)' },
+  { value: 'population-asc', label: 'Population (low to high)' },
+  { value: 'area-desc', label: 'Area (high to low)' },
+  { value: 'area-asc', label: 'Area (low to high)' },
 ];
 
 export function createFilterPanel(container, { regions, filters, onChange }) {
   container.innerHTML = `
     <div class="filter-panel">
       <div class="filter-field filter-field--search">
-        <label for="filter-search">Buscar país</label>
-        <input id="filter-search" type="search" placeholder="Ej: Argentina, Japón..." autocomplete="off" />
+        <label for="filter-search">Search country</label>
+        <div class="filter-search-box">
+          <span class="filter-search-box__icon" aria-hidden="true">⌕</span>
+          <input id="filter-search" type="search" placeholder="e.g. Argentina, Japan..." autocomplete="off" />
+        </div>
       </div>
 
       <fieldset class="filter-field filter-field--regions">
-        <legend>Región</legend>
+        <legend>Region</legend>
         <div class="filter-regions" id="filter-regions"></div>
       </fieldset>
 
       <div class="filter-field">
-        <label for="filter-sort">Ordenar por</label>
+        <label for="filter-sort">Sort by</label>
         <select id="filter-sort">
           ${SORT_OPTIONS.map((o) => `<option value="${o.value}">${o.label}</option>`).join('')}
         </select>
       </div>
 
-      <button type="button" class="filter-reset" id="filter-reset">Limpiar filtros</button>
+      <button type="button" class="filter-reset" id="filter-reset">↺ Clear filters</button>
     </div>
   `;
 

@@ -1,42 +1,48 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Globing — Compará países</title>
+  <title>Globeing — Compare Countries</title>
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
   <header class="site-header">
-    <a class="site-header__brand" href="#" aria-label="Globeing — inicio">
+    <a class="site-header__brand" href="#" aria-label="Globeing — home">
       <img class="site-header__logo" src="assets/logo.png" alt="Globeing" />
     </a>
-    <nav class="site-header__nav" aria-label="Navegación principal">
+    <nav class="site-header__nav" aria-label="Main navigation">
       <a href="#about">About us</a>
       <a href="#contact">Contact</a>
-      <a href="#" class="site-header__cta">Download</a>
+      <a href="#" class="site-header__cta">Download app</a>
     </nav>
   </header>
 
-  <p class="app-header__tagline">Explore the map, filter countries, and drag your picks into the comparison panel to see population and land area side by side.</p>
+  <div class="app-header__intro">
+    <p class="app-header__tagline">Compare countries by population and land area.</p>
+    <span id="country-count-badge" class="app-header__stat" hidden></span>
+  </div>
 
-  <p id="status" class="status">Cargando datos y mapa…</p>
+  <div id="status" class="status">
+    <span class="status__spinner" aria-hidden="true"></span>
+    <span>Loading data and map…</span>
+  </div>
 
   <main class="app-layout">
     <aside class="app-layout__sidebar">
-      <section id="filter-panel" aria-label="Filtros"></section>
-      <section id="country-list" class="app-layout__list" aria-label="Lista de países"></section>
+      <section id="filter-panel" aria-label="Filters"></section>
+      <section id="country-list" class="app-layout__list" aria-label="Country list"></section>
     </aside>
 
-    <section class="app-layout__map" aria-label="Mapa interactivo">
+    <section class="app-layout__map" aria-label="Interactive map">
       <div id="map-view"></div>
     </section>
   </main>
 
-  <section id="compare-zone" class="app-layout__compare" aria-label="Comparador de países"></section>
+  <section id="compare-zone" class="app-layout__compare" aria-label="Country comparison"></section>
 
   <footer class="app-footer">
-    <p>Datos de población y superficie de fuentes públicas (dataset estático). Mapa base: Natural Earth / world-atlas.</p>
+    <p>Population and land area data from public sources (static dataset). Base map: Natural Earth / world-atlas.</p>
   </footer>
 
   <script type="module" src="js/app.js"></script>

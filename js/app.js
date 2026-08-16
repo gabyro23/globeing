@@ -4,8 +4,10 @@ import { createFilterPanel } from './components/filterPanel.js';
 import { createCountryList } from './components/countryList.js';
 import { createMapView } from './components/mapView.js';
 import { createCompareZone } from './components/compareZone.js';
-import { MAX_COMPARE, assignCountryColors } from './selectionColors.js';
+import { MAX_COMPARE } from './selectionColors.js';
 import { initSiteHeader } from './components/siteHeader.js';
+
+const DEFAULT_COMPARE_ALPHA3 = ['ARG', 'JPN'];
 
 initSiteHeader();
 
@@ -30,14 +32,17 @@ async function main() {
   try {
     const [countries, world] = await Promise.all([loadCountries(), loadWorldTopology()]);
     statusEl.remove();
-    assignCountryColors(countries);
 
     const byAlpha3 = new Map(countries.map((c) => [c.alpha3, c]));
     const regions = [...new Set(countries.map((c) => c.region))].sort();
 
+    const countBadge = document.getElementById('country-count-badge');
+    countBadge.textContent = `${countries.length} countries · public data`;
+    countBadge.hidden = false;
+
     const store = createStore({
       filters: { search: '', regions: [...regions], sort: 'name-asc' },
-      compareAlpha3: [],
+      compareAlpha3: DEFAULT_COMPARE_ALPHA3.filter((a) => byAlpha3.has(a)),
     });
 
     function toggleCompare(alpha3) {
@@ -108,7 +113,7 @@ async function main() {
     render(store.getState());
   } catch (error) {
     console.error(error);
-    statusEl.textContent = `No se pudo cargar la app: ${error.message}`;
+    statusEl.textContent = `Couldn't load the app: ${error.message}`;
     statusEl.classList.add('status--error');
   }
 }

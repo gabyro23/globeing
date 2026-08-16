@@ -1,69 +1,122 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useState } from "react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+} from "recharts";
+import { INDICATORS } from "../lib/indicators";
+
+const COLOR_A = "#2563eb"; // azul
+const COLOR_B = "#f97316"; // naranja
 
 export default function Home() {
+  const [countryList, setCountryList] = useState([]);
+  const [codeA, setCodeA] = useState("");
+  const [codeB, setCodeB] = useState("");
+  const [dataA, setDataA] = useState(null);
+  const [dataB, setDataB] = useState(null);
+
+  // Cargar la lista liviana de países una sola vez, al entrar a la página
+  useEffect(() => {
+    fetch("/api/countries")
+      .then((res) => res.json())
+      .then((list) => {
+        setCountryList(list);
+        // valores por defecto para que se vea algo apenas entras
+        if (list.length > 1) {
+          const arg = list.find((c) => c.iso3 === "ARG");
+          const esp = list.find((c) => c.iso3 === "ESP");
+          setCodeA(arg ? arg.iso3 : list[0].iso3);
+          setCodeB(esp ? esp.iso3 : list[1].iso3);
+        }
+      });
+  }, []);
+
+  // Cada vez que cambia el país A, traer todos sus datos
+  useEffect(() => {
+    if (!codeA) return;
+    fetch(`/api/countries?code=${codeA}`)
+      .then((res) => res.json())
+      .then(setDataA);
+  }, [codeA]);
+
+  // Lo mismo para el país B
+  useEffect(() => {
+    if (!codeB) return;
+    fetch(`/api/countries?code=${codeB}`)
+      .then((res) => res.json())
+      .then(setDataB);
+  }, [codeB]);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.js
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="max-w-5xl mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-6">Comparar países</h1>
+
+      <div className="flex gap-4 mb-8">
+        <select
+          value={codeA}
+          onChange={(e) => setCodeA(e.target.value)}
+          className="border rounded px-3 py-2 flex-1"
+        >
+          {countryList.map((c) => (
+            <option key={c.iso3} value={c.iso3}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={codeB}
+          onChange={(e) => setCodeB(e.target.value)}
+          className="border rounded px-3 py-2 flex-1"
+        >
+          {countryList.map((c) => (
+            <option key={c.iso3} value={c.iso3}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {dataA && dataB ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {INDICATORS.map((ind) => {
+            const valueA = Number(dataA[ind.key]) || 0;
+            const valueB = Number(dataB[ind.key]) || 0;
+            const chartData = [
+              { name: dataA.name, value: valueA },
+              { name: dataB.name, value: valueB },
+            ];
+
+            return (
+              <div key={ind.key} className="border rounded-lg p-4">
+                <h2 className="font-semibold mb-2">
+                  {ind.label} {ind.unit && `(${ind.unit})`}
+                </h2>
+                <ResponsiveContainer width="100%" height={140}>
+                  <BarChart data={chartData} layout="vertical" margin={{ left: 10 }}>
+                    <XAxis type="number" hide />
+                    <YAxis type="category" dataKey="name" width={90} />
+                    <Tooltip />
+                    <Bar dataKey="value" radius={[0, 4, 4, 0]}>
+                      <Cell fill={COLOR_A} />
+                      <Cell fill={COLOR_B} />
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            );
+          })}
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      ) : (
+        <p className="text-gray-500">Elegí dos países para comparar.</p>
+      )}
+    </main>
   );
 }

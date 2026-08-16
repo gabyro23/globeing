@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<style>
+@font-face{font-family:'Source Serif';src:local('Georgia');}
+body{margin:0;background:oklch(0.98 0.005 90);}
+a{color:oklch(0.45 0.09 250);}
+a:hover{color:oklch(0.35 0.09 250);}
+</style>
+</helmet>
+
+<section id="2a" style="width:1440px;margin:40px auto;background:#FBF5EF;border-radius:4px;overflow:hidden;font-family:Helvetica,Arial,sans-serif;color:oklch(0.25 0.03 260);box-shadow:0 1px 3px oklch(0 0 0 / 0.1);">
+  <div style="display:inline-block;font-size:12px;font-weight:700;letter-spacing:.08em;color:#077187;background:#E7F0EC;padding:4px 10px;border-radius:3px;margin:20px 0 0 32px;">TURN 2 — REDESIGN PROPOSAL · <a href="#2a" style="color:#077187;">2a</a></div>
+
+  <header style="display:flex;align-items:center;justify-content:space-between;padding:20px 40px;background:#fff;border-bottom:1px solid oklch(0.9 0.005 90);">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div style="width:34px;height:34px;border-radius:50%;background:conic-gradient(from 200deg, #074F57, #74A57F, #077187, #074F57);"></div>
+      <div style="font-size:22px;font-weight:800;letter-spacing:-.02em;">glob<span style="color:#077187;">eing</span></div>
+    </div>
+    <nav style="display:flex;align-items:center;gap:32px;font-size:15px;font-weight:600;">
+      <a href="#" style="color:oklch(0.25 0.03 260);text-decoration:none;">Sobre nosotros</a>
+      <a href="#" style="color:oklch(0.25 0.03 260);text-decoration:none;">Contacto</a>
+      <a href="#" style="background:#077187;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:700;">Descargar app</a>
+    </nav>
+  </header>
+
+  <div style="padding:24px 40px 8px;display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;">
+    <p style="font-size:16px;line-height:1.5;color:oklch(0.4 0.02 260);margin:0;max-width:560px;">Buscá o filtrá países en el mapa, y agregalos a la comparación con un clic o arrastrándolos.</p>
+    <span style="font-size:13px;color:oklch(0.55 0.01 90);margin-left:auto;">233 países · fuentes públicas</span>
+  </div>
+
+  <div style="display:flex;gap:24px;padding:16px 40px 0;align-items:flex-start;">
+    <aside style="width:320px;flex:0 0 auto;display:flex;flex-direction:column;gap:16px;">
+      <div style="background:#fff;border:1px solid oklch(0.9 0.005 90);border-radius:14px;padding:20px;">
+        <div style="position:relative;margin-bottom:18px;">
+          <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:15px;color:oklch(0.6 0.01 90);">⌕</span>
+          <input placeholder="Buscar país, ej. Japón" style="width:100%;box-sizing:border-box;padding:12px 14px 12px 36px;border-radius:9px;border:1px solid oklch(0.87 0.005 90);font-size:14px;background:oklch(0.98 0.005 90);">
+        </div>
+        <div style="font-size:13px;font-weight:700;color:oklch(0.45 0.02 260);margin-bottom:8px;">Región</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;">
+          <span style="background:#E7F0EC;color:#074F57;border:1px solid #9ECE9A;font-size:13px;font-weight:600;padding:6px 12px;border-radius:20px;">✓ Africa</span>
+          <span style="background:#E7F0EC;color:#074F57;border:1px solid #9ECE9A;font-size:13px;font-weight:600;padding:6px 12px;border-radius:20px;">✓ Americas</span>
+          <span style="background:#E7F0EC;color:#074F57;border:1px solid #9ECE9A;font-size:13px;font-weight:600;padding:6px 12px;border-radius:20px;">✓ Asia</span>
+          <span style="background:#E7F0EC;color:#074F57;border:1px solid #9ECE9A;font-size:13px;font-weight:600;padding:6px 12px;border-radius:20px;">✓ Europe</span>
+          <span style="background:#E7F0EC;color:#074F57;border:1px solid #9ECE9A;font-size:13px;font-weight:600;padding:6px 12px;border-radius:20px;">✓ Oceania</span>
+        </div>
+        <div style="font-size:13px;font-weight:700;color:oklch(0.45 0.02 260);margin-bottom:8px;">Ordenar por</div>
+        <select style="width:100%;padding:10px 12px;border-radius:9px;border:1px solid oklch(0.87 0.005 90);font-size:14px;background:#fff;margin-bottom:14px;">
+          <option>Nombre (A-Z)</option>
+        </select>
+        <button style="width:100%;background:none;border:none;color:#074F57;font-size:13px;font-weight:700;cursor:pointer;padding:6px 0;text-align:left;">↺ Limpiar filtros</button>
+      </div>
+
+      <div style="background:#fff;border:1px solid oklch(0.9 0.005 90);border-radius:14px;overflow:hidden;">
+        <div style="padding:14px 20px;border-bottom:1px solid oklch(0.93 0.005 90);font-size:13px;color:oklch(0.5 0.01 90);">233 resultados</div>
+        <div style="max-height:360px;overflow:hidden;">
+          <div style="display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid oklch(0.95 0.005 90);">
+            <span style="font-size:22px;">🇦🇫</span>
+            <div style="flex:1;"><div style="font-weight:700;font-size:14px;">Afghanistan</div><div style="font-size:12px;color:oklch(0.55 0.01 90);">37,2 M hab. · 652,1 mil km²</div></div>
+            <button style="width:30px;height:30px;border-radius:50%;border:1.5px solid #077187;color:#077187;background:#fff;font-size:16px;font-weight:700;cursor:pointer;flex:0 0 auto;">+</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid oklch(0.95 0.005 90);background:#EEF5F0;">
+            <span style="font-size:22px;">🇦🇱</span>
+            <div style="flex:1;"><div style="font-weight:700;font-size:14px;">Albania</div><div style="font-size:12px;color:oklch(0.55 0.01 90);">2,9 M hab. · 28,7 mil km²</div></div>
+            <button style="width:30px;height:30px;border-radius:50%;border:none;color:#fff;background:#077187;font-size:16px;font-weight:700;cursor:pointer;flex:0 0 auto;">✓</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:14px 20px;">
+            <span style="font-size:22px;">🇩🇿</span>
+            <div style="flex:1;"><div style="font-weight:700;font-size:14px;">Algeria</div><div style="font-size:12px;color:oklch(0.55 0.01 90);">42,2 M hab. · 2,4 M km²</div></div>
+            <button style="width:30px;height:30px;border-radius:50%;border:1.5px solid #077187;color:#077187;background:#fff;font-size:16px;font-weight:700;cursor:pointer;flex:0 0 auto;">+</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <div style="flex:1;position:relative;background:#fff;border:1px solid oklch(0.9 0.005 90);border-radius:14px;min-height:520px;display:flex;align-items:center;justify-content:center;">
+      <div style="position:absolute;inset:0;background:
+        repeating-linear-gradient(45deg, oklch(0.94 0.008 90) 0 2px, transparent 2px 14px);border-radius:14px;"></div>
+      <div style="position:relative;text-align:center;color:oklch(0.5 0.01 90);font-family:monospace;font-size:13px;line-height:1.6;">
+        world map — countries default to a single muted sand fill,<br>
+        hover highlights in sage, selected countries get a solid teal outline
+      </div>
+      <div style="position:absolute;left:20px;bottom:20px;background:#fff;border:1px solid oklch(0.9 0.005 90);border-radius:10px;padding:10px 14px;display:flex;gap:16px;font-size:12px;">
+        <div style="display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:2px;background:#9ECE9A;display:inline-block;"></span>Sin seleccionar</div>
+        <div style="display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:2px;background:#74A57F;display:inline-block;"></span>Al pasar el mouse</div>
+        <div style="display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:2px;background:#077187;display:inline-block;"></span>Seleccionado</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin:24px 40px 32px;background:#fff;border:1px solid oklch(0.9 0.005 90);border-radius:14px;padding:16px 24px;display:flex;align-items:center;gap:20px;box-shadow:0 -2px 12px oklch(0 0 0 / 0.04);">
+    <div style="font-size:13px;font-weight:700;color:oklch(0.45 0.02 260);white-space:nowrap;">Comparando 2 países</div>
+    <div style="display:flex;gap:10px;flex:1;">
+      <div style="display:flex;align-items:center;gap:8px;background:#EEF5F0;border:1px solid #9ECE9A;border-radius:10px;padding:8px 12px;">
+        <span style="font-size:18px;">🇦🇱</span><span style="font-size:13px;font-weight:600;">Albania</span>
+        <span style="color:oklch(0.6 0.01 90);cursor:pointer;font-size:13px;margin-left:4px;">✕</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;background:#EEF5F0;border:1px solid #9ECE9A;border-radius:10px;padding:8px 12px;">
+        <span style="font-size:18px;">🇯🇵</span><span style="font-size:13px;font-weight:600;">Japón</span>
+        <span style="color:oklch(0.6 0.01 90);cursor:pointer;font-size:13px;margin-left:4px;">✕</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;border:1.5px dashed oklch(0.85 0.01 90);border-radius:10px;padding:8px 16px;color:oklch(0.6 0.01 90);font-size:13px;">+ agregar otro</div>
+    </div>
+    <button style="background:#077187;color:#fff;border:none;padding:12px 22px;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;">Ver comparación →</button>
+  </div>
+</section>
+
+<div style="display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap;padding:40px;">
+<section id="1a" style="width:800px;flex:0 0 auto;background:#fff;border:1px solid oklch(0.88 0.01 90);border-radius:2px;margin:0;padding:40px 48px 60px;font-family:Georgia,'Times New Roman',serif;color:oklch(0.22 0.01 90);">
+  <div style="display:inline-block;font-family:Helvetica,Arial,sans-serif;font-size:12px;font-weight:700;letter-spacing:.08em;color:oklch(0.45 0.09 250);background:oklch(0.93 0.03 250);padding:4px 10px;border-radius:3px;margin-bottom:20px;">OPTION 1A — WRITTEN BRIEF</div>
+  <h1 style="font-size:40px;margin:0 0 8px;font-weight:400;">Globing — UX audit</h1>
+  <p style="font-family:Helvetica,Arial,sans-serif;font-size:15px;color:oklch(0.45 0.01 90);margin:0 0 40px;">gabyro23.github.io/globing — top issues, based on best-practice review</p>
+
+  <p style="font-family:Helvetica,Arial,sans-serif;font-size:16px;line-height:1.6;max-width:680px;margin:0 0 48px;color:oklch(0.32 0.01 90);">
+    Globing lets people filter a world map and drag countries into a panel to compare population and land area. The core idea is sound. The issues below are about whether first-time visitors can discover and trust that interaction — ordered roughly by how many people they block.
+  </p>
+
+  <div style="display:flex;flex-direction:column;gap:0;">
+    <div style="display:grid;grid-template-columns:60px 1fr;gap:24px;padding:28px 0;border-top:1px solid oklch(0.85 0.01 90);">
+      <div style="font-size:28px;color:oklch(0.7 0.02 90);">01</div>
+      <div>
+        <h3 style="font-family:Helvetica,Arial,sans-serif;font-size:18px;margin:0 0 8px;">Nav is English, content is Spanish</h3>
+        <p style="font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;margin:0 0 6px;color:oklch(0.35 0.01 90);"><strong>Why it matters:</strong> "About us / Contact / Download" sits above Spanish instructions and a Spanish loading message. Mixed languages on one screen read as unfinished or auto-translated, and it's not clear which audience the site is actually for.</p>
+        <p style="font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;margin:0;color:oklch(0.35 0.01 90);"><strong>Fix:</strong> Pick one language for the whole shell (nav, headings, buttons, empty/loading states). If both audiences matter, add a real language toggle rather than mixing per-element.</p>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:60px 1fr;gap:24px;padding:28px 0;border-top:1px solid oklch(0.85 0.01 90);">
+      <div style="font-size:28px;color:oklch(0.7 0.02 90);">02</div>
+      <div>
+        <h3 style="font-family:Helvetica,Arial,sans-serif;font-size:18px;margin:0 0 8px;">Drag-and-drop is the only way to add a country</h3>
+        <p style="font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;margin:0 0 6px;color:oklch(0.35 0.01 90);"><strong>Why it matters:</strong> Dragging a pin into a panel is a nice flourish but a poor primary interaction: it's imprecise on touch screens, invisible to keyboard/screen-reader users, and nothing on the map signals that countries are draggable in the first place.</p>
+        <p style="font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;margin:0;color:oklch(0.35 0.01 90);"><strong>Fix:</strong> Make click/tap-to-add the primary path (e.g. a "+ Compare" button on hover/tap), keep drag as an optional shortcut. Add a subtle hint the first time (e.g. a pulsing pin or "drag or click to compare").</p>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:60px 1fr;gap:24px;padding:28px 0;border-top:1px solid oklch(0.85 0.01 90);">
+      <div style="font-size:28px;color:oklch(0.7 0.02 90);">03</div>
+      <div>
+        <h3 style="font-family:Helvetica,Arial,sans-serif;font-size:18px;margin:0 0 8px;">No visible search or filter control</h3>
+        <p style="font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;margin:0 0 6px;color:oklch(0.35 0.01 90);"><strong>Why it matters:</strong> The intro text promises you can "filter countries," but there's no search box or filter chips in the initial view — someone looking for a specific country (e.g. Peru) has to hunt for it on a world map instead.</p>
+        <p style="font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;margin:0;color:oklch(0.35 0.01 90);"><strong>Fix:</strong> Put a persistent search/autocomplete field above or beside the map, always visible, not buried behind an icon.</p>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:60px 1fr;gap:24px;padding:28px 0;border-top:1px solid oklch(0.85 0.01 90);">
+      <div style="font-size:28px;color:oklch(0.7 0.02 90);">04</div>
+      <div>
+        <h3 style="font-family:Helvetica,Arial,sans-serif;font-size:18px;margin:0 0 8px;">Comparison panel has no example state</h3>
+        <p style="font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;margin:0 0 6px;color:oklch(0.35 0.01 90);"><strong>Why it matters:</strong> A first-time visitor sees an empty panel and instructions telling them to drag something into it — but never sees what a filled-in comparison actually looks like, so it's hard to know if it's worth the effort.</p>
+        <p style="font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;margin:0;color:oklch(0.35 0.01 90);"><strong>Fix:</strong> Pre-load two default countries into the panel on first visit, so the value is visible immediately, then let people swap them out.</p>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:60px 1fr;gap:24px;padding:28px 0;border-top:1px solid oklch(0.85 0.01 90);">
+      <div style="font-size:28px;color:oklch(0.7 0.02 90);">05</div>
+      <div>
+        <h3 style="font-family:Helvetica,Arial,sans-serif;font-size:18px;margin:0 0 8px;">Loading state is a bare line of text</h3>
+        <p style="font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;margin:0 0 6px;color:oklch(0.35 0.01 90);"><strong>Why it matters:</strong> "Cargando datos y mapa…" with no spinner, skeleton, or progress cue reads as a stall on slower connections — visitors can't tell if the site is working or stuck.</p>
+        <p style="font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;margin:0;color:oklch(0.35 0.01 90);"><strong>Fix:</strong> Show a map-shaped skeleton or spinner during load, and keep the message on screen only as long as it's true.</p>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:60px 1fr;gap:24px;padding:28px 0;border-top:1px solid oklch(0.85 0.01 90);">
+      <div style="font-size:28px;color:oklch(0.7 0.02 90);">06</div>
+      <div>
+        <h3 style="font-family:Helvetica,Arial,sans-serif;font-size:18px;margin:0 0 8px;">"Download" in the nav is ambiguous</h3>
+        <p style="font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;margin:0 0 6px;color:oklch(0.35 0.01 90);"><strong>Why it matters:</strong> It's not clear if this downloads a mobile app, the raw dataset, or the current comparison as an image/CSV. Ambiguous CTAs get ignored.</p>
+        <p style="font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;margin:0;color:oklch(0.35 0.01 90);"><strong>Fix:</strong> Rename to say exactly what it does — "Export comparison," "Get the dataset," or "Download app."</p>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:60px 1fr;gap:24px;padding:28px 0;border-top:1px solid oklch(0.85 0.01 90);border-bottom:1px solid oklch(0.85 0.01 90);">
+      <div style="font-size:28px;color:oklch(0.7 0.02 90);">07</div>
+      <div>
+        <h3 style="font-family:Helvetica,Arial,sans-serif;font-size:18px;margin:0 0 8px;">Instructions compete with the interface for attention</h3>
+        <p style="font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;margin:0 0 6px;color:oklch(0.35 0.01 90);"><strong>Why it matters:</strong> The hero is a paragraph of instructions rather than a clear, glanceable structure — there's no visual separation between "read this" and "use this," so the eye doesn't know where to land first.</p>
+        <p style="font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;margin:0;color:oklch(0.35 0.01 90);"><strong>Fix:</strong> Shorten the instructions to a short line or two, and let the interface itself (search field, map, panel) do the explaining through labels and affordances.</p>
+      </div>
+    </div>
+  </div>
+
+  <p style="font-family:Helvetica,Arial,sans-serif;font-size:13px;color:oklch(0.55 0.01 90);margin-top:32px;">Note: this review is based on the site's markup and copy; a live click-through pass would surface additional issues (map performance, error states, exact drag behavior).</p>
+</section>
+
+<section id="1b" style="width:640px;flex:0 0 auto;font-family:Helvetica,Arial,sans-serif;color:oklch(0.22 0.01 90);">
+  <div style="display:inline-block;font-size:12px;font-weight:700;letter-spacing:.08em;color:oklch(0.45 0.09 250);background:oklch(0.93 0.03 250);padding:4px 10px;border-radius:3px;margin-bottom:20px;">OPTION 1B — CARD DECK</div>
+  <h1 style="font-family:Georgia,serif;font-size:28px;margin:0 0 24px;font-weight:400;">Globing — top issues at a glance</h1>
+  <div style="display:flex;flex-direction:column;gap:14px;">
+    <div style="background:#fff;border:1px solid oklch(0.88 0.01 90);border-radius:10px;padding:20px 24px;display:flex;gap:16px;">
+      <div style="font-family:Georgia,serif;font-size:22px;color:oklch(0.45 0.09 250);flex:0 0 auto;">1</div>
+      <div><div style="font-weight:700;font-size:15px;margin-bottom:4px;">Mixed languages, one screen</div><div style="font-size:14px;line-height:1.5;color:oklch(0.4 0.01 90);">English nav over Spanish copy reads unfinished. Pick one language for the whole shell.</div></div>
+    </div>
+    <div style="background:#fff;border:1px solid oklch(0.88 0.01 90);border-radius:10px;padding:20px 24px;display:flex;gap:16px;">
+      <div style="font-family:Georgia,serif;font-size:22px;color:oklch(0.45 0.09 250);flex:0 0 auto;">2</div>
+      <div><div style="font-weight:700;font-size:15px;margin-bottom:4px;">Drag is the only way to compare</div><div style="font-size:14px;line-height:1.5;color:oklch(0.4 0.01 90);">No click/tap fallback, no hint it's draggable. Add a "+ Compare" tap target as the primary path.</div></div>
+    </div>
+    <div style="background:#fff;border:1px solid oklch(0.88 0.01 90);border-radius:10px;padding:20px 24px;display:flex;gap:16px;">
+      <div style="font-family:Georgia,serif;font-size:22px;color:oklch(0.45 0.09 250);flex:0 0 auto;">3</div>
+      <div><div style="font-weight:700;font-size:15px;margin-bottom:4px;">No visible search field</div><div style="font-size:14px;line-height:1.5;color:oklch(0.4 0.01 90);">Filtering is promised in the copy but not shown. Add a persistent search box, not hidden behind an icon.</div></div>
+    </div>
+    <div style="background:#fff;border:1px solid oklch(0.88 0.01 90);border-radius:10px;padding:20px 24px;display:flex;gap:16px;">
+      <div style="font-family:Georgia,serif;font-size:22px;color:oklch(0.45 0.09 250);flex:0 0 auto;">4</div>
+      <div><div style="font-weight:700;font-size:15px;margin-bottom:4px;">Empty panel, no example</div><div style="font-size:14px;line-height:1.5;color:oklch(0.4 0.01 90);">First-time visitors never see a filled-in comparison. Pre-load two default countries.</div></div>
+    </div>
+    <div style="background:#fff;border:1px solid oklch(0.88 0.01 90);border-radius:10px;padding:20px 24px;display:flex;gap:16px;">
+      <div style="font-family:Georgia,serif;font-size:22px;color:oklch(0.45 0.09 250);flex:0 0 auto;">5</div>
+      <div><div style="font-weight:700;font-size:15px;margin-bottom:4px;">Loading is just a text line</div><div style="font-size:14px;line-height:1.5;color:oklch(0.4 0.01 90);">No spinner or skeleton — feels stalled on slow connections.</div></div>
+    </div>
+    <div style="background:#fff;border:1px solid oklch(0.88 0.01 90);border-radius:10px;padding:20px 24px;display:flex;gap:16px;">
+      <div style="font-family:Georgia,serif;font-size:22px;color:oklch(0.45 0.09 250);flex:0 0 auto;">6</div>
+      <div><div style="font-weight:700;font-size:15px;margin-bottom:4px;">"Download" says nothing about what</div><div style="font-size:14px;line-height:1.5;color:oklch(0.4 0.01 90);">App? Data? Export? Rename to state the action.</div></div>
+    </div>
+    <div style="background:#fff;border:1px solid oklch(0.88 0.01 90);border-radius:10px;padding:20px 24px;display:flex;gap:16px;">
+      <div style="font-family:Georgia,serif;font-size:22px;color:oklch(0.45 0.09 250);flex:0 0 auto;">7</div>
+      <div><div style="font-weight:700;font-size:15px;margin-bottom:4px;">Instructions crowd out the interface</div><div style="font-size:14px;line-height:1.5;color:oklch(0.4 0.01 90);">Trim the hero paragraph; let labels and affordances on the map/panel do the explaining.</div></div>
+    </div>
+  </div>
+</section>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;palette&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;tsType&quot;:&quot;string[]&quot;,&quot;default&quot;:[&quot;#FF6B6B&quot;,&quot;#2EC4B6&quot;,&quot;#FFD166&quot;,&quot;#FFF8F0&quot;],&quot;options&quot;:[[&quot;#077187&quot;,&quot;#74A57F&quot;,&quot;#9ECE9A&quot;,&quot;#E4C5AF&quot;],[&quot;#C65D45&quot;,&quot;#6FA89B&quot;,&quot;#D9B36C&quot;,&quot;#F5F4EF&quot;],[&quot;#FF6B6B&quot;,&quot;#2EC4B6&quot;,&quot;#FFD166&quot;,&quot;#FFF8F0&quot;],[&quot;#EF476F&quot;,&quot;#06D6A0&quot;,&quot;#FFC43D&quot;,&quot;#FBF7F4&quot;],[&quot;#F3722C&quot;,&quot;#43AA8B&quot;,&quot;#F9C74F&quot;,&quot;#FFFBF5&quot;]],&quot;section&quot;:&quot;Redesign feel (2a)&quot;},&quot;shape&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;default&quot;:&quot;rounded&quot;,&quot;options&quot;:[&quot;rounded&quot;,&quot;sharp&quot;],&quot;section&quot;:&quot;Redesign feel (2a)&quot;},&quot;mapStyle&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;default&quot;:&quot;playful&quot;,&quot;options&quot;:[&quot;playful&quot;,&quot;calm&quot;],&quot;section&quot;:&quot;Redesign feel (2a)&quot;}}">class Component extends DCLogic {
+  renderVals() {
+    const p = this.props.palette ?? ["#077187","#74A57F","#9ECE9A","#E4C5AF"];
+    const sharp = (this.props.shape ?? "rounded") === "sharp";
+    const playful = (this.props.mapStyle ?? "playful") === "playful";
+    return {
+      accent: p[0], accent2: p[1], tertiary: p[2], pageBg: p[3],
+      cardRadius: sharp ? "4px" : "18px",
+      chipRadius: sharp ? "4px" : "20px",
+      controlRadius: sharp ? "4px" : "10px",
+      addBtnRadius: sharp ? "6px" : "50%",
+      mapPlayful: playful,
+    };
+  }
+}</script>
+</body>
+</html>

@@ -1,5 +1,5 @@
-const numberFormatter = new Intl.NumberFormat('es', { maximumFractionDigits: 0 });
-const compactFormatter = new Intl.NumberFormat('es', { notation: 'compact', maximumFractionDigits: 1 });
+const numberFormatter = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
+const compactFormatter = new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 });
 
 export function formatNumber(value) {
   return numberFormatter.format(value);
@@ -14,7 +14,7 @@ export function formatArea(km2) {
 }
 
 export function formatPopulation(people) {
-  return `${formatNumber(people)} hab.`;
+  return formatNumber(people);
 }
 
 export function formatAreaCompact(km2) {
@@ -22,5 +22,5 @@ export function formatAreaCompact(km2) {
 }
 
 export function formatPopulationCompact(people) {
-  return `${formatCompact(people)} hab.`;
+  return formatCompact(people);
 }

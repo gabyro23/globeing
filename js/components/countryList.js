@@ -12,12 +12,12 @@ export function createCountryList(container) {
 
   return {
     render(countries, { selectedAlpha3, onToggle }) {
-      countEl.textContent = `${countries.length} país${countries.length === 1 ? '' : 'es'}`;
+      countEl.textContent = `${countries.length} ${countries.length === 1 ? 'country' : 'countries'}`;
       list.innerHTML = '';
       if (countries.length === 0) {
         const empty = document.createElement('p');
         empty.className = 'country-list__empty';
-        empty.textContent = 'No hay países que coincidan con los filtros.';
+        empty.textContent = 'No countries match your filters.';
         list.appendChild(empty);
         return;
       }

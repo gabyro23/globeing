@@ -23,7 +23,7 @@ export function createMapView(container, { world, countries, selectedAlpha3, onT
     .attr('class', 'map-view__svg')
     .attr('viewBox', `0 0 ${width} ${height}`)
     .attr('role', 'img')
-    .attr('aria-label', 'Mapa mundial interactivo de países');
+    .attr('aria-label', 'Interactive world map of countries');
 
   const zoomLayer = svg.append('g');
 
@@ -41,7 +41,6 @@ export function createMapView(container, { world, countries, selectedAlpha3, onT
     .join('path')
     .attr('class', 'country')
     .attr('d', path)
-    .attr('fill', (d) => countryOf(d).color)
     .attr('tabindex', 0)
     .attr('role', 'button')
     .attr('aria-label', (d) => countryOf(d).name)

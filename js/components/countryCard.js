@@ -8,19 +8,18 @@ export function createCountryCard(country, { selected, onToggle }) {
   card.setAttribute('role', 'button');
   card.setAttribute('tabindex', '0');
   card.setAttribute('aria-pressed', String(!!selected));
-  card.title = 'Arrastrá a "Comparar" o hacé click para agregar';
-  card.style.setProperty('--chip-color', country.color);
+  card.title = selected ? 'Click or drag to remove from comparison' : 'Click or drag to add to comparison';
 
   card.innerHTML = `
     <span class="country-card__flag" aria-hidden="true">${country.flag}</span>
     <div class="country-card__body">
       <h3 class="country-card__name">${country.name}</h3>
       <dl class="country-card__stats">
-        <div><dt>Población</dt><dd title="${formatPopulation(country.population)}">${formatPopulationCompact(country.population)}</dd></div>
-        <div><dt>Superficie</dt><dd title="${formatArea(country.area)}">${formatAreaCompact(country.area)}</dd></div>
+        <div><dt>Population</dt><dd title="${formatPopulation(country.population)}">${formatPopulationCompact(country.population)}</dd></div>
+        <div><dt>Area</dt><dd title="${formatArea(country.area)}">${formatAreaCompact(country.area)}</dd></div>
       </dl>
     </div>
-    <span class="country-card__check" aria-hidden="true">✓</span>
+    <span class="country-card__check" aria-hidden="true">${selected ? '✓' : '+'}</span>
   `;
 
   makeDraggable(card, country.alpha3);
