@@ -1,11 +1,16 @@
-const numberFormatter = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
-const compactFormatter = new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 });
+const numberFormatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
+const compactFormatter = new Intl.NumberFormat("en-US", {
+  notation: "compact",
+  maximumFractionDigits: 1,
+});
 
 export function formatNumber(value) {
+  if (value === null || value === undefined || value === "") return "—";
   return numberFormatter.format(value);
 }
 
 export function formatCompact(value) {
+  if (value === null || value === undefined || value === "") return "—";
   return compactFormatter.format(value);
 }
 

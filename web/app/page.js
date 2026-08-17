@@ -1,122 +1,161 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  Cell,
-} from "recharts";
-import { INDICATORS } from "../lib/indicators";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import WorldMap from "../components/WorldMap";
+import FilterPanel from "../components/FilterPanel";
+import CountryList from "../components/CountryList";
+import CompareZone from "../components/CompareZone";
+import { metaForAlpha3 } from "../lib/countryMeta";
+import { MAX_COMPARE } from "../lib/constants";
 
-const COLOR_A = "#2563eb"; // azul
-const COLOR_B = "#f97316"; // naranja
+const DEFAULT_COMPARE = ["ARG", "ESP"];
+
+function applyFilters(countries, filters) {
+  const term = filters.search.toLowerCase();
+  const filtered = countries.filter(
+    (c) => filters.regions.includes(c.region) && (term === "" || c.name.toLowerCase().includes(term))
+  );
+
+  const [key, direction] = filters.sort.split("-");
+  const sortKey = filters.sort.startsWith("area_km2") ? "area_km2" : key;
+  const sign = direction === "asc" ? 1 : -1;
+  filtered.sort((a, b) => {
+    if (sortKey === "name") return a.name.localeCompare(b.name) * sign;
+    return ((a[sortKey] || 0) - (b[sortKey] || 0)) * sign;
+  });
+
+  return filtered;
+}
 
 export default function Home() {
-  const [countryList, setCountryList] = useState([]);
-  const [codeA, setCodeA] = useState("");
-  const [codeB, setCodeB] = useState("");
-  const [dataA, setDataA] = useState(null);
-  const [dataB, setDataB] = useState(null);
+  const [countries, setCountries] = useState([]);
+  const [error, setError] = useState(null);
+  const [filters, setFilters] = useState({ search: "", regions: [], sort: "name-asc" });
+  const [compareAlpha3, setCompareAlpha3] = useState(DEFAULT_COMPARE);
 
-  // Cargar la lista liviana de países una sola vez, al entrar a la página
   useEffect(() => {
     fetch("/api/countries")
       .then((res) => res.json())
-      .then((list) => {
-        setCountryList(list);
-        // valores por defecto para que se vea algo apenas entras
-        if (list.length > 1) {
-          const arg = list.find((c) => c.iso3 === "ARG");
-          const esp = list.find((c) => c.iso3 === "ESP");
-          setCodeA(arg ? arg.iso3 : list[0].iso3);
-          setCodeB(esp ? esp.iso3 : list[1].iso3);
-        }
-      });
+      .then((rows) => {
+        if (rows.error) throw new Error(rows.error);
+        const enriched = rows.map((c) => ({ ...c, ...metaForAlpha3(c.iso3) }));
+        setCountries(enriched);
+        const regions = [...new Set(enriched.map((c) => c.region))].sort();
+        setFilters((f) => ({ ...f, regions }));
+      })
+      .catch((err) => setError(err.message));
   }, []);
 
-  // Cada vez que cambia el país A, traer todos sus datos
-  useEffect(() => {
-    if (!codeA) return;
-    fetch(`/api/countries?code=${codeA}`)
-      .then((res) => res.json())
-      .then(setDataA);
-  }, [codeA]);
+  const byAlpha3 = useMemo(() => new Map(countries.map((c) => [c.iso3, c])), [countries]);
+  const allRegions = useMemo(() => [...new Set(countries.map((c) => c.region))].sort(), [countries]);
 
-  // Lo mismo para el país B
-  useEffect(() => {
-    if (!codeB) return;
-    fetch(`/api/countries?code=${codeB}`)
-      .then((res) => res.json())
-      .then(setDataB);
-  }, [codeB]);
+  const filteredCountries = useMemo(() => applyFilters(countries, filters), [countries, filters]);
+  const selectedAlpha3Set = useMemo(() => new Set(compareAlpha3), [compareAlpha3]);
+  const filteredAlpha3Set = useMemo(
+    () => new Set(filteredCountries.map((c) => c.iso3)),
+    [filteredCountries]
+  );
+  const selectedCountries = useMemo(
+    () => compareAlpha3.map((a) => byAlpha3.get(a)).filter(Boolean),
+    [compareAlpha3, byAlpha3]
+  );
+
+  const toggleCompare = useCallback((iso3) => {
+    setCompareAlpha3((current) => {
+      if (current.includes(iso3)) return current.filter((a) => a !== iso3);
+      if (current.length >= MAX_COMPARE) return current;
+      return [...current, iso3];
+    });
+  }, []);
+
+  const removeCompare = useCallback((iso3) => {
+    setCompareAlpha3((current) => current.filter((a) => a !== iso3));
+  }, []);
+
+  const reorderCompare = useCallback((draggedAlpha3, targetIndex, before) => {
+    setCompareAlpha3((current) => {
+      const withoutDragged = current.filter((a) => a !== draggedAlpha3);
+      const targetAlpha3 = current[targetIndex];
+      let insertAt = withoutDragged.indexOf(targetAlpha3);
+      if (insertAt === -1) insertAt = withoutDragged.length;
+      if (!before) insertAt += 1;
+      withoutDragged.splice(insertAt, 0, draggedAlpha3);
+      return withoutDragged;
+    });
+  }, []);
+
+  const handleDropAlpha3 = useCallback(
+    (iso3) => {
+      if (!byAlpha3.has(iso3)) return;
+      toggleCompare(iso3);
+    },
+    [byAlpha3, toggleCompare]
+  );
 
   return (
-    <main className="max-w-5xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Comparar países</h1>
-
-      <div className="flex gap-4 mb-8">
-        <select
-          value={codeA}
-          onChange={(e) => setCodeA(e.target.value)}
-          className="border rounded px-3 py-2 flex-1"
-        >
-          {countryList.map((c) => (
-            <option key={c.iso3} value={c.iso3}>
-              {c.name}
-            </option>
-          ))}
-        </select>
-
-        <select
-          value={codeB}
-          onChange={(e) => setCodeB(e.target.value)}
-          className="border rounded px-3 py-2 flex-1"
-        >
-          {countryList.map((c) => (
-            <option key={c.iso3} value={c.iso3}>
-              {c.name}
-            </option>
-          ))}
-        </select>
+    <>
+      <div className="app-header__intro">
+        <p className="app-header__tagline">Compará países por población, superficie y economía.</p>
+        {countries.length > 0 && (
+          <span className="app-header__stat">{countries.length} países · datos públicos</span>
+        )}
       </div>
 
-      {dataA && dataB ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {INDICATORS.map((ind) => {
-            const valueA = Number(dataA[ind.key]) || 0;
-            const valueB = Number(dataB[ind.key]) || 0;
-            const chartData = [
-              { name: dataA.name, value: valueA },
-              { name: dataB.name, value: valueB },
-            ];
-
-            return (
-              <div key={ind.key} className="border rounded-lg p-4">
-                <h2 className="font-semibold mb-2">
-                  {ind.label} {ind.unit && `(${ind.unit})`}
-                </h2>
-                <ResponsiveContainer width="100%" height={140}>
-                  <BarChart data={chartData} layout="vertical" margin={{ left: 10 }}>
-                    <XAxis type="number" hide />
-                    <YAxis type="category" dataKey="name" width={90} />
-                    <Tooltip />
-                    <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                      <Cell fill={COLOR_A} />
-                      <Cell fill={COLOR_B} />
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            );
-          })}
+      {countries.length === 0 && !error && (
+        <div className="status">
+          <span className="status__spinner" aria-hidden="true" />
+          <span>Cargando datos y mapa…</span>
         </div>
-      ) : (
-        <p className="text-gray-500">Elegí dos países para comparar.</p>
       )}
-    </main>
+
+      {error && (
+        <div className="status status--error">
+          <span>No se pudo cargar la app: {error}</span>
+        </div>
+      )}
+
+      {countries.length > 0 && (
+        <>
+          <main className="app-layout">
+            <aside className="app-layout__sidebar">
+              <FilterPanel
+                regions={allRegions}
+                filters={filters}
+                onChange={(patch) => setFilters((f) => ({ ...f, ...patch }))}
+              />
+              <div className="app-layout__list">
+                <CountryList
+                  countries={filteredCountries}
+                  selectedAlpha3={selectedAlpha3Set}
+                  onToggle={toggleCompare}
+                />
+              </div>
+            </aside>
+
+            <section className="app-layout__map">
+              <WorldMap
+                selectedAlpha3={selectedAlpha3Set}
+                filteredAlpha3={filteredAlpha3Set}
+                onToggleCountry={toggleCompare}
+                onDropAlpha3={handleDropAlpha3}
+              />
+            </section>
+          </main>
+
+          <section className="app-layout__compare">
+            <CompareZone
+              selectedCountries={selectedCountries}
+              onDropAlpha3={handleDropAlpha3}
+              onRemove={removeCompare}
+              onReorder={reorderCompare}
+            />
+          </section>
+        </>
+      )}
+
+      <footer className="app-footer">
+        <p>Datos de población, superficie y economía de fuentes públicas (World Bank).</p>
+      </footer>
+    </>
   );
 }
