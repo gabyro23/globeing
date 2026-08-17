@@ -3,10 +3,35 @@
 // iconitos de población, y el redondeo del "valor por ícono" (cuántos
 // habitantes representa cada personita) para que la leyenda sea legible.
 
-const MIN_SPACING = 3; // px — por debajo de esto los iconitos se pisan demasiado
-const MAX_SPACING = 46; // px
+const MIN_SPACING = 3.6; // px — por debajo de esto los iconitos se pisan demasiado
+const MAX_SPACING = 50; // px
 const MAX_SAMPLE_ATTEMPTS = 7;
 const SPACING_DECAY = 0.72;
+
+// --- Constantes de layout del pictograma (compartidas entre
+// CountryPictogram, que dibuja cada silueta, y CompareModal, que necesita
+// reservar suficiente alto de contenedor para la más grande) ------------
+
+export const PICTOGRAM_ICON_WIDTH = 10; // px — ancho fijo de cada iconito
+export const PICTOGRAM_ICON_HEIGHT = 11; // px — alto fijo (cabeza + torso + piernas)
+export const PICTOGRAM_BASE_PAD = PICTOGRAM_ICON_HEIGHT * 1.2;
+
+// Padding simple para el mini-mapa de "tamaño real" de la esquina: no tiene
+// canto 3D, sólo necesita lugar para el trazo del borde.
+export const PICTOGRAM_MINI_PAD = 3;
+
+// Grosor del canto 3D extruido de la silueta, según el tamaño del país en
+// pantalla (clampeado para que ni un país gigante ni uno chico se vean
+// desproporcionados).
+export function pictogramExtrusionDepth(targetBoxPx) {
+  return Math.min(Math.max(targetBoxPx * 0.035, 1.5), 6);
+}
+
+// Padding total que hay que sumarle al bbox real de la silueta para que
+// el canto extruido y la sombra difusa no se recorten dentro del SVG.
+export function pictogramViewPad(targetBoxPx) {
+  return PICTOGRAM_BASE_PAD + pictogramExtrusionDepth(targetBoxPx) * 1.5 + 8;
+}
 
 // --- Geometría -------------------------------------------------------
 

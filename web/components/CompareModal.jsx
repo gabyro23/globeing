@@ -4,13 +4,26 @@ import { useEffect, useMemo, useState } from "react";
 import CountryPictogram from "./CountryPictogram";
 import { INDICATORS } from "../lib/indicators";
 import { loadWorld, featuresByAlpha3 } from "../lib/worldAtlas";
-import { niceIconValue } from "../lib/pictogram";
+import { niceIconValue, pictogramViewPad } from "../lib/pictogram";
+import { buildStatComparisons } from "../lib/compareInsights";
 import { formatNumber } from "../lib/format";
 
 const BOX_SIZE = 260; // px — tamaño del país más grande del set comparado
+// Alto reservado para el lienzo de cada país: el tamaño de referencia más el
+// padding que necesita el país MÁS GRANDE (el que define la escala) para que
+// su canto 3D y su sombra no se recorten ni se superpongan con el badge/título.
+const CANVAS_HEIGHT = BOX_SIZE + pictogramViewPad(BOX_SIZE) * 2;
 const BASELINE_KEYS = new Set(["population", "area_km2", "population_density"]);
 const EXTRA_INDICATORS = INDICATORS.filter((i) => !BASELINE_KEYS.has(i.key));
 const DEFAULT_EXTRA_KEYS = ["gdp_per_capita_usd", "life_expectancy_years"];
+
+// Estadísticas que siempre se comparan, además de las que el usuario tilde
+// en el checklist de indicadores extra.
+const BASELINE_COMPARISON_STATS = [
+  { key: "area_km2", label: "Superficie" },
+  { key: "population", label: "Población" },
+  { key: "population_density", label: "Densidad" },
+];
 
 // Pantalla de comparación dedicada: silueta real de cada país a escala
 // relativa entre sí (el más grande define la escala), con una grilla de
@@ -55,6 +68,17 @@ export default function CompareModal({ open, countries, onClose }) {
     () => countries.find((c) => Number(c.area_km2) === maxArea) || countries[0],
     [countries, maxArea]
   );
+
+  const comparisonGroups = useMemo(() => {
+    const extraStats = extraKeys
+      .map((key) => INDICATORS.find((i) => i.key === key))
+      .filter(Boolean)
+      .map((ind) => ({ key: ind.key, label: ind.label }));
+
+    return [...BASELINE_COMPARISON_STATS, ...extraStats]
+      .map((stat) => ({ ...stat, items: buildStatComparisons(countries, stat.key, stat.label) }))
+      .filter((group) => group.items.length > 0);
+  }, [countries, extraKeys]);
 
   function toggleExtra(key) {
     setExtraKeys((current) =>
@@ -114,19 +138,40 @@ export default function CompareModal({ open, countries, onClose }) {
           )}
 
           {featureMap && (
-            <div className="pictogram-row">
-              {countries.map((country) => (
-                <CountryPictogram
-                  key={country.iso3}
-                  country={country}
-                  feature={featureMap.get(country.iso3)}
-                  boxSize={BOX_SIZE}
-                  maxArea={maxArea}
-                  iconValue={iconValue}
-                  extraIndicatorKeys={extraKeys}
-                />
-              ))}
-            </div>
+            <>
+              <div className="pictogram-row">
+                {countries.map((country) => (
+                  <CountryPictogram
+                    key={country.iso3}
+                    country={country}
+                    feature={featureMap.get(country.iso3)}
+                    boxSize={BOX_SIZE}
+                    canvasHeight={CANVAS_HEIGHT}
+                    maxArea={maxArea}
+                    iconValue={iconValue}
+                    extraIndicatorKeys={extraKeys}
+                  />
+                ))}
+              </div>
+
+              {comparisonGroups.length > 0 && (
+                <section className="compare-insights">
+                  <h3>Diferencias clave</h3>
+                  <div className="compare-insights__groups">
+                    {comparisonGroups.map((group) => (
+                      <div className="compare-insights__group" key={group.key}>
+                        <h4>{group.label}</h4>
+                        <ul>
+                          {group.items.map((item) => (
+                            <li key={item.key}>{item.text}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
+            </>
           )}
         </div>
 

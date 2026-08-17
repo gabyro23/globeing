@@ -869,6 +869,7 @@ path.country.is-dimmed {
 }
 
 .pictogram-canvas {
+  position: relative;
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -880,16 +881,25 @@ path.country.is-dimmed {
   max-width: 100%;
 }
 
+/* --- Relieve 3D de la silueta: sombra difusa + canto extruido + cara superior --- */
+.pictogram-shadow {
+  fill: var(--ink);
+  opacity: 0.22;
+  filter: blur(3px);
+}
+
+.pictogram-extrusion {
+  fill: var(--accent-deep);
+  stroke: none;
+}
+
 .pictogram-silhouette {
-  fill: var(--accent);
   stroke: var(--accent-deep);
-  stroke-width: 1;
-  filter: drop-shadow(0 3px 6px rgba(34, 66, 72, 0.25));
+  stroke-width: 0.75;
+  stroke-linejoin: round;
 }
 
 .pictogram-icon {
-  color: var(--accent-ink);
-  fill: currentColor;
   pointer-events: none;
 }
 
@@ -903,6 +913,52 @@ path.country.is-dimmed {
   margin: 4px 0 0;
   font-size: 15px;
   font-weight: 700;
+}
+
+/* --- Mini-mapa de "tamaño real" en la esquina inferior izquierda --- */
+.pictogram-mini-inset {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+}
+
+.pictogram-mini-inset__frame {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  width: 66px;
+  height: 66px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+}
+
+.pictogram-mini-svg {
+  display: block;
+}
+
+.pictogram-mini-silhouette {
+  fill: var(--accent-deep);
+  fill-opacity: 0.85;
+  stroke: var(--accent-deep);
+  stroke-width: 0.6;
+}
+
+.pictogram-mini-inset__caption {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.pictogram-icon-shadow {
+  fill: var(--ink);
+  opacity: 0.16;
 }
 
 .pictogram-icon-count {
@@ -938,6 +994,68 @@ path.country.is-dimmed {
   margin: 0;
   font-weight: 700;
   white-space: nowrap;
+}
+
+.compare-insights {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--divider);
+}
+
+.compare-insights h3 {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.compare-insights__groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.compare-insights__group {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  padding: 12px 14px;
+}
+
+.compare-insights__group h4 {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--accent-deep);
+}
+
+.compare-insights__group ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.compare-insights__group li {
+  position: relative;
+  padding-left: 14px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--ink);
+}
+
+.compare-insights__group li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--sage-light);
 }
 
 .compare-modal__legend {
