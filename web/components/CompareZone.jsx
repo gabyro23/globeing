@@ -34,11 +34,12 @@ function BarGroup({ title, unit, rows }) {
 
 // Port de js/components/compareZone.js — extendido para mostrar los
 // 11 indicadores en vez de solo población y área.
-export default function CompareZone({ selectedCountries, onDropAlpha3, onRemove, onReorder }) {
+export default function CompareZone({ selectedCountries, onDropAlpha3, onRemove, onReorder, onOpenCompare }) {
   const [dragOver, setDragOver] = useState(false);
   const [dropTarget, setDropTarget] = useState(null); // { iso3, before }
 
   const isFull = selectedCountries.length >= MAX_COMPARE;
+  const canOpenCompare = selectedCountries.length >= 2;
 
   return (
     <div className="compare-zone">
@@ -56,9 +57,20 @@ export default function CompareZone({ selectedCountries, onDropAlpha3, onRemove,
           if (alpha3) onDropAlpha3(alpha3);
         }}
       >
-        <p className="compare-zone__hint">
-          Arrastrá países acá (o hacé click en el mapa / la lista) para compararlos — hasta {MAX_COMPARE}.
-        </p>
+        <div className="compare-zone__dropbox-header">
+          <p className="compare-zone__hint">
+            Arrastrá países acá (o hacé click en el mapa / la lista) para compararlos — hasta {MAX_COMPARE}.
+          </p>
+          <button
+            type="button"
+            className="btn-primary"
+            disabled={!canOpenCompare}
+            title={canOpenCompare ? "Abrir comparación visual" : "Elegí al menos 2 países para comparar"}
+            onClick={onOpenCompare}
+          >
+            Ver comparación →
+          </button>
+        </div>
         <div className="compare-zone__chips">
           {selectedCountries.map((country, index) => (
             <div

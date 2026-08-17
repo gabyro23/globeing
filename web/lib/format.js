@@ -29,3 +29,19 @@ export function formatAreaCompact(km2) {
 export function formatPopulationCompact(people) {
   return formatCompact(people);
 }
+
+const decimalFormatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: 1 });
+
+// Formatea el valor de un indicador (de lib/indicators.js) según su unidad,
+// para mostrarlo como etiqueta en el pictograma de comparación.
+export function formatIndicatorValue(value, unit) {
+  if (value === null || value === undefined || value === "") return "—";
+  const num = Number(value);
+  if (Number.isNaN(num)) return "—";
+
+  if (unit === "%") return `${decimalFormatter.format(num)}%`;
+  if (unit === "años") return `${decimalFormatter.format(num)} años`;
+  if (unit === "US$") return `US$ ${formatCompact(num)}`;
+  if (unit) return `${formatNumber(num)} ${unit}`;
+  return formatNumber(num);
+}

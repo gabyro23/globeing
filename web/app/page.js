@@ -5,6 +5,7 @@ import WorldMap from "../components/WorldMap";
 import FilterPanel from "../components/FilterPanel";
 import CountryList from "../components/CountryList";
 import CompareZone from "../components/CompareZone";
+import CompareModal from "../components/CompareModal";
 import { metaForAlpha3 } from "../lib/countryMeta";
 import { MAX_COMPARE } from "../lib/constants";
 
@@ -32,6 +33,7 @@ export default function Home() {
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState({ search: "", regions: [], sort: "name-asc" });
   const [compareAlpha3, setCompareAlpha3] = useState(DEFAULT_COMPARE);
+  const [compareModalOpen, setCompareModalOpen] = useState(false);
 
   useEffect(() => {
     fetch("/api/countries")
@@ -148,8 +150,15 @@ export default function Home() {
               onDropAlpha3={handleDropAlpha3}
               onRemove={removeCompare}
               onReorder={reorderCompare}
+              onOpenCompare={() => setCompareModalOpen(true)}
             />
           </section>
+
+          <CompareModal
+            open={compareModalOpen}
+            countries={selectedCountries}
+            onClose={() => setCompareModalOpen(false)}
+          />
         </>
       )}
 
