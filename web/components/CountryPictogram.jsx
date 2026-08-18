@@ -10,15 +10,11 @@ import {
   pictogramViewPad,
   PICTOGRAM_ICON_WIDTH as ICON_WIDTH,
   PICTOGRAM_ICON_HEIGHT as ICON_HEIGHT,
-  PICTOGRAM_MINI_PAD,
 } from "../lib/pictogram";
 import { formatArea, formatPopulation, formatIndicatorValue } from "../lib/format";
-import { scaleBadgeLabel } from "../lib/compareInsights";
 import { INDICATORS } from "../lib/indicators";
 
 const EXTRUSION_STEPS = 10; // capas finas que arman el "canto" 3D de la silueta
-const MINI_FRAME = 66; // px — marco fijo del mini-mapa de tamaño real (esquina)
-const MINI_MIN_VISIBLE = 9; // px — piso para que un país chico no desaparezca del mini-mapa
 
 const BASELINE_KEYS = new Set(["population", "area_km2", "population_density"]);
 const indicatorByKey = new Map(INDICATORS.map((i) => [i.key, i]));
@@ -54,15 +50,14 @@ function PersonSymbol({ id, colors }) {
 // países comparados (para que la grilla de población se lea clara sin
 // importar cuán chico sea el país), con relieve 3D (degradé + canto
 // extruido + sombra) y una grilla de personitas con volumen representando
-// su población. En la esquina inferior izquierda del lienzo se agrega un
-// mini-mapa con la proporción de tamaño REAL entre los países del grupo.
-// Debajo, la tabla de datos clave (área, población, densidad + extras).
+// su población. Debajo, la tabla de datos clave (área, población, densidad
+// + extras). El mini-mapa de tamaño REAL entre países vive aparte, en
+// TrueScalePanel (un solo recuadro compartido dentro de pictogram-row).
 export default function CountryPictogram({
   country,
   feature,
   boxSize,
   canvasHeight,
-  maxArea,
   iconValue,
   extraIndicatorKeys,
 }) {
@@ -99,21 +94,6 @@ export default function CountryPictogram({
       return { dx: depth * t, dy: depth * 1.3 * t };
     });
 
-    // Mini-mapa de tamaño REAL: mismo país, pero proyectado a escala
-    // relativa real (sqrt del área frente al país más grande del grupo)
-    // dentro de un marco fijo y chico en la esquina.
-    const miniScale = maxArea > 0 ? Math.sqrt(Math.max(Number(country.area_km2) || 1, 1) / maxArea) : 1;
-    const miniInner = MINI_FRAME - PICTOGRAM_MINI_PAD * 2; // deja lugar al padding sin desbordar el marco
-    const miniBoxPx = Math.max(miniInner * miniScale, MINI_MIN_VISIBLE);
-    const miniProjection = d3
-      .geoAzimuthalEqualArea()
-      .rotate([-centroid[0], -centroid[1]])
-      .fitSize([miniBoxPx, miniBoxPx], feature);
-    const miniPathGen = d3.geoPath(miniProjection);
-    const miniPathD = miniPathGen(feature);
-    const miniBounds = miniPathGen.bounds(feature);
-    const [[mx0, my0], [mx1, my1]] = miniBounds;
-
     return {
       pathD,
       points,
@@ -124,20 +104,12 @@ export default function CountryPictogram({
       width: x1 - x0 + viewPad * 2,
       height: y1 - y0 + viewPad * 2,
       viewBox: `${x0 - viewPad} ${y0 - viewPad} ${x1 - x0 + viewPad * 2} ${y1 - y0 + viewPad * 2}`,
-      mini: {
-        pathD: miniPathD,
-        width: mx1 - mx0 + PICTOGRAM_MINI_PAD * 2,
-        height: my1 - my0 + PICTOGRAM_MINI_PAD * 2,
-        viewBox: `${mx0 - PICTOGRAM_MINI_PAD} ${my0 - PICTOGRAM_MINI_PAD} ${mx1 - mx0 + PICTOGRAM_MINI_PAD * 2} ${my1 - my0 + PICTOGRAM_MINI_PAD * 2}`,
-      },
     };
-  }, [feature, country.area_km2, country.population, maxArea, boxSize, iconValue]);
+  }, [feature, country.population, boxSize, iconValue]);
 
   const extraStats = extraIndicatorKeys
     .map((key) => indicatorByKey.get(key))
     .filter((ind) => ind && !BASELINE_KEYS.has(ind.key));
-
-  const scaleBadge = scaleBadgeLabel(Number(country.area_km2), maxArea);
 
   return (
     <div className="pictogram-column">
@@ -202,24 +174,6 @@ export default function CountryPictogram({
           </svg>
         ) : (
           <p className="pictogram-missing">Sin datos de mapa para este país.</p>
-        )}
-
-        {layout && (
-          <div className="pictogram-mini-inset">
-            <div className="pictogram-mini-inset__frame">
-              <svg
-                width={layout.mini.width}
-                height={layout.mini.height}
-                viewBox={layout.mini.viewBox}
-                className="pictogram-mini-svg"
-                role="img"
-                aria-label={`Tamaño real de ${country.name} comparado con el resto del grupo`}
-              >
-                <path d={layout.mini.pathD} className="pictogram-mini-silhouette" />
-              </svg>
-            </div>
-            <span className="pictogram-mini-inset__caption">{scaleBadge || "Tamaño real"}</span>
-          </div>
         )}
       </div>
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import CountryPictogram from "./CountryPictogram";
+import TrueScalePanel from "./TrueScalePanel";
 import { INDICATORS } from "../lib/indicators";
 import { loadWorld, featuresByAlpha3 } from "../lib/worldAtlas";
 import { niceIconValue, pictogramViewPad } from "../lib/pictogram";
@@ -16,6 +17,13 @@ const CANVAS_HEIGHT = BOX_SIZE + pictogramViewPad(BOX_SIZE) * 2;
 const BASELINE_KEYS = new Set(["population", "area_km2", "population_density"]);
 const EXTRA_INDICATORS = INDICATORS.filter((i) => !BASELINE_KEYS.has(i.key));
 const DEFAULT_EXTRA_KEYS = ["gdp_per_capita_usd", "life_expectancy_years"];
+
+// Recuadro de "tamaño real": tamaño (alto en px, para el país más grande
+// del grupo) inicial y límites para los botones de agrandar/achicar.
+const TRUE_SCALE_DEFAULT = 96;
+const TRUE_SCALE_MIN = 56;
+const TRUE_SCALE_MAX = 220;
+const TRUE_SCALE_STEP = 24;
 
 // Estadísticas que siempre se comparan, además de las que el usuario tilde
 // en el checklist de indicadores extra.
@@ -33,6 +41,7 @@ export default function CompareModal({ open, countries, onClose }) {
   const [featureMap, setFeatureMap] = useState(null);
   const [mapError, setMapError] = useState(null);
   const [extraKeys, setExtraKeys] = useState(DEFAULT_EXTRA_KEYS);
+  const [trueScaleSize, setTrueScaleSize] = useState(TRUE_SCALE_DEFAULT);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -140,6 +149,17 @@ export default function CompareModal({ open, countries, onClose }) {
           {featureMap && (
             <>
               <div className="pictogram-row">
+                <TrueScalePanel
+                  countries={countries}
+                  featureMap={featureMap}
+                  maxArea={maxArea}
+                  size={trueScaleSize}
+                  onIncrease={() => setTrueScaleSize((s) => Math.min(s + TRUE_SCALE_STEP, TRUE_SCALE_MAX))}
+                  onDecrease={() => setTrueScaleSize((s) => Math.max(s - TRUE_SCALE_STEP, TRUE_SCALE_MIN))}
+                  canIncrease={trueScaleSize < TRUE_SCALE_MAX}
+                  canDecrease={trueScaleSize > TRUE_SCALE_MIN}
+                />
+
                 {countries.map((country) => (
                   <CountryPictogram
                     key={country.iso3}
@@ -147,7 +167,6 @@ export default function CompareModal({ open, countries, onClose }) {
                     feature={featureMap.get(country.iso3)}
                     boxSize={BOX_SIZE}
                     canvasHeight={CANVAS_HEIGHT}
-                    maxArea={maxArea}
                     iconValue={iconValue}
                     extraIndicatorKeys={extraKeys}
                   />
