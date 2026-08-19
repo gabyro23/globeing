@@ -45,3 +45,25 @@ export function formatIndicatorValue(value, unit) {
   if (unit) return `${formatNumber(num)} ${unit}`;
   return formatNumber(num);
 }
+
+// Escala grande legible en palabras (Million/Billion/Trillion), para no
+// mostrar números larguísimos en la zona de comparación (barras).
+function scaledWithWord(num) {
+  const abs = Math.abs(num);
+  if (abs >= 1e12) return `${decimalFormatter.format(num / 1e12)} Trillion`;
+  if (abs >= 1e9) return `${decimalFormatter.format(num / 1e9)} Billion`;
+  if (abs >= 1e6) return `${decimalFormatter.format(num / 1e6)} Million`;
+  return formatNumber(num);
+}
+
+export function formatCompareValue(value, unit) {
+  if (value === null || value === undefined || value === "") return "—";
+  const num = Number(value);
+  if (Number.isNaN(num)) return "—";
+
+  if (unit === "%") return `${decimalFormatter.format(num)}%`;
+  if (unit === "años") return `${decimalFormatter.format(num)} años`;
+  if (unit === "US$") return `US$ ${scaledWithWord(num)}`;
+  if (unit) return `${scaledWithWord(num)} ${unit}`;
+  return scaledWithWord(num);
+}

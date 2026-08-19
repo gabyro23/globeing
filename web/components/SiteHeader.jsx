@@ -23,11 +23,12 @@ export default function SiteHeader() {
         )}
       </a>
       <nav className="site-header__nav" aria-label="Main navigation">
+        <a href="#rankings">Rankings</a>
+        <a href="#compare">Compare</a>
+        <a href="#by-years">By Years</a>
+        <a href="#random-facts">Random Facts</a>
         <a href="#about">About us</a>
         <a href="#contact">Contact</a>
-        <a href="#" className="site-header__cta">
-          Download app
-        </a>
       </nav>
     </header>
   );

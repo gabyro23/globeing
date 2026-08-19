@@ -35,7 +35,7 @@ function PersonSymbol({ id, colors }) {
   return (
     <symbol id={id} viewBox="0 0 10 11">
       <ellipse cx="5" cy="10.35" rx="2" ry="0.5" className="pictogram-icon-shadow" />
-      <circle cx="5" cy="1.9" r="1.5" fill={colors.head} />
+      <circle cx="5" cy="1.9" r="1.5" className="pictogram-icon-head" />
       <path
         d="M2.3,7 C2.3,4.6 3.2,3.4 5,3.4 C6.8,3.4 7.7,4.6 7.7,7 L7.7,7.4 L2.3,7.4 Z"
         fill={colors.torso}

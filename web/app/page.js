@@ -2,8 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import WorldMap from "../components/WorldMap";
-import FilterPanel from "../components/FilterPanel";
-import CountryList from "../components/CountryList";
+import SearchBar from "../components/SearchBar";
 import CompareZone from "../components/CompareZone";
 import CompareModal from "../components/CompareModal";
 import { metaForAlpha3 } from "../lib/countryMeta";
@@ -12,26 +11,16 @@ import { MAX_COMPARE } from "../lib/constants";
 const DEFAULT_COMPARE = ["ARG", "ESP"];
 
 function applyFilters(countries, filters) {
-  const term = filters.search.toLowerCase();
-  const filtered = countries.filter(
-    (c) => filters.regions.includes(c.region) && (term === "" || c.name.toLowerCase().includes(term))
-  );
-
-  const [key, direction] = filters.sort.split("-");
-  const sortKey = filters.sort.startsWith("area_km2") ? "area_km2" : key;
-  const sign = direction === "asc" ? 1 : -1;
-  filtered.sort((a, b) => {
-    if (sortKey === "name") return a.name.localeCompare(b.name) * sign;
-    return ((a[sortKey] || 0) - (b[sortKey] || 0)) * sign;
-  });
-
-  return filtered;
+  const term = filters.search.trim().toLowerCase();
+  const filtered =
+    term === "" ? countries : countries.filter((c) => c.name.toLowerCase().includes(term));
+  return [...filtered].sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export default function Home() {
   const [countries, setCountries] = useState([]);
   const [error, setError] = useState(null);
-  const [filters, setFilters] = useState({ search: "", regions: [], sort: "name-asc" });
+  const [filters, setFilters] = useState({ search: "" });
   const [compareAlpha3, setCompareAlpha3] = useState(DEFAULT_COMPARE);
   const [compareModalOpen, setCompareModalOpen] = useState(false);
 
@@ -42,14 +31,11 @@ export default function Home() {
         if (rows.error) throw new Error(rows.error);
         const enriched = rows.map((c) => ({ ...c, ...metaForAlpha3(c.iso3) }));
         setCountries(enriched);
-        const regions = [...new Set(enriched.map((c) => c.region))].sort();
-        setFilters((f) => ({ ...f, regions }));
       })
       .catch((err) => setError(err.message));
   }, []);
 
   const byAlpha3 = useMemo(() => new Map(countries.map((c) => [c.iso3, c])), [countries]);
-  const allRegions = useMemo(() => [...new Set(countries.map((c) => c.region))].sort(), [countries]);
 
   const filteredCountries = useMemo(() => applyFilters(countries, filters), [countries, filters]);
   const selectedAlpha3Set = useMemo(() => new Set(compareAlpha3), [compareAlpha3]);
@@ -96,10 +82,14 @@ export default function Home() {
 
   return (
     <>
-      <div className="app-header__intro">
-        <p className="app-header__tagline">Compará países por población, superficie y economía.</p>
+      <div className="app-hero">
+        <h1 className="app-hero__title">Choose, Compare, and Learn</h1>
+        <p className="app-hero__subtitle">
+          Data can also be fun, play with our interactive tool and discover what makes each country
+          unique
+        </p>
         {countries.length > 0 && (
-          <span className="app-header__stat">{countries.length} países · datos públicos</span>
+          <span className="app-hero__stat">{countries.length} países · datos públicos</span>
         )}
       </div>
 
@@ -118,31 +108,26 @@ export default function Home() {
 
       {countries.length > 0 && (
         <>
-          <main className="app-layout">
-            <aside className="app-layout__sidebar">
-              <FilterPanel
-                regions={allRegions}
-                filters={filters}
-                onChange={(patch) => setFilters((f) => ({ ...f, ...patch }))}
-              />
-              <div className="app-layout__list">
-                <CountryList
-                  countries={filteredCountries}
-                  selectedAlpha3={selectedAlpha3Set}
-                  onToggle={toggleCompare}
-                />
-              </div>
-            </aside>
+          <div className="search-section">
+            <SearchBar
+              countries={filteredCountries}
+              selectedAlpha3={selectedAlpha3Set}
+              onToggle={toggleCompare}
+              search={filters.search}
+              onSearchChange={(value) => setFilters((f) => ({ ...f, search: value }))}
+            />
+          </div>
 
-            <section className="app-layout__map">
+          <section className="map-section">
+            <div className="app-layout__map">
               <WorldMap
                 selectedAlpha3={selectedAlpha3Set}
                 filteredAlpha3={filteredAlpha3Set}
                 onToggleCountry={toggleCompare}
                 onDropAlpha3={handleDropAlpha3}
               />
-            </section>
-          </main>
+            </div>
+          </section>
 
           <section className="app-layout__compare">
             <CompareZone

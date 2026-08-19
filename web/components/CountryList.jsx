@@ -2,7 +2,8 @@
 
 import CountryCard from "./CountryCard";
 
-// Port de js/components/countryList.js
+// Port de js/components/countryList.js — ahora se usa exclusivamente como
+// resultado del dropdown de búsqueda (ver SearchBar).
 export default function CountryList({ countries, selectedAlpha3, onToggle }) {
   return (
     <div>
@@ -11,7 +12,7 @@ export default function CountryList({ countries, selectedAlpha3, onToggle }) {
       </p>
       <div className="country-list">
         {countries.length === 0 ? (
-          <p className="country-list__empty">Ningún país coincide con tus filtros.</p>
+          <p className="country-list__empty">Ningún país coincide con tu búsqueda.</p>
         ) : (
           countries.map((country) => (
             <CountryCard

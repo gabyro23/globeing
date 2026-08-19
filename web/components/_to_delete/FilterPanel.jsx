@@ -6,6 +6,7 @@ import { SORT_OPTIONS } from "../lib/constants";
 // Port de js/components/filterPanel.js
 export default function FilterPanel({ regions, filters, onChange }) {
   const [searchValue, setSearchValue] = useState(filters.search);
+  const [filtersOpen, setFiltersOpen] = useState(true);
   const debounceRef = useRef(null);
 
   useEffect(() => setSearchValue(filters.search), [filters.search]);
@@ -47,37 +48,51 @@ export default function FilterPanel({ regions, filters, onChange }) {
         </div>
       </div>
 
-      <fieldset className="filter-field filter-field--regions">
-        <legend>Región</legend>
-        <div className="filter-regions">
-          {regions.map((region) => (
-            <label className="filter-region-chip" key={region}>
-              <input
-                type="checkbox"
-                value={region}
-                checked={filters.regions.includes(region)}
-                onChange={() => toggleRegion(region)}
-              />
-              <span>{region}</span>
-            </label>
-          ))}
-        </div>
-      </fieldset>
-
-      <div className="filter-field">
-        <label htmlFor="filter-sort">Ordenar por</label>
-        <select id="filter-sort" value={filters.sort} onChange={(e) => onChange({ sort: e.target.value })}>
-          {SORT_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>
-              {o.label}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <button type="button" className="filter-reset" onClick={handleReset}>
-        ↺ Limpiar filtros
+      <button
+        type="button"
+        className="filter-toggle"
+        aria-expanded={filtersOpen}
+        onClick={() => setFiltersOpen((o) => !o)}
+      >
+        {filtersOpen ? "Ocultar filtros" : "Mostrar filtros"}
+        <span aria-hidden="true">{filtersOpen ? "▲" : "▼"}</span>
       </button>
+
+      {filtersOpen && (
+        <>
+          <fieldset className="filter-field filter-field--regions">
+            <legend>Región</legend>
+            <div className="filter-regions">
+              {regions.map((region) => (
+                <label className="filter-region-chip" key={region}>
+                  <input
+                    type="checkbox"
+                    value={region}
+                    checked={filters.regions.includes(region)}
+                    onChange={() => toggleRegion(region)}
+                  />
+                  <span>{region}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+
+          <div className="filter-field">
+            <label htmlFor="filter-sort">Ordenar por</label>
+            <select id="filter-sort" value={filters.sort} onChange={(e) => onChange({ sort: e.target.value })}>
+              {SORT_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <button type="button" className="filter-reset" onClick={handleReset}>
+            ↺ Limpiar filtros
+          </button>
+        </>
+      )}
     </div>
   );
 }

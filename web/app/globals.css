@@ -132,42 +132,36 @@ body {
   border-color: var(--accent);
 }
 
-.site-header__nav a.site-header__cta {
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 10px 20px;
-  font-weight: 700;
-}
-
-.site-header__nav a.site-header__cta:hover {
-  background: var(--accent-deep);
-  color: #fff;
-  border-color: transparent;
-}
-
-/* --- Intro / tagline --- */
-.app-header__intro {
+/* --- Hero --- */
+.app-hero {
   display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 16px;
-  margin: 12px 0 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 28px 0 8px;
   padding: 0 clamp(16px, 4vw, 40px);
 }
 
-.app-header__tagline {
+.app-hero__title {
+  margin: 0;
+  font-size: clamp(32px, 5vw, 52px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: var(--ink);
+}
+
+.app-hero__subtitle {
   margin: 0;
   color: var(--muted);
-  max-width: 560px;
-  font-size: 16px;
+  max-width: 620px;
+  font-size: 17px;
   font-weight: 400;
   line-height: 1.5;
 }
 
-.app-header__stat {
-  margin-left: auto;
+.app-hero__stat {
+  margin-top: 4px;
   font-size: 0.8rem;
   color: var(--muted);
   white-space: nowrap;
@@ -207,35 +201,15 @@ body {
   border-color: var(--danger);
 }
 
-/* --- Layout principal: sidebar + mapa --- */
-.app-layout {
-  display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: var(--space-3);
-  padding: 8px clamp(16px, 4vw, 40px);
+/* --- Layout principal: buscador + mapa a pantalla completa --- */
+.search-section {
+  padding: 8px clamp(16px, 4vw, 40px) 0;
+  position: relative;
+  z-index: 10;
 }
 
-@media (max-width: 900px) {
-  .app-layout {
-    grid-template-columns: 1fr;
-  }
-}
-
-.app-layout__sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-width: 0;
-}
-
-.app-layout__list {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 0;
-  max-height: 520px;
-  overflow-y: auto;
+.map-section {
+  padding: 14px clamp(16px, 4vw, 40px) 0;
 }
 
 .app-layout__map {
@@ -245,61 +219,28 @@ body {
   box-shadow: var(--shadow);
   overflow: hidden;
   min-width: 0;
-  align-self: start;
 }
 
-/* --- Filter panel --- */
-.filter-panel {
+/* --- Search bar (reemplaza al viejo panel de filtros) --- */
+.search-bar {
+  position: relative;
+  max-width: 480px;
+}
+
+.search-bar__box {
+  position: relative;
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.filter-field label,
-.filter-field legend {
-  display: block;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--muted);
-  margin-bottom: 8px;
-  padding: 0;
-}
-
-.filter-field input[type="search"],
-.filter-field select {
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: var(--radius-control);
   border: 1px solid var(--border-strong);
-  color: var(--ink);
-  font-size: 14px;
-  font-family: inherit;
+  border-radius: var(--radius-control);
+  box-shadow: var(--shadow);
+  transition: border-color 0.15s;
 }
 
-.filter-field input[type="search"] {
-  background: var(--bg);
-}
-
-.filter-field select {
-  background: var(--surface);
-}
-
-.filter-field input[type="search"]:focus,
-.filter-field select:focus {
-  outline: none;
+.search-bar__box:focus-within {
   border-color: var(--accent);
 }
 
-.filter-search-box {
-  position: relative;
-}
-
-.filter-search-box__icon {
+.search-bar__icon {
   position: absolute;
   left: 14px;
   top: 50%;
@@ -309,69 +250,55 @@ body {
   pointer-events: none;
 }
 
-.filter-search-box input[type="search"] {
-  padding-left: 38px;
-}
-
-.filter-field--regions {
+.search-bar__box input[type="search"] {
+  width: 100%;
+  padding: 12px 38px;
+  border-radius: var(--radius-control);
   border: none;
-  margin: 0;
-  padding: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 14px;
+  font-family: inherit;
 }
 
-.filter-regions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+.search-bar__box input[type="search"]:focus {
+  outline: none;
 }
 
-.filter-region-chip {
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 12px;
-  border-radius: var(--radius-chip);
-  border: 1px solid var(--border-strong);
-  background: var(--surface);
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  user-select: none;
-  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+.search-bar__box input[type="search"]::-webkit-search-cancel-button {
+  display: none;
 }
 
-.filter-region-chip input {
+.search-bar__clear {
   position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-}
-
-.filter-region-chip input:checked ~ span::before {
-  content: "✓ ";
-}
-
-.filter-region-chip:has(input:checked) {
-  border-color: var(--sage-light);
-  color: var(--accent-deep);
-  background: var(--sage-bg);
-}
-
-.filter-reset {
-  align-self: flex-start;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
   background: none;
   border: none;
-  color: var(--accent-deep);
-  padding: 6px 0;
+  color: var(--muted);
+  font-size: 20px;
+  line-height: 1;
   cursor: pointer;
-  font-size: 0.82rem;
-  font-weight: 700;
+  padding: 4px 6px;
 }
 
-.filter-reset:hover {
-  color: var(--accent);
+.search-bar__clear:hover {
+  color: var(--accent-deep);
+}
+
+.search-bar__results {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  max-height: 420px;
+  overflow-y: auto;
+  z-index: 20;
 }
 
 /* --- Country list & cards --- */
@@ -843,6 +770,40 @@ path.country.is-dimmed {
   gap: 6px;
 }
 
+.indicator-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: var(--radius-chip);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.indicator-chip input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.indicator-chip input:checked ~ span::before {
+  content: "✓ ";
+}
+
+.indicator-chip:has(input:checked) {
+  border-color: var(--sage-light);
+  color: var(--accent-deep);
+  background: var(--sage-bg);
+}
+
 .compare-modal__body {
   flex: 1;
   overflow: auto;
@@ -852,8 +813,19 @@ path.country.is-dimmed {
 .pictogram-row {
   display: flex;
   align-items: flex-start;
+  flex-wrap: nowrap;
+  gap: clamp(16px, 3vw, 40px);
+  min-width: min-content;
+}
+
+/* Los países se centran en el espacio que le queda al lado del recuadro de
+   tamaño real, que a su vez queda siempre fijo en la esquina izquierda. */
+.pictogram-countries {
+  display: flex;
+  align-items: flex-start;
   justify-content: center;
   flex-wrap: nowrap;
+  flex: 1;
   gap: clamp(16px, 3vw, 40px);
   min-width: min-content;
 }
@@ -1015,6 +987,14 @@ path.country.is-dimmed {
 .pictogram-icon-shadow {
   fill: var(--ink);
   opacity: 0.16;
+}
+
+/* Cabeza blanca en vez del color de la variante: más contraste contra el
+   relieve de color de la silueta del país. */
+.pictogram-icon-head {
+  fill: #fff;
+  stroke: var(--accent-deep);
+  stroke-width: 0.25;
 }
 
 .pictogram-icon-count {

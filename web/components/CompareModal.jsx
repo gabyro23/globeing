@@ -120,7 +120,7 @@ export default function CompareModal({ open, countries, onClose }) {
           <span className="compare-modal__indicators-label">Datos extra a mostrar:</span>
           <div className="compare-modal__indicators-list">
             {EXTRA_INDICATORS.map((ind) => (
-              <label className="filter-region-chip" key={ind.key}>
+              <label className="indicator-chip" key={ind.key}>
                 <input
                   type="checkbox"
                   checked={extraKeys.includes(ind.key)}
@@ -160,17 +160,19 @@ export default function CompareModal({ open, countries, onClose }) {
                   canDecrease={trueScaleSize > TRUE_SCALE_MIN}
                 />
 
-                {countries.map((country) => (
-                  <CountryPictogram
-                    key={country.iso3}
-                    country={country}
-                    feature={featureMap.get(country.iso3)}
-                    boxSize={BOX_SIZE}
-                    canvasHeight={CANVAS_HEIGHT}
-                    iconValue={iconValue}
-                    extraIndicatorKeys={extraKeys}
-                  />
-                ))}
+                <div className="pictogram-countries">
+                  {countries.map((country) => (
+                    <CountryPictogram
+                      key={country.iso3}
+                      country={country}
+                      feature={featureMap.get(country.iso3)}
+                      boxSize={BOX_SIZE}
+                      canvasHeight={CANVAS_HEIGHT}
+                      iconValue={iconValue}
+                      extraIndicatorKeys={extraKeys}
+                    />
+                  ))}
+                </div>
               </div>
 
               {comparisonGroups.length > 0 && (

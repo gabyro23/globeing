@@ -4,6 +4,7 @@ import { useState } from "react";
 import { MAX_COMPARE } from "../lib/constants";
 import { INDICATORS } from "../lib/indicators";
 import { handleDragStart, readDraggedAlpha3 } from "../lib/dnd";
+import { formatCompareValue } from "../lib/format";
 
 function BarGroup({ title, unit, rows }) {
   const max = Math.max(...rows.map((r) => r.value || 0), 1);
@@ -23,9 +24,7 @@ function BarGroup({ title, unit, rows }) {
               style={{ width: `${Math.max((r.value / max) * 100, 2)}%` }}
             />
           </div>
-          <span className="compare-bar-row__value">
-            {r.value === null || r.value === undefined || r.value === "" ? "—" : r.value.toLocaleString("en-US")}
-          </span>
+          <span className="compare-bar-row__value">{formatCompareValue(r.value, unit)}</span>
         </div>
       ))}
     </section>
