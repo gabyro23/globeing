@@ -32,22 +32,22 @@ export function formatPopulationCompact(people) {
 
 const decimalFormatter = new Intl.NumberFormat("en-US", { maximumFractionDigits: 1 });
 
-// Formatea el valor de un indicador (de lib/indicators.js) según su unidad,
-// para mostrarlo como etiqueta en el pictograma de comparación.
+// Formats an indicator's value (from lib/indicators.js) based on its unit,
+// for display as a label in the comparison pictogram.
 export function formatIndicatorValue(value, unit) {
   if (value === null || value === undefined || value === "") return "—";
   const num = Number(value);
   if (Number.isNaN(num)) return "—";
 
   if (unit === "%") return `${decimalFormatter.format(num)}%`;
-  if (unit === "años") return `${decimalFormatter.format(num)} años`;
+  if (unit === "years") return `${decimalFormatter.format(num)} years`;
   if (unit === "US$") return `US$ ${formatCompact(num)}`;
   if (unit) return `${formatNumber(num)} ${unit}`;
   return formatNumber(num);
 }
 
-// Escala grande legible en palabras (Million/Billion/Trillion), para no
-// mostrar números larguísimos en la zona de comparación (barras).
+// Readable large-number scale (Million/Billion/Trillion), so the
+// comparison zone doesn't show extremely long numbers.
 function scaledWithWord(num) {
   const abs = Math.abs(num);
   if (abs >= 1e12) return `${decimalFormatter.format(num / 1e12)} Trillion`;
@@ -62,7 +62,7 @@ export function formatCompareValue(value, unit) {
   if (Number.isNaN(num)) return "—";
 
   if (unit === "%") return `${decimalFormatter.format(num)}%`;
-  if (unit === "años") return `${decimalFormatter.format(num)} años`;
+  if (unit === "years") return `${decimalFormatter.format(num)} years`;
   if (unit === "US$") return `US$ ${scaledWithWord(num)}`;
   if (unit) return `${scaledWithWord(num)} ${unit}`;
   return scaledWithWord(num);

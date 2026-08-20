@@ -84,22 +84,22 @@ export default function ComparePage() {
     <>
       <div className="app-hero">
         <h1 className="app-hero__title">Compare</h1>
-        <p className="app-hero__subtitle">Buscá países, elegí hasta {MAX_COMPARE} y compará sus datos.</p>
+        <p className="app-hero__subtitle">Search for countries, pick up to {MAX_COMPARE}, and compare their data.</p>
         {countries.length > 0 && (
-          <span className="app-hero__stat">{countries.length} países · datos públicos</span>
+          <span className="app-hero__stat">{countries.length} countries · public data</span>
         )}
       </div>
 
       {countries.length === 0 && !error && (
         <div className="status">
           <span className="status__spinner" aria-hidden="true" />
-          <span>Cargando datos y mapa…</span>
+          <span>Loading data and map…</span>
         </div>
       )}
 
       {error && (
         <div className="status status--error">
-          <span>No se pudo cargar la app: {error}</span>
+          <span>Couldn&apos;t load the app: {error}</span>
         </div>
       )}
 
@@ -115,6 +115,16 @@ export default function ComparePage() {
             />
           </div>
 
+          <section className="app-layout__compare">
+            <CompareZone
+              selectedCountries={selectedCountries}
+              onDropAlpha3={handleDropAlpha3}
+              onRemove={removeCompare}
+              onReorder={reorderCompare}
+              onOpenCompare={() => setCompareModalOpen(true)}
+            />
+          </section>
+
           <section className="map-section">
             <div className="app-layout__map">
               <WorldMap
@@ -126,16 +136,6 @@ export default function ComparePage() {
             </div>
           </section>
 
-          <section className="app-layout__compare">
-            <CompareZone
-              selectedCountries={selectedCountries}
-              onDropAlpha3={handleDropAlpha3}
-              onRemove={removeCompare}
-              onReorder={reorderCompare}
-              onOpenCompare={() => setCompareModalOpen(true)}
-            />
-          </section>
-
           <CompareModal
             open={compareModalOpen}
             countries={selectedCountries}
@@ -145,7 +145,7 @@ export default function ComparePage() {
       )}
 
       <footer className="app-footer">
-        <p>Datos de población, superficie y economía de fuentes públicas (World Bank).</p>
+        <p>Population, area, and economic data from public sources (World Bank).</p>
       </footer>
     </>
   );

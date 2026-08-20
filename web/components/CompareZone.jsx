@@ -31,8 +31,8 @@ function BarGroup({ title, unit, rows }) {
   );
 }
 
-// Port de js/components/compareZone.js — extendido para mostrar los
-// 11 indicadores en vez de solo población y área.
+// Port of js/components/compareZone.js — extended to show all 11
+// indicators instead of just population and area.
 export default function CompareZone({ selectedCountries, onDropAlpha3, onRemove, onReorder, onOpenCompare }) {
   const [dragOver, setDragOver] = useState(false);
   const [dropTarget, setDropTarget] = useState(null); // { iso3, before }
@@ -58,16 +58,16 @@ export default function CompareZone({ selectedCountries, onDropAlpha3, onRemove,
       >
         <div className="compare-zone__dropbox-header">
           <p className="compare-zone__hint">
-            Arrastrá países acá (o hacé click en el mapa / la lista) para compararlos — hasta {MAX_COMPARE}.
+            Drag countries here (or click on the map / list) to compare them — up to {MAX_COMPARE}.
           </p>
           <button
             type="button"
             className="btn-primary"
             disabled={!canOpenCompare}
-            title={canOpenCompare ? "Abrir comparación visual" : "Elegí al menos 2 países para comparar"}
+            title={canOpenCompare ? "Open visual comparison" : "Pick at least 2 countries to compare"}
             onClick={onOpenCompare}
           >
-            Ver comparación →
+            View comparison →
           </button>
         </div>
         <div className="compare-zone__chips">
@@ -103,7 +103,7 @@ export default function CompareZone({ selectedCountries, onDropAlpha3, onRemove,
               <button
                 type="button"
                 className="compare-chip__remove"
-                aria-label={`Quitar ${country.name}`}
+                aria-label={`Remove ${country.name}`}
                 onClick={() => onRemove(country.iso3)}
               >
                 ×
@@ -115,7 +115,7 @@ export default function CompareZone({ selectedCountries, onDropAlpha3, onRemove,
 
       <div className="compare-zone__charts">
         {selectedCountries.length === 0 ? (
-          <p className="compare-zone__empty">Todavía no elegiste países para comparar.</p>
+          <p className="compare-zone__empty">You haven&apos;t picked any countries to compare yet.</p>
         ) : (
           INDICATORS.map((ind) => {
             const rows = selectedCountries

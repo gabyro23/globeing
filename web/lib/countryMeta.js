@@ -1,7 +1,7 @@
-// Metadata que no vive en Supabase (bandera, región) pero que ya
-// teníamos curada en el prototipo original (data/countries.json,
-// copiado acá como countryTopoIds.json). La usamos para completar
-// lo que trae la base de datos.
+// Metadata that doesn't live in Supabase (flag, region) but that we
+// already had curated in the original prototype (data/countries.json,
+// copied here as countryTopoIds.json). We use it to fill in what the
+// database provides.
 import topoIds from "./countryTopoIds.json";
 
 const metaByAlpha3 = new Map(topoIds.map((c) => [c.alpha3, c]));

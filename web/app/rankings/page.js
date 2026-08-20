@@ -5,13 +5,15 @@ import { INDICATORS } from "../../lib/indicators";
 import { metaForAlpha3 } from "../../lib/countryMeta";
 import { formatCompareValue } from "../../lib/format";
 
-// Página de Rankings: elegís un indicador (PIB, superficie, etc.) con los
-// botones de arriba y se arman 3 tablas — el top 10, el último 10, y el
-// listado completo — todas ordenadas por ese indicador.
+// Rankings page: pick an indicator (GDP, area, etc.) with the buttons up
+// top and 3 tables get built — the top 10, the bottom 10, and the full
+// list — all sorted by that indicator. The "all countries" table also has
+// its own search box to filter by name without losing the overall rank.
 export default function RankingsPage() {
   const [countries, setCountries] = useState([]);
   const [error, setError] = useState(null);
   const [selectedKey, setSelectedKey] = useState(INDICATORS[0].key);
+  const [allSearch, setAllSearch] = useState("");
 
   useEffect(() => {
     fetch("/api/countries")
@@ -47,31 +49,39 @@ export default function RankingsPage() {
   );
   const allRanked = useMemo(() => ranked.map((c, i) => ({ ...c, rank: i + 1 })), [ranked]);
 
+  // Filtering keeps each country's overall rank number (doesn't renumber),
+  // so searching still shows where a country actually stands.
+  const visibleAllRanked = useMemo(() => {
+    const term = allSearch.trim().toLowerCase();
+    if (!term) return allRanked;
+    return allRanked.filter((c) => c.name.toLowerCase().includes(term));
+  }, [allRanked, allSearch]);
+
   return (
     <>
       <div className="app-hero">
         <h1 className="app-hero__title">Rankings</h1>
         <p className="app-hero__subtitle">
-          Elegí un indicador y mirá qué países lideran la tabla — y cuáles quedan últimos.
+          Pick an indicator and see which countries lead the table — and which ones rank last.
         </p>
       </div>
 
       {countries.length === 0 && !error && (
         <div className="status">
           <span className="status__spinner" aria-hidden="true" />
-          <span>Cargando datos…</span>
+          <span>Loading data…</span>
         </div>
       )}
 
       {error && (
         <div className="status status--error">
-          <span>No se pudo cargar la app: {error}</span>
+          <span>Couldn&apos;t load the app: {error}</span>
         </div>
       )}
 
       {countries.length > 0 && (
         <div className="rankings-page">
-          <div className="ranking-tabs" role="tablist" aria-label="Elegir indicador">
+          <div className="ranking-tabs" role="tablist" aria-label="Choose an indicator">
             {INDICATORS.map((ind) => (
               <button
                 key={ind.key}
@@ -94,7 +104,7 @@ export default function RankingsPage() {
               tone="best"
             />
             <RankingTable
-              title={`Últimos 10 — ${indicator.label}`}
+              title={`Bottom 10 — ${indicator.label}`}
               rows={worst10}
               indicator={indicator}
               tone="worst"
@@ -102,11 +112,13 @@ export default function RankingsPage() {
           </div>
 
           <RankingTable
-            title={`Todos los países — ${indicator.label}`}
-            rows={allRanked}
+            title={`All countries — ${indicator.label}`}
+            rows={visibleAllRanked}
             indicator={indicator}
             tone="all"
             tall
+            searchValue={allSearch}
+            onSearchChange={setAllSearch}
           />
         </div>
       )}
@@ -114,16 +126,35 @@ export default function RankingsPage() {
   );
 }
 
-function RankingTable({ title, rows, indicator, tone, tall }) {
+function RankingTable({ title, rows, indicator, tone, tall, searchValue, onSearchChange }) {
+  const hasSearch = typeof onSearchChange === "function";
+
   return (
     <section className={"ranking-table-card ranking-table-card--" + tone}>
-      <h2 className="ranking-table-card__title">{title}</h2>
+      <div className="ranking-table-card__header">
+        <h2 className="ranking-table-card__title">{title}</h2>
+        {hasSearch && (
+          <div className="ranking-table-search">
+            <span className="ranking-table-search__icon" aria-hidden="true">
+              ⌕
+            </span>
+            <input
+              type="search"
+              placeholder="Search country..."
+              autoComplete="off"
+              aria-label="Search country in this table"
+              value={searchValue}
+              onChange={(e) => onSearchChange(e.target.value)}
+            />
+          </div>
+        )}
+      </div>
       <div className={"ranking-table-scroll" + (tall ? " ranking-table-scroll--tall" : "")}>
         <table className="ranking-table">
           <thead>
             <tr>
               <th className="ranking-table__rank-col">#</th>
-              <th>País</th>
+              <th>Country</th>
               <th className="ranking-table__value-col">
                 {indicator.label}
                 {indicator.unit && ` (${indicator.unit})`}
@@ -134,7 +165,9 @@ function RankingTable({ title, rows, indicator, tone, tall }) {
             {rows.length === 0 ? (
               <tr>
                 <td colSpan={3} className="ranking-table__empty">
-                  Sin datos disponibles para este indicador.
+                  {hasSearch && searchValue
+                    ? "No country matches your search."
+                    : "No data available for this indicator."}
                 </td>
               </tr>
             ) : (

@@ -1,9 +1,9 @@
-// Genera las frases de "diferencia entre los datos" (ej. "Argentina tiene
-// 3.2× más población que España") para la pantalla de comparación visual.
-// Para cada estadística, el país con el valor más alto es la referencia y
-// se compara contra cada uno de los demás.
+// Builds the "difference between the data" sentences (e.g. "Argentina has
+// 3.2× more population than Spain") for the visual comparison screen.
+// For each statistic, the country with the highest value is the reference
+// and gets compared against each of the others.
 
-const SIMILAR_THRESHOLD = 1.05; // si el ratio es menor a esto, se consideran "similares"
+const SIMILAR_THRESHOLD = 1.05; // below this ratio, countries are considered "similar"
 
 function formatMultiplier(ratio) {
   if (!Number.isFinite(ratio) || ratio < SIMILAR_THRESHOLD) return null;
@@ -11,19 +11,19 @@ function formatMultiplier(ratio) {
   return `${ratio.toFixed(decimals)}×`;
 }
 
-// Frase por tipo de estadística: "área" se lee como tamaño ("más grande/chico"),
-// el resto se lee como cantidad ("tiene N× más <indicador>").
+// Sentence per statistic type: "area" reads as size ("bigger/smaller"),
+// everything else reads as a quantity ("has N× more <indicator>").
 function sentenceFor(statKey, label, referenceName, subjectName, mult) {
-  if (!mult) return `${referenceName} y ${subjectName} tienen ${label.toLowerCase()} similar.`;
+  if (!mult) return `${referenceName} and ${subjectName} have a similar ${label.toLowerCase()}.`;
   if (statKey === "area_km2") {
-    return `${referenceName} es ${mult} más grande que ${subjectName} en superficie.`;
+    return `${referenceName} is ${mult} bigger than ${subjectName} in area.`;
   }
-  return `${referenceName} tiene ${mult} más ${label.toLowerCase()} que ${subjectName}.`;
+  return `${referenceName} has ${mult} more ${label.toLowerCase()} than ${subjectName}.`;
 }
 
-// Devuelve [{ key, text }] comparando cada país contra el que tiene el valor
-// más alto de `statKey` (la referencia). Se omite si hay menos de 2 países
-// con datos válidos para esa estadística.
+// Returns [{ key, text }] comparing each country against the one with the
+// highest value of `statKey` (the reference). Skipped if fewer than 2
+// countries have valid data for that statistic.
 export function buildStatComparisons(countries, statKey, label) {
   const values = countries
     .map((country) => ({ country, value: Number(country[statKey]) }))
@@ -45,11 +45,11 @@ export function buildStatComparisons(countries, statKey, label) {
     });
 }
 
-// Etiqueta corta tipo badge para un país frente al más grande del grupo por
-// superficie (ej. "5.5× más chico" o "Escala base" si es el más grande).
+// Short badge-style label for a country versus the largest in the group by
+// area (e.g. "5.5× smaller", or "Base scale" if it is the largest).
 export function scaleBadgeLabel(area, maxArea) {
   if (!area || !maxArea) return null;
-  if (area >= maxArea) return "Escala base";
+  if (area >= maxArea) return "Base scale";
   const mult = formatMultiplier(maxArea / area);
-  return mult ? `${mult} más chico` : "Tamaño similar";
+  return mult ? `${mult} smaller` : "Similar size";
 }

@@ -3,14 +3,14 @@
 import { useMemo } from "react";
 import * as d3 from "d3";
 
-const MINI_PAD = 3; // px — margen interno para que el trazo no se recorte
-const MINI_MIN_VISIBLE = 8; // px — piso para que un país chico no desaparezca
+const MINI_PAD = 3; // px — inner margin so the stroke doesn't get clipped
+const MINI_MIN_VISIBLE = 8; // px — floor so a small country doesn't disappear
 
-// Un solo recuadro (no uno por país) con la silueta de cada país del grupo
-// dibujada a su escala real relativa entre sí — el país más grande del
-// grupo ocupa el alto `size`, el resto se escala proporcional según su
-// superficie real (sqrt del área). Vive dentro de pictogram-row, con
-// botones +/- para agrandar o achicar el recuadro completo.
+// A single box (not one per country) with each country in the group's
+// silhouette drawn at its real scale relative to the others — the largest
+// country in the group takes up the `size` height, the rest scale
+// proportionally by their real area (sqrt of area). Lives inside
+// pictogram-row, with +/- buttons to enlarge or shrink the whole box.
 export default function TrueScalePanel({
   countries,
   featureMap,
@@ -59,13 +59,13 @@ export default function TrueScalePanel({
   return (
     <div className="true-scale-panel">
       <div className="true-scale-panel__header">
-        <span className="true-scale-panel__title">Tamaño real</span>
+        <span className="true-scale-panel__title">True scale</span>
         <div className="true-scale-panel__zoom">
           <button
             type="button"
             onClick={onDecrease}
             disabled={!canDecrease}
-            aria-label="Achicar recuadro de tamaño real"
+            aria-label="Shrink true-scale box"
           >
             −
           </button>
@@ -73,7 +73,7 @@ export default function TrueScalePanel({
             type="button"
             onClick={onIncrease}
             disabled={!canIncrease}
-            aria-label="Agrandar recuadro de tamaño real"
+            aria-label="Enlarge true-scale box"
           >
             +
           </button>
@@ -89,7 +89,7 @@ export default function TrueScalePanel({
                 height={item.height}
                 viewBox={item.viewBox}
                 role="img"
-                aria-label={`Tamaño real de ${item.name}`}
+                aria-label={`True scale of ${item.name}`}
               >
                 <path d={item.pathD} className="pictogram-mini-silhouette" />
               </svg>

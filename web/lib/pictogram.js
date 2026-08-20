@@ -1,42 +1,42 @@
-// Utilidades para el pictograma de comparación: point-in-polygon sobre la
-// silueta ya proyectada de un país, muestreo de puntos para la grilla de
-// iconitos de población, y el redondeo del "valor por ícono" (cuántos
-// habitantes representa cada personita) para que la leyenda sea legible.
+// Utilities for the comparison pictogram: point-in-polygon over a
+// country's already-projected silhouette, point sampling for the
+// population icon grid, and rounding the "value per icon" (how many
+// people each little person represents) so the legend stays readable.
 
-const MIN_SPACING = 3.6; // px — por debajo de esto los iconitos se pisan demasiado
+const MIN_SPACING = 3.6; // px — below this the icons overlap too much
 const MAX_SPACING = 50; // px
 const MAX_SAMPLE_ATTEMPTS = 7;
 const SPACING_DECAY = 0.72;
 
-// --- Constantes de layout del pictograma (compartidas entre
-// CountryPictogram, que dibuja cada silueta, y CompareModal, que necesita
-// reservar suficiente alto de contenedor para la más grande) ------------
+// --- Pictogram layout constants (shared between CountryPictogram, which
+// draws each silhouette, and CompareModal, which needs to reserve enough
+// container height for the largest one) --------------------------------
 
-export const PICTOGRAM_ICON_WIDTH = 10; // px — ancho fijo de cada iconito
-export const PICTOGRAM_ICON_HEIGHT = 11; // px — alto fijo (cabeza + torso + piernas)
+export const PICTOGRAM_ICON_WIDTH = 10; // px — fixed width of each icon
+export const PICTOGRAM_ICON_HEIGHT = 11; // px — fixed height (head + torso + legs)
 export const PICTOGRAM_BASE_PAD = PICTOGRAM_ICON_HEIGHT * 1.2;
 
-// Padding simple para el mini-mapa de "tamaño real" de la esquina: no tiene
-// canto 3D, sólo necesita lugar para el trazo del borde.
+// Simple padding for the corner "true scale" mini-map: it has no 3D edge,
+// it only needs room for the border stroke.
 export const PICTOGRAM_MINI_PAD = 3;
 
-// Grosor del canto 3D extruido de la silueta, según el tamaño del país en
-// pantalla (clampeado para que ni un país gigante ni uno chico se vean
-// desproporcionados).
+// Thickness of the silhouette's extruded 3D edge, based on the country's
+// on-screen size (clamped so neither a huge nor a tiny country looks
+// disproportionate).
 export function pictogramExtrusionDepth(targetBoxPx) {
   return Math.min(Math.max(targetBoxPx * 0.035, 1.5), 6);
 }
 
-// Padding total que hay que sumarle al bbox real de la silueta para que
-// el canto extruido y la sombra difusa no se recorten dentro del SVG.
+// Total padding to add to the silhouette's real bbox so the extruded edge
+// and the soft shadow don't get clipped inside the SVG.
 export function pictogramViewPad(targetBoxPx) {
   return PICTOGRAM_BASE_PAD + pictogramExtrusionDepth(targetBoxPx) * 1.5 + 8;
 }
 
-// --- Geometría -------------------------------------------------------
+// --- Geometry ----------------------------------------------------------
 
-// Proyecta un anillo de coordenadas [lon, lat] a píxeles con la proyección
-// dada, descartando puntos que la proyección no pueda resolver.
+// Projects a ring of [lon, lat] coordinates to pixels with the given
+// projection, dropping points the projection can't resolve.
 function projectRing(ring, projection) {
   const projected = [];
   for (const coord of ring) {
@@ -46,9 +46,9 @@ function projectRing(ring, projection) {
   return projected;
 }
 
-// Convierte la geometría (Polygon | MultiPolygon) de un feature de topojson
-// ya proyectado en una lista de polígonos { outer, holes } en espacio de
-// píxeles, listos para hacer point-in-polygon sin tocar el DOM.
+// Converts an already-projected topojson feature's geometry
+// (Polygon | MultiPolygon) into a list of { outer, holes } polygons in
+// pixel space, ready for point-in-polygon without touching the DOM.
 export function extractPolygons(geometry, projection) {
   if (!geometry) return [];
   const rawPolygons =
@@ -66,7 +66,7 @@ export function extractPolygons(geometry, projection) {
     .filter((poly) => poly.outer.length > 2);
 }
 
-// Bounding box en píxeles de una lista de polígonos ya proyectados.
+// Pixel-space bounding box of a list of already-projected polygons.
 export function polygonsBounds(polygons) {
   let minX = Infinity;
   let minY = Infinity;
@@ -84,7 +84,7 @@ export function polygonsBounds(polygons) {
   return { minX, minY, maxX, maxY };
 }
 
-// Ray casting estándar (even-odd rule).
+// Standard ray casting (even-odd rule).
 function pointInRing(x, y, ring) {
   let inside = false;
   for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
@@ -111,10 +111,10 @@ export function pointInAnyPolygon(x, y, polygons) {
   return false;
 }
 
-// --- Muestreo de puntos para la grilla de iconitos --------------------
+// --- Point sampling for the icon grid ----------------------------------
 
-// Genera una grilla tipo "ladrillo" (filas alternadas desfasadas medio
-// paso) dentro del bbox, con el spacing dado.
+// Generates a "brick"-style grid (alternating rows offset by half a step)
+// within the bbox, at the given spacing.
 function gridPoints(bbox, spacing) {
   const points = [];
   const halfStep = spacing / 2;
@@ -129,8 +129,8 @@ function gridPoints(bbox, spacing) {
   return points;
 }
 
-// Toma `count` puntos distribuidos parejo a lo largo de una lista ya
-// ordenada (en vez de truncar, lo que sesgaría hacia una esquina).
+// Picks `count` points evenly spread across an already-ordered list
+// (instead of truncating, which would bias toward one corner).
 function evenlySubsample(points, count) {
   if (points.length <= count) return points;
   const stride = points.length / count;
@@ -141,10 +141,10 @@ function evenlySubsample(points, count) {
   return picked;
 }
 
-// Encuentra hasta `targetCount` puntos dentro de la silueta (polygons),
-// densificando la grilla si hace falta hasta un mínimo de spacing. Si la
-// silueta es demasiado chica para el spacing mínimo, devuelve los que
-// entren (menos que targetCount) en vez de trabar.
+// Finds up to `targetCount` points inside the silhouette (polygons),
+// densifying the grid as needed down to a minimum spacing. If the
+// silhouette is too small for the minimum spacing, returns however many
+// fit (fewer than targetCount) instead of getting stuck.
 export function samplePictogramPoints({ polygons, bbox, targetCount }) {
   if (targetCount <= 0 || polygons.length === 0) return [];
 
@@ -163,11 +163,11 @@ export function samplePictogramPoints({ polygons, bbox, targetCount }) {
   return evenlySubsample(inside, targetCount);
 }
 
-// --- Escala de la leyenda (habitantes por ícono) -----------------------
+// --- Legend scale (people per icon) -------------------------------------
 
-// Redondea a un "número lindo" (1/2/5 × 10^n) para que la leyenda sea
-// legible, apuntando a que el país con más población no muestre más de
-// ~targetMaxIcons iconitos.
+// Rounds to a "nice number" (1/2/5 × 10^n) so the legend stays readable,
+// aiming for the most populous country to show no more than
+// ~targetMaxIcons icons.
 export function niceIconValue(maxPopulation, targetMaxIcons = 140) {
   const safePopulation = Math.max(maxPopulation || 0, 1);
   const raw = safePopulation / targetMaxIcons;

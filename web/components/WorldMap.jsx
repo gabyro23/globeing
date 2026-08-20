@@ -9,7 +9,7 @@ import { readDraggedAlpha3 } from "../lib/dnd";
 const WORLD_ATLAS_URL =
   "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
-// Port de js/components/mapView.js
+// Port of js/components/mapView.js
 export default function WorldMap({ selectedAlpha3, filteredAlpha3, onToggleCountry, onDropAlpha3 }) {
   const containerRef = useRef(null);
   const mapApiRef = useRef(null);
@@ -19,7 +19,7 @@ export default function WorldMap({ selectedAlpha3, filteredAlpha3, onToggleCount
   useEffect(() => {
     fetch(WORLD_ATLAS_URL)
       .then((res) => {
-        if (!res.ok) throw new Error(`No se pudo cargar el mapa (${res.status})`);
+        if (!res.ok) throw new Error(`Couldn't load the map (${res.status})`);
         return res.json();
       })
       .then(setWorld)
@@ -35,6 +35,7 @@ export default function WorldMap({ selectedAlpha3, filteredAlpha3, onToggleCount
       .feature(world, world.objects.countries)
       .features.filter((f) => byId.has(normalizeId(f.id)));
     const countryOf = (feature) => byId.get(normalizeId(feature.id));
+    const isMac = typeof navigator !== "undefined" && /mac/i.test(navigator.userAgent);
 
     const width = 960;
     const height = 480;
@@ -48,13 +49,18 @@ export default function WorldMap({ selectedAlpha3, filteredAlpha3, onToggleCount
 
     const wrapper = d3.select(container).append("div").attr("class", "map-view");
     const tooltip = wrapper.append("div").attr("class", "map-tooltip").attr("hidden", true);
+    const zoomHint = wrapper
+      .append("div")
+      .attr("class", "map-view__zoom-hint")
+      .attr("hidden", true)
+      .text(isMac ? "Hold ⌘ and scroll to zoom" : "Hold Ctrl and scroll to zoom");
 
     const svg = wrapper
       .append("svg")
       .attr("class", "map-view__svg")
       .attr("viewBox", `0 0 ${width} ${height}`)
       .attr("role", "img")
-      .attr("aria-label", "Mapa interactivo del mundo");
+      .attr("aria-label", "Interactive world map");
 
     const zoomLayer = svg.append("g");
 
@@ -98,6 +104,9 @@ export default function WorldMap({ selectedAlpha3, filteredAlpha3, onToggleCount
       })
       .on("mouseleave", () => tooltip.attr("hidden", true));
 
+    // Wheel-scroll only zooms the map while Cmd (Mac) or Ctrl (Windows/Linux)
+    // is held, so a plain scroll over the map keeps scrolling the page
+    // instead of getting trapped zooming in and out.
     const zoom = d3
       .zoom()
       .scaleExtent([1, 8])
@@ -105,10 +114,29 @@ export default function WorldMap({ selectedAlpha3, filteredAlpha3, onToggleCount
         [0, 0],
         [width, height],
       ])
+      .filter((event) => {
+        if (event.type === "wheel") return event.ctrlKey || event.metaKey;
+        return !event.ctrlKey && !event.button;
+      })
       .on("zoom", (event) => zoomLayer.attr("transform", event.transform));
     svg.call(zoom);
 
-    // El mapa también es zona de drop (para arrastrar una tarjeta de la lista).
+    // Nudge the user with a brief hint (like Google Maps) when they scroll
+    // over the map without the modifier key held.
+    let hintTimer = null;
+    svg.on("wheel.zoomHint", (event) => {
+      if (event.ctrlKey || event.metaKey) {
+        zoomHint.attr("hidden", true);
+        return;
+      }
+      zoomHint.attr("hidden", null).classed("is-visible", true);
+      if (hintTimer) clearTimeout(hintTimer);
+      hintTimer = setTimeout(() => {
+        zoomHint.classed("is-visible", false);
+      }, 1200);
+    });
+
+    // The map is also a drop zone (for dragging a card from the list).
     container.addEventListener("dragover", (event) => event.preventDefault());
     container.addEventListener("drop", (event) => {
       event.preventDefault();
@@ -119,12 +147,13 @@ export default function WorldMap({ selectedAlpha3, filteredAlpha3, onToggleCount
     mapApiRef.current = { countryPaths, countryOf, wrapper };
 
     return () => {
+      if (hintTimer) clearTimeout(hintTimer);
       mapApiRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [world]);
 
-  // Resaltar selección sin redibujar el mapa entero
+  // Highlight the selection without redrawing the whole map
   useEffect(() => {
     const api = mapApiRef.current;
     if (!api) return;
@@ -132,7 +161,7 @@ export default function WorldMap({ selectedAlpha3, filteredAlpha3, onToggleCount
     api.countryPaths.classed("is-selected", (d) => selectedAlpha3.has(api.countryOf(d)?.alpha3));
   }, [selectedAlpha3, world]);
 
-  // Atenuar los países que no pasan el filtro activo
+  // Dim the countries that don't pass the active filter
   useEffect(() => {
     const api = mapApiRef.current;
     if (!api) return;
@@ -145,7 +174,7 @@ export default function WorldMap({ selectedAlpha3, filteredAlpha3, onToggleCount
   if (error) {
     return (
       <div className="p-4 text-sm" style={{ color: "var(--danger)" }}>
-        No se pudo cargar el mapa: {error}
+        Couldn&apos;t load the map: {error}
       </div>
     );
   }

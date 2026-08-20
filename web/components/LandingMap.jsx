@@ -8,16 +8,16 @@ const WORLD_ATLAS_URL = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-11
 const W = 1360;
 const H = 700;
 
-// Seis países de ejemplo, uno por indicador — vidriera decorativa de lo que
-// se puede comparar en /compare (no son datos en vivo). Puerto directo del
-// diseño Home.html de Claude Design.
+// Six example countries, one per indicator — a decorative showcase of what
+// can be compared in /compare (not live data). Direct port of the Home.html
+// design from Claude Design.
 const POINTS = [
-  { country: "Canada", flag: "🇨🇦", label: "PIB", value: "2.3 Trillion", lon: -106, lat: 58, dx: 0, dy: -14 },
-  { country: "Spain", flag: "🇪🇸", label: "Población", value: "48.8 Million", lon: -3.7, lat: 40, dx: -30, dy: -16 },
-  { country: "Japan", flag: "🇯🇵", label: "Superficie", value: "377,975 km²", lon: 138, lat: 37, dx: 60, dy: -14 },
-  { country: "Brazil", flag: "🇧🇷", label: "Población", value: "212.6 Million", lon: -51, lat: -11, dx: 0, dy: -14 },
-  { country: "Kenya", flag: "🇰🇪", label: "PIB", value: "108 Billion", lon: 37.9, lat: 0.2, dx: 40, dy: -14 },
-  { country: "Australia", flag: "🇦🇺", label: "Superficie", value: "7,692,024 km²", lon: 134, lat: -25, dx: 0, dy: -14 },
+  { country: "Canada", flag: "🇨🇦", label: "GDP", value: "2.3 Trillion", lon: -106, lat: 58, dx: 0, dy: -14 },
+  { country: "Spain", flag: "🇪🇸", label: "Population", value: "48.8 Million", lon: -3.7, lat: 40, dx: -30, dy: -16 },
+  { country: "Japan", flag: "🇯🇵", label: "Surface", value: "377,975 km²", lon: 138, lat: 37, dx: 60, dy: -14 },
+  { country: "Brazil", flag: "🇧🇷", label: "Population", value: "212.6 Million", lon: -51, lat: -11, dx: 0, dy: -14 },
+  { country: "Kenya", flag: "🇰🇪", label: "GDP", value: "108 Billion", lon: 37.9, lat: 0.2, dx: 40, dy: -14 },
+  { country: "Australia", flag: "🇦🇺", label: "Surface", value: "7,692,024 km²", lon: 134, lat: -25, dx: 0, dy: -14 },
 ];
 
 export default function LandingMap() {
@@ -64,7 +64,7 @@ export default function LandingMap() {
               (POINTS.some((p) => p.country === d.properties.name) ? " is-highlighted" : "")
           );
 
-        // limpia pins/dots de una corrida previa del effect (ej. React Strict Mode)
+        // clean up pins/dots from a previous effect run (e.g. React Strict Mode)
         zone.querySelectorAll(".landing-pin, .landing-dot").forEach((el) => el.remove());
 
         POINTS.forEach((p) => {
@@ -113,9 +113,9 @@ export default function LandingMap() {
         className="landing-map__svg"
         viewBox={`0 0 ${W} ${H}`}
         role="img"
-        aria-label="Mapa del mundo con datos de ejemplo de seis países"
+        aria-label="World map with example data for six countries"
       />
-      {error && <p className="landing-map__error">No se pudo cargar el mapa: {error}</p>}
+      {error && <p className="landing-map__error">Couldn&apos;t load the map: {error}</p>}
     </div>
   );
 }

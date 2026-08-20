@@ -1,7 +1,7 @@
-// Carga del mismo world-atlas (110m) que usa WorldMap.jsx, pero expuesto
-// como utilidad reusable para extraer el GeoJSON feature de un país
-// puntual (lo necesita CompareModal/CountryPictogram para dibujar la
-// silueta real de cada país seleccionado).
+// Loads the same world-atlas (110m) that WorldMap.jsx uses, but exposed as
+// a reusable utility to extract the GeoJSON feature for a single country
+// (needed by CompareModal/CountryPictogram to draw the real silhouette of
+// each selected country).
 import * as topojson from "topojson-client";
 import topoIds from "./countryTopoIds.json";
 
@@ -13,19 +13,19 @@ const topoIdByAlpha3 = new Map(topoIds.map((c) => [c.alpha3, normalizeId(c.id)])
 
 let worldPromise = null;
 
-// Fetch (con cache en memoria para el resto de la sesión de la pestaña)
-// del TopoJSON del mundo entero.
+// Fetches (with an in-memory cache for the rest of the tab's session) the
+// whole world's TopoJSON.
 export function loadWorld() {
   if (!worldPromise) {
     worldPromise = fetch(WORLD_ATLAS_URL).then((res) => {
-      if (!res.ok) throw new Error(`No se pudo cargar el mapa (${res.status})`);
+      if (!res.ok) throw new Error(`Couldn't load the map (${res.status})`);
       return res.json();
     });
   }
   return worldPromise;
 }
 
-// A partir del TopoJSON crudo, arma un Map alpha3 -> GeoJSON feature.
+// Builds a Map of alpha3 -> GeoJSON feature from the raw TopoJSON.
 export function featuresByAlpha3(world) {
   const land = topojson.feature(world, world.objects.countries).features;
   const byTopoId = new Map(land.map((f) => [normalizeId(f.id), f]));

@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 /* ============================================================
-   Design system portado de tu prototipo (css/styles.css)
-   Style guide v1 · Agosto 2026 · Rediseño 2a
+   Design system ported from the original prototype (css/styles.css)
+   Style guide v1 · August 2026 · Redesign 2a
    ============================================================ */
 :root {
   --bg: #fbf5ef;
@@ -95,20 +95,33 @@ body {
 .site-header__brand {
   display: flex;
   align-items: center;
+  gap: 9px;
   text-decoration: none;
 }
 
-.site-header__logo {
-  height: 46px;
-  width: auto;
-  display: block;
+/* Logo mark: conic-gradient globe, fixed brand colors (does not adapt to
+   dark mode — see the "Logo Globeing" spec in the project). */
+.logo-mark {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: conic-gradient(from 200deg, #074f57, #74a57f, #077187, #074f57);
 }
 
-.site-header__wordmark {
-  font-size: 22px;
-  font-weight: 800;
+.logo-wordmark {
+  font-family: var(--font-calistoga), Georgia, serif;
+  font-size: 26px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+.logo-wordmark__glob {
   color: var(--ink);
-  letter-spacing: -0.02em;
+}
+
+.logo-wordmark__eing {
+  color: var(--accent);
 }
 
 .site-header__nav {
@@ -201,7 +214,7 @@ body {
   border-color: var(--danger);
 }
 
-/* --- Layout principal: buscador + mapa a pantalla completa --- */
+/* --- Main layout: search bar + full-width map --- */
 .search-section {
   padding: 8px clamp(16px, 4vw, 40px) 0;
   position: relative;
@@ -221,7 +234,7 @@ body {
   min-width: 0;
 }
 
-/* --- Search bar (reemplaza al viejo panel de filtros) --- */
+/* --- Search bar (replaces the old filter panel) --- */
 .search-bar {
   position: relative;
   max-width: 480px;
@@ -434,7 +447,7 @@ body {
   color: #fff;
 }
 
-/* --- Mapa interactivo --- */
+/* --- Interactive map --- */
 .map-view-container,
 .map-view {
   position: relative;
@@ -496,6 +509,28 @@ path.country.is-dimmed {
   line-height: 1.4;
   z-index: 5;
   max-width: 220px;
+}
+
+.map-view__zoom-hint {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  background: rgba(30, 42, 44, 0.45);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 12px;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 6;
+}
+
+.map-view__zoom-hint.is-visible {
+  opacity: 1;
 }
 
 /* --- Compare zone --- */
@@ -647,7 +682,7 @@ path.country.is-dimmed {
   font-size: 0.78rem;
 }
 
-/* --- Botón primario (guía de estilos §03) --- */
+/* --- Primary button (style guide §03) --- */
 .btn-primary {
   background: var(--accent);
   color: var(--accent-ink);
@@ -683,7 +718,7 @@ path.country.is-dimmed {
   margin: 0;
 }
 
-/* --- Comparación visual (pictogramas) --- */
+/* --- Visual comparison (pictograms) --- */
 .compare-modal-backdrop {
   position: fixed;
   inset: 0;
@@ -818,8 +853,8 @@ path.country.is-dimmed {
   min-width: min-content;
 }
 
-/* Los países se centran en el espacio que le queda al lado del recuadro de
-   tamaño real, que a su vez queda siempre fijo en la esquina izquierda. */
+/* Countries center in whatever space is left next to the true-scale box,
+   which itself always stays pinned to the left corner. */
 .pictogram-countries {
   display: flex;
   align-items: flex-start;
@@ -853,7 +888,7 @@ path.country.is-dimmed {
   max-width: 100%;
 }
 
-/* --- Relieve 3D de la silueta: sombra difusa + canto extruido + cara superior --- */
+/* --- 3D relief of the silhouette: soft shadow + extruded edge + top face --- */
 .pictogram-shadow {
   fill: var(--ink);
   opacity: 0.22;
@@ -894,7 +929,7 @@ path.country.is-dimmed {
   stroke-width: 0.6;
 }
 
-/* --- Recuadro compartido de "tamaño real" (dentro de pictogram-row) --- */
+/* --- Shared "true scale" box (inside pictogram-row) --- */
 .true-scale-panel {
   display: flex;
   flex-direction: column;
@@ -989,8 +1024,8 @@ path.country.is-dimmed {
   opacity: 0.16;
 }
 
-/* Cabeza blanca en vez del color de la variante: más contraste contra el
-   relieve de color de la silueta del país. */
+/* White head instead of the variant color: more contrast against the
+   colored relief of the country's silhouette. */
 .pictogram-icon-head {
   fill: #fff;
   stroke: var(--accent-deep);
@@ -1124,7 +1159,7 @@ path.country.is-dimmed {
   }
 }
 
-/* --- Landing page (puerto de Home.html) --- */
+/* --- Landing page (ported from Home.html) --- */
 .landing-page {
   max-width: 1440px;
   margin: 0 auto;
@@ -1253,7 +1288,7 @@ path.country.is-dimmed {
   text-align: center;
   font-size: 13px;
   color: var(--muted);
-  padding: 8px 0 64px;
+  padding: 8px 0 32px;
 }
 
 @media (max-width: 1100px) {
@@ -1333,8 +1368,17 @@ path.country.is-dimmed {
   min-width: 0;
 }
 
+.ranking-table-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
 .ranking-table-card__title {
-  margin: 0 0 12px;
+  margin: 0;
   font-size: 15px;
   font-weight: 700;
 }
@@ -1345,6 +1389,43 @@ path.country.is-dimmed {
 
 .ranking-table-card--worst .ranking-table-card__title {
   color: var(--danger);
+}
+
+.ranking-table-search {
+  position: relative;
+  flex-shrink: 0;
+  width: 220px;
+  max-width: 100%;
+}
+
+.ranking-table-search__icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: 13px;
+  pointer-events: none;
+}
+
+.ranking-table-search input[type="search"] {
+  width: 100%;
+  padding: 7px 10px 7px 30px;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--border-strong);
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.ranking-table-search input[type="search"]:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.ranking-table-search input[type="search"]::-webkit-search-cancel-button {
+  display: none;
 }
 
 .ranking-table-scroll {
@@ -1411,4 +1492,166 @@ path.country.is-dimmed {
   color: var(--muted);
   text-align: center;
   padding: 20px;
+}
+
+/* --- Random facts --- */
+.daily-fact {
+  padding: 0 clamp(16px, 4vw, 40px) 40px;
+}
+
+.daily-fact--page {
+  padding-top: 4px;
+}
+
+.daily-fact__card {
+  max-width: 780px;
+  margin: 0 auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px clamp(20px, 4vw, 32px);
+  text-align: left;
+}
+
+.daily-fact--page .daily-fact__card {
+  margin: 0;
+}
+
+.daily-fact__eyebrow {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+
+.daily-fact__text {
+  margin: 0;
+  font-size: 19px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.daily-fact__country {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.daily-fact__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.daily-fact__source {
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+
+.daily-fact__source:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.daily-fact__more {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.daily-fact__more:hover {
+  text-decoration: underline;
+}
+
+.fact-archive {
+  padding: 32px clamp(16px, 4vw, 40px) 40px;
+}
+
+.fact-archive__title {
+  margin: 0 0 16px;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.fact-archive__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.fact-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fact-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.fact-card__date {
+  font-size: 12px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.fact-card__category {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent-deep);
+  background: var(--sage-bg);
+  border-radius: var(--radius-badge);
+  padding: 3px 7px;
+}
+
+.fact-card__text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink);
+  flex: 1;
+}
+
+.fact-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.fact-card__country {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.fact-card__source {
+  color: var(--muted);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+
+.fact-card__source:hover {
+  color: var(--accent);
+  border-color: var(--accent);
 }

@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import CountryList from "./CountryList";
 
-// Barra de búsqueda única (reemplaza al viejo panel de filtros): la lista de
-// resultados es un dropdown que sólo aparece mientras hay texto escrito.
+// Single search bar (replaces the old filter panel): the results list is a
+// dropdown that only appears while there's text typed in.
 export default function SearchBar({ countries, selectedAlpha3, onToggle, search, onSearchChange }) {
   const [searchValue, setSearchValue] = useState(search);
   const debounceRef = useRef(null);
@@ -35,14 +35,14 @@ export default function SearchBar({ countries, selectedAlpha3, onToggle, search,
         <input
           id="global-search"
           type="search"
-          placeholder="Buscar país... ej. Argentina, Japón"
+          placeholder="Search for a country... e.g. Argentina, Japan"
           autoComplete="off"
-          aria-label="Buscar país"
+          aria-label="Search country"
           value={searchValue}
           onChange={handleInput}
         />
         {hasQuery && (
-          <button type="button" className="search-bar__clear" aria-label="Limpiar búsqueda" onClick={handleClear}>
+          <button type="button" className="search-bar__clear" aria-label="Clear search" onClick={handleClear}>
             ×
           </button>
         )}

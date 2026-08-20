@@ -14,14 +14,14 @@ import {
 import { formatArea, formatPopulation, formatIndicatorValue } from "../lib/format";
 import { INDICATORS } from "../lib/indicators";
 
-const EXTRUSION_STEPS = 10; // capas finas que arman el "canto" 3D de la silueta
+const EXTRUSION_STEPS = 10; // thin stacked layers that build the silhouette's 3D "edge"
 
 const BASELINE_KEYS = new Set(["population", "area_km2", "population_density"]);
 const indicatorByKey = new Map(INDICATORS.map((i) => [i.key, i]));
 
-// 4 variantes de color (en base a la paleta de marca) para que la grilla de
-// personitas tenga variedad visual, como en la referencia adjunta por el
-// usuario, sin salirse del sistema de diseño de Globeing.
+// 4 color variants (based on the brand palette) so the grid of little
+// people has visual variety, like in the reference the user attached,
+// without straying from Globeing's design system.
 const PERSON_VARIANTS = [
   { head: "var(--accent-deep)", torso: "var(--accent)", legs: "var(--ink)" },
   { head: "var(--accent-deep)", torso: "var(--sage)", legs: "var(--accent-deep)" },
@@ -29,8 +29,8 @@ const PERSON_VARIANTS = [
   { head: "var(--accent-deep)", torso: "var(--sage-light)", legs: "var(--accent)" },
 ];
 
-// Personita "de verdad" (cabeza + remera + pantalón + sombra en el piso) en
-// vez del isotype plano anterior — inspirada en la referencia del usuario.
+// A "real" little person (head + shirt + pants + ground shadow) instead of
+// the earlier flat isotype — inspired by the user's reference.
 function PersonSymbol({ id, colors }) {
   return (
     <symbol id={id} viewBox="0 0 10 11">
@@ -46,13 +46,13 @@ function PersonSymbol({ id, colors }) {
   );
 }
 
-// Dibuja la silueta de un país en un lienzo del MISMO tamaño para todos los
-// países comparados (para que la grilla de población se lea clara sin
-// importar cuán chico sea el país), con relieve 3D (degradé + canto
-// extruido + sombra) y una grilla de personitas con volumen representando
-// su población. Debajo, la tabla de datos clave (área, población, densidad
-// + extras). El mini-mapa de tamaño REAL entre países vive aparte, en
-// TrueScalePanel (un solo recuadro compartido dentro de pictogram-row).
+// Draws a country's silhouette on a canvas of the SAME size for every
+// compared country (so the population grid reads clearly no matter how
+// small the country is), with 3D relief (gradient + extruded edge +
+// shadow) and a grid of little people with volume representing its
+// population. Below it, the key data table (area, population, density +
+// extras). The REAL-size mini-map between countries lives separately, in
+// TrueScalePanel (a single shared box inside pictogram-row).
 export default function CountryPictogram({
   country,
   feature,
@@ -66,9 +66,9 @@ export default function CountryPictogram({
   const layout = useMemo(() => {
     if (!feature) return null;
 
-    const targetBoxPx = boxSize; // mismo tamaño de lienzo para todos los países
-    const depth = pictogramExtrusionDepth(targetBoxPx); // grosor del canto 3D
-    const viewPad = pictogramViewPad(targetBoxPx); // deja lugar a canto + sombra difusa
+    const targetBoxPx = boxSize; // same canvas size for every country
+    const depth = pictogramExtrusionDepth(targetBoxPx); // thickness of the 3D edge
+    const viewPad = pictogramViewPad(targetBoxPx); // leaves room for the edge + soft shadow
 
     const centroid = d3.geoCentroid(feature);
     const projection = d3
@@ -125,7 +125,7 @@ export default function CountryPictogram({
             viewBox={layout.viewBox}
             className="pictogram-svg"
             role="img"
-            aria-label={`Silueta de ${country.name} con iconitos representando su población`}
+            aria-label={`Silhouette of ${country.name} with icons representing its population`}
           >
             <defs>
               <linearGradient id={fillGradientId} x1="0%" y1="0%" x2="100%" y2="100%">
@@ -138,14 +138,14 @@ export default function CountryPictogram({
               ))}
             </defs>
 
-            {/* sombra ambiente difusa, da la sensación de que la silueta "flota" */}
+            {/* soft ambient shadow, gives the sense that the silhouette "floats" */}
             <path
               d={layout.pathD}
               className="pictogram-shadow"
               transform={`translate(${layout.shadowOffset.dx} ${layout.shadowOffset.dy})`}
             />
 
-            {/* canto extruido: capas finas apiladas simulan el grosor 3D */}
+            {/* extruded edge: thin stacked layers simulate the 3D thickness */}
             {layout.extrusionSteps.map((step, i) => (
               <path
                 key={i}
@@ -155,7 +155,7 @@ export default function CountryPictogram({
               />
             ))}
 
-            {/* cara superior */}
+            {/* top face */}
             <path d={layout.pathD} className="pictogram-silhouette" fill={`url(#${fillGradientId})`} />
 
             <g className="pictogram-icon-layer">
@@ -173,22 +173,22 @@ export default function CountryPictogram({
             </g>
           </svg>
         ) : (
-          <p className="pictogram-missing">Sin datos de mapa para este país.</p>
+          <p className="pictogram-missing">No map data available for this country.</p>
         )}
       </div>
 
       <dl className="pictogram-stats">
         <div>
-          <dt>Área</dt>
+          <dt>Area</dt>
           <dd>{formatArea(country.area_km2)}</dd>
         </div>
         <div>
-          <dt>Población</dt>
+          <dt>Population</dt>
           <dd>{formatPopulation(country.population)}</dd>
         </div>
         <div>
-          <dt>Densidad</dt>
-          <dd>{formatIndicatorValue(country.population_density, "hab/km²")}</dd>
+          <dt>Density</dt>
+          <dd>{formatIndicatorValue(country.population_density, "people/km²")}</dd>
         </div>
         {extraStats.map((ind) => (
           <div key={ind.key}>
@@ -200,8 +200,8 @@ export default function CountryPictogram({
 
       {layout && (
         <p className="pictogram-icon-count">
-          ≈ {layout.shownIconCount.toLocaleString("en-US")} iconitos
-          {layout.shownIconCount < layout.requestedIconCount && " (espacio limitado)"}
+          ≈ {layout.shownIconCount.toLocaleString("en-US")} icons
+          {layout.shownIconCount < layout.requestedIconCount && " (limited space)"}
         </p>
       )}
     </div>

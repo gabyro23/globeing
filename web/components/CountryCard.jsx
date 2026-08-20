@@ -8,7 +8,7 @@ import {
 } from "../lib/format";
 import { handleDragStart } from "../lib/dnd";
 
-// Port de js/components/countryCard.js
+// Port of js/components/countryCard.js
 export default function CountryCard({ country, selected, onToggle }) {
   return (
     <article
@@ -16,7 +16,7 @@ export default function CountryCard({ country, selected, onToggle }) {
       role="button"
       tabIndex={0}
       aria-pressed={selected}
-      title={selected ? "Click o arrastrá para quitar de la comparación" : "Click o arrastrá para agregar a la comparación"}
+      title={selected ? "Click or drag to remove from comparison" : "Click or drag to add to comparison"}
       draggable
       onDragStart={handleDragStart(country.iso3)}
       onClick={() => onToggle(country.iso3)}
@@ -34,13 +34,13 @@ export default function CountryCard({ country, selected, onToggle }) {
         <h3 className="country-card__name">{country.name}</h3>
         <dl className="country-card__stats">
           <div>
-            <dt>Población</dt>
+            <dt>Population</dt>
             <dd title={formatPopulation(country.population)}>
               {formatPopulationCompact(country.population)}
             </dd>
           </div>
           <div>
-            <dt>Superficie</dt>
+            <dt>Area</dt>
             <dd title={formatArea(country.area_km2)}>{formatAreaCompact(country.area_km2)}</dd>
           </div>
         </dl>

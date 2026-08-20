@@ -1,5 +1,5 @@
-// Port de js/dnd.js — mismo contrato de drag-and-drop nativo (HTML5)
-// compartido entre la lista de países, el mapa y la zona de comparación.
+// Port of js/dnd.js — same native (HTML5) drag-and-drop contract shared
+// between the country list, the map, and the comparison zone.
 export const DND_MIME = "application/x-country-alpha3";
 
 export function handleDragStart(alpha3) {
