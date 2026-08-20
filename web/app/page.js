@@ -1,155 +1,29 @@
-"use client";
+import Link from "next/link";
+import LandingMap from "../components/LandingMap";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import WorldMap from "../components/WorldMap";
-import SearchBar from "../components/SearchBar";
-import CompareZone from "../components/CompareZone";
-import CompareModal from "../components/CompareModal";
-import { metaForAlpha3 } from "../lib/countryMeta";
-import { MAX_COMPARE } from "../lib/constants";
-
-const DEFAULT_COMPARE = ["ARG", "ESP"];
-
-function applyFilters(countries, filters) {
-  const term = filters.search.trim().toLowerCase();
-  const filtered =
-    term === "" ? countries : countries.filter((c) => c.name.toLowerCase().includes(term));
-  return [...filtered].sort((a, b) => a.name.localeCompare(b.name));
-}
-
+// Landing pública de Globeing (puerto de Home.html, diseño de Claude Design).
+// La app funcional (buscador + mapa interactivo + comparación) vive en /compare.
 export default function Home() {
-  const [countries, setCountries] = useState([]);
-  const [error, setError] = useState(null);
-  const [filters, setFilters] = useState({ search: "" });
-  const [compareAlpha3, setCompareAlpha3] = useState(DEFAULT_COMPARE);
-  const [compareModalOpen, setCompareModalOpen] = useState(false);
-
-  useEffect(() => {
-    fetch("/api/countries")
-      .then((res) => res.json())
-      .then((rows) => {
-        if (rows.error) throw new Error(rows.error);
-        const enriched = rows.map((c) => ({ ...c, ...metaForAlpha3(c.iso3) }));
-        setCountries(enriched);
-      })
-      .catch((err) => setError(err.message));
-  }, []);
-
-  const byAlpha3 = useMemo(() => new Map(countries.map((c) => [c.iso3, c])), [countries]);
-
-  const filteredCountries = useMemo(() => applyFilters(countries, filters), [countries, filters]);
-  const selectedAlpha3Set = useMemo(() => new Set(compareAlpha3), [compareAlpha3]);
-  const filteredAlpha3Set = useMemo(
-    () => new Set(filteredCountries.map((c) => c.iso3)),
-    [filteredCountries]
-  );
-  const selectedCountries = useMemo(
-    () => compareAlpha3.map((a) => byAlpha3.get(a)).filter(Boolean),
-    [compareAlpha3, byAlpha3]
-  );
-
-  const toggleCompare = useCallback((iso3) => {
-    setCompareAlpha3((current) => {
-      if (current.includes(iso3)) return current.filter((a) => a !== iso3);
-      if (current.length >= MAX_COMPARE) return current;
-      return [...current, iso3];
-    });
-  }, []);
-
-  const removeCompare = useCallback((iso3) => {
-    setCompareAlpha3((current) => current.filter((a) => a !== iso3));
-  }, []);
-
-  const reorderCompare = useCallback((draggedAlpha3, targetIndex, before) => {
-    setCompareAlpha3((current) => {
-      const withoutDragged = current.filter((a) => a !== draggedAlpha3);
-      const targetAlpha3 = current[targetIndex];
-      let insertAt = withoutDragged.indexOf(targetAlpha3);
-      if (insertAt === -1) insertAt = withoutDragged.length;
-      if (!before) insertAt += 1;
-      withoutDragged.splice(insertAt, 0, draggedAlpha3);
-      return withoutDragged;
-    });
-  }, []);
-
-  const handleDropAlpha3 = useCallback(
-    (iso3) => {
-      if (!byAlpha3.has(iso3)) return;
-      toggleCompare(iso3);
-    },
-    [byAlpha3, toggleCompare]
-  );
-
   return (
-    <>
-      <div className="app-hero">
-        <h1 className="app-hero__title">Choose, Compare, and Learn</h1>
-        <p className="app-hero__subtitle">
+    <div className="landing-page">
+      <header className="landing-hero">
+        <h1 className="landing-hero__title">Choose, Compare, and Learn</h1>
+        <p className="landing-hero__lede">
           Data can also be fun, play with our interactive tool and discover what makes each country
-          unique
+          unique.
         </p>
-        {countries.length > 0 && (
-          <span className="app-hero__stat">{countries.length} países · datos públicos</span>
-        )}
-      </div>
+        <Link href="/compare" className="btn-primary landing-hero__cta">
+          Start comparing →
+        </Link>
+      </header>
 
-      {countries.length === 0 && !error && (
-        <div className="status">
-          <span className="status__spinner" aria-hidden="true" />
-          <span>Cargando datos y mapa…</span>
-        </div>
-      )}
+      <LandingMap />
 
-      {error && (
-        <div className="status status--error">
-          <span>No se pudo cargar la app: {error}</span>
-        </div>
-      )}
-
-      {countries.length > 0 && (
-        <>
-          <div className="search-section">
-            <SearchBar
-              countries={filteredCountries}
-              selectedAlpha3={selectedAlpha3Set}
-              onToggle={toggleCompare}
-              search={filters.search}
-              onSearchChange={(value) => setFilters((f) => ({ ...f, search: value }))}
-            />
-          </div>
-
-          <section className="map-section">
-            <div className="app-layout__map">
-              <WorldMap
-                selectedAlpha3={selectedAlpha3Set}
-                filteredAlpha3={filteredAlpha3Set}
-                onToggleCountry={toggleCompare}
-                onDropAlpha3={handleDropAlpha3}
-              />
-            </div>
-          </section>
-
-          <section className="app-layout__compare">
-            <CompareZone
-              selectedCountries={selectedCountries}
-              onDropAlpha3={handleDropAlpha3}
-              onRemove={removeCompare}
-              onReorder={reorderCompare}
-              onOpenCompare={() => setCompareModalOpen(true)}
-            />
-          </section>
-
-          <CompareModal
-            open={compareModalOpen}
-            countries={selectedCountries}
-            onClose={() => setCompareModalOpen(false)}
-          />
-        </>
-      )}
+      <p className="landing-legend">Hover a card to lift it · six countries, three indicators</p>
 
       <footer className="app-footer">
         <p>Datos de población, superficie y economía de fuentes públicas (World Bank).</p>
       </footer>
-    </>
+    </div>
   );
 }
