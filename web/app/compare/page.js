@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import WorldMap from "../../components/WorldMap";
 import SearchBar from "../../components/SearchBar";
-import CompareZone from "../../components/CompareZone";
+import SelectedCountries from "../../components/SelectedCountries";
+import CompareCharts from "../../components/CompareCharts";
 import CompareModal from "../../components/CompareModal";
 import { metaForAlpha3 } from "../../lib/countryMeta";
 import { MAX_COMPARE } from "../../lib/constants";
@@ -116,9 +117,8 @@ export default function ComparePage() {
           </div>
 
           <section className="app-layout__compare">
-            <CompareZone
+            <SelectedCountries
               selectedCountries={selectedCountries}
-              onDropAlpha3={handleDropAlpha3}
               onRemove={removeCompare}
               onReorder={reorderCompare}
               onOpenCompare={() => setCompareModalOpen(true)}
@@ -134,6 +134,10 @@ export default function ComparePage() {
                 onDropAlpha3={handleDropAlpha3}
               />
             </div>
+          </section>
+
+          <section className="app-layout__compare">
+            <CompareCharts selectedCountries={selectedCountries} />
           </section>
 
           <CompareModal
