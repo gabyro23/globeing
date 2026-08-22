@@ -7,7 +7,12 @@ import { INDICATORS } from "../lib/indicators";
 import { loadWorld, featuresByAlpha3 } from "../lib/worldAtlas";
 import { niceIconValue, pictogramViewPad } from "../lib/pictogram";
 import { buildStatComparisons } from "../lib/compareInsights";
-import { formatNumber } from "../lib/format";
+import { formatNumber, formatIndicatorValue } from "../lib/format";
+
+// How many bags the biggest GDP in the group should show, roughly — kept
+// lower than the population target since a bag icon is visually "heavier"
+// than a personita.
+const GDP_TARGET_MAX_ICONS = 90;
 
 const BOX_SIZE = 260; // px — size of the largest country in the compared set
 // Height reserved for each country's canvas: the reference size plus the
@@ -76,6 +81,22 @@ export default function CompareModal({ open, countries, onClose }) {
   const largestCountry = useMemo(
     () => countries.find((c) => Number(c.area_km2) === maxArea) || countries[0],
     [countries, maxArea]
+  );
+
+  const showGdpPictogram = extraKeys.includes("gdp_usd");
+  const maxGdp = useMemo(
+    () => Math.max(...countries.map((c) => Number(c.gdp_usd) || 0), 1),
+    [countries]
+  );
+  const gdpIconValue = useMemo(
+    () => niceIconValue(maxGdp, GDP_TARGET_MAX_ICONS),
+    [maxGdp]
+  );
+  // The dedicated GDP row already shows GDP with its own icons + value, so
+  // drop it from the population row's stat list to avoid showing it twice.
+  const populationRowExtraKeys = useMemo(
+    () => extraKeys.filter((key) => key !== "gdp_usd"),
+    [extraKeys]
   );
 
   const comparisonGroups = useMemo(() => {
@@ -169,11 +190,34 @@ export default function CompareModal({ open, countries, onClose }) {
                       boxSize={BOX_SIZE}
                       canvasHeight={CANVAS_HEIGHT}
                       iconValue={iconValue}
-                      extraIndicatorKeys={extraKeys}
+                      extraIndicatorKeys={populationRowExtraKeys}
                     />
                   ))}
                 </div>
               </div>
+
+              {showGdpPictogram && (
+                <div className="pictogram-gdp-row">
+                  <span className="pictogram-gdp-row__label">GDP</span>
+                  <div className="pictogram-countries">
+                    {countries.map((country) => (
+                      <CountryPictogram
+                        key={country.iso3}
+                        country={country}
+                        feature={featureMap.get(country.iso3)}
+                        boxSize={BOX_SIZE}
+                        canvasHeight={CANVAS_HEIGHT}
+                        iconValue={gdpIconValue}
+                        metric="gdp"
+                        showStats={false}
+                      />
+                    ))}
+                  </div>
+                  <p className="pictogram-row__legend">
+                    💰 Each bag represents {formatIndicatorValue(gdpIconValue, "US$")} of GDP.
+                  </p>
+                </div>
+              )}
 
               {comparisonGroups.length > 0 && (
                 <section className="compare-insights">

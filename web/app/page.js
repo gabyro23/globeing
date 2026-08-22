@@ -1,6 +1,7 @@
 import Link from "next/link";
 import LandingMap from "../components/LandingMap";
 import { getTodayFact } from "../lib/dailyFact";
+import { flagForCountryName } from "../lib/randomFactFlags";
 
 // Regenerate at most hourly so "today's fact" rolls over to the next day
 // without needing the whole page to be dynamically rendered on every request.
@@ -33,7 +34,10 @@ export default function Home() {
         <div className="daily-fact__card">
           <span className="daily-fact__eyebrow">Random fact of the day</span>
           <p className="daily-fact__text">
-            {fact.fact} <span className="daily-fact__country">— {fact.country}</span>
+            {fact.fact}{" "}
+            <span className="daily-fact__country">
+              — {flagForCountryName(fact.country)} {fact.country}
+            </span>
           </p>
           <div className="daily-fact__footer">
             <a

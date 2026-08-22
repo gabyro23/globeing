@@ -1,4 +1,5 @@
 import { getAccumulatedFacts } from "../../lib/dailyFact";
+import { flagForCountryName } from "../../lib/randomFactFlags";
 
 // Regenerate at most hourly so the archive picks up each new day's fact
 // without needing the whole page to be dynamically rendered on every request.
@@ -31,7 +32,10 @@ export default function RandomFactsPage() {
         <div className="daily-fact__card">
           <span className="daily-fact__eyebrow">Today · {factDateLabel(today.day)}</span>
           <p className="daily-fact__text">
-            {today.fact} <span className="daily-fact__country">— {today.country}</span>
+            {today.fact}{" "}
+            <span className="daily-fact__country">
+              — {flagForCountryName(today.country)} {today.country}
+            </span>
           </p>
           <div className="daily-fact__footer">
             <a
@@ -58,7 +62,9 @@ export default function RandomFactsPage() {
                 </div>
                 <p className="fact-card__text">{f.fact}</p>
                 <div className="fact-card__footer">
-                  <span className="fact-card__country">{f.country}</span>
+                  <span className="fact-card__country">
+                    {flagForCountryName(f.country)} {f.country}
+                  </span>
                   <a className="fact-card__source" href={f.source.url} target="_blank" rel="noreferrer">
                     {f.source.name}
                   </a>

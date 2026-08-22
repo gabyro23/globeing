@@ -12,8 +12,10 @@ const SPACING_DECAY = 0.72;
 // draws each silhouette, and CompareModal, which needs to reserve enough
 // container height for the largest one) --------------------------------
 
-export const PICTOGRAM_ICON_WIDTH = 10; // px — fixed width of each icon
-export const PICTOGRAM_ICON_HEIGHT = 11; // px — fixed height (head + torso + legs)
+// Matches the "personita" figure's natural proportions (viewBox 60x120,
+// i.e. 1:2) instead of the earlier abstract isotype's 10x11 box.
+export const PICTOGRAM_ICON_WIDTH = 7.5; // px — fixed width of each icon
+export const PICTOGRAM_ICON_HEIGHT = 15; // px — fixed height (head + torso + legs)
 export const PICTOGRAM_BASE_PAD = PICTOGRAM_ICON_HEIGHT * 1.2;
 
 // Simple padding for the corner "true scale" mini-map: it has no 3D edge,
@@ -181,7 +183,14 @@ export function niceIconValue(maxPopulation, targetMaxIcons = 140) {
   return niceBase * 10 ** exp;
 }
 
-export function iconCountForPopulation(population, iconValue) {
-  if (!population || !iconValue) return 0;
-  return Math.max(1, Math.round(population / iconValue));
+// Generic "how many icons" rounding — used both for population (icons =
+// little people) and for any other summable quantity like GDP (icons =
+// money bags), since the math is identical either way.
+export function iconCountForValue(value, iconValue) {
+  if (!value || !iconValue) return 0;
+  return Math.max(1, Math.round(value / iconValue));
 }
+
+// Back-compat alias — population was the only metric this was used for
+// before GDP pictograms existed.
+export const iconCountForPopulation = iconCountForValue;
