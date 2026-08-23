@@ -1,5 +1,6 @@
 import Link from "next/link";
 import LandingMap from "../components/LandingMap";
+import ShareButton from "../components/ShareButton";
 import { getTodayFact } from "../lib/dailyFact";
 import { flagForCountryName } from "../lib/randomFactFlags";
 
@@ -32,7 +33,14 @@ export default function Home() {
 
       <section className="daily-fact">
         <div className="daily-fact__card">
-          <span className="daily-fact__eyebrow">Random fact of the day</span>
+          <div className="daily-fact__header">
+            <span className="daily-fact__eyebrow">Random fact of the day</span>
+            <ShareButton
+              path="/random-facts"
+              title={`Random fact — ${fact.country}`}
+              text={`Did you know? ${fact.fact} — ${flagForCountryName(fact.country)} ${fact.country}`}
+            />
+          </div>
           <p className="daily-fact__text">
             {fact.fact}{" "}
             <span className="daily-fact__country">
@@ -54,10 +62,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      <footer className="app-footer">
-        <p>Population, area, and economic data from public sources (World Bank).</p>
-      </footer>
     </div>
   );
 }

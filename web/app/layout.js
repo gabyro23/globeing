@@ -1,6 +1,7 @@
 import { Calistoga } from "next/font/google";
 import "./globals.css";
 import SiteHeader from "../components/SiteHeader";
+import SiteFooter from "../components/SiteFooter";
 
 const calistoga = Calistoga({ subsets: ["latin"], weight: "400", variable: "--font-calistoga" });
 
@@ -14,7 +15,8 @@ export default function RootLayout({ children }) {
     <html lang="en" className={`h-full ${calistoga.variable}`}>
       <body className="min-h-full flex flex-col">
         <SiteHeader />
-        {children}
+        <main className="flex-1">{children}</main>
+        <SiteFooter />
       </body>
     </html>
   );

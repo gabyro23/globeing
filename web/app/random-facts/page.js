@@ -74,10 +74,6 @@ export default function RandomFactsPage() {
           </div>
         </section>
       )}
-
-      <footer className="app-footer">
-        <p>Facts curated from public references — see each card&apos;s source link for more.</p>
-      </footer>
     </>
   );
 }

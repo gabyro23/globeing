@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CROSSWORD_PUZZLES, CROSSWORD_CONFETTI_COLORS } from "../lib/crosswordPuzzles";
 import { buildCrosswordGrid, cellsOfWord, isWordSolved, activeWordFor } from "../lib/crosswordEngine";
+import ShareButton from "./ShareButton";
 
 const LETTER_PATTERN = /[^A-ZÑÁÉÍÓÚ]/g;
 
@@ -198,6 +199,13 @@ export default function CrosswordGame() {
               {mm}:{ss}
             </div>
           </div>
+          <ShareButton
+            path="/crosswords"
+            title={`Crosswords of the world — ${puzzle.title}`}
+            text={`I'm ${solvedCount}/${puzzle.words.length} words into the "${puzzle.title}" crossword on Globeing. Dare your friends to beat your time!`}
+            label="Dare your friends"
+            className="share-button share-button--labeled crossword-share-btn"
+          />
         </div>
       </div>
 

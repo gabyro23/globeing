@@ -786,12 +786,6 @@ path.country.is-dimmed {
   white-space: nowrap;
 }
 
-.app-footer {
-  padding: 12px clamp(16px, 4vw, 40px) 32px;
-  color: var(--muted);
-  font-size: 0.78rem;
-}
-
 /* --- Primary button (style guide §03) --- */
 .btn-primary {
   background: var(--accent);
@@ -1465,6 +1459,51 @@ path.country.is-dimmed {
   color: var(--accent-ink);
 }
 
+.ranking-filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.ranking-filters__label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.ranking-region-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ranking-region-tab {
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-chip);
+  color: var(--muted);
+  padding: 6px 14px;
+  font-size: 12.5px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.ranking-region-tab:hover {
+  border-color: var(--sage);
+  color: var(--sage);
+}
+
+.ranking-region-tab.is-active {
+  background: var(--sage);
+  border-color: var(--sage);
+  color: var(--accent-ink);
+}
+
 .ranking-tables {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -1634,6 +1673,18 @@ path.country.is-dimmed {
 
 .daily-fact--page .daily-fact__card {
   margin: 0;
+}
+
+.daily-fact__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.daily-fact__header .daily-fact__eyebrow {
+  margin-bottom: 0;
 }
 
 .daily-fact__eyebrow {
@@ -1828,8 +1879,14 @@ path.country.is-dimmed {
 
 .crossword-stats {
   display: flex;
+  align-items: center;
   gap: 10px;
-  flex: 0 0 auto;
+  /* shrink (not 0 0 auto) so this box can compress below its natural
+     content width on narrow screens, which lets its own flex-wrap
+     actually kick in instead of overflowing the viewport. */
+  flex: 0 1 auto;
+  max-width: 100%;
+  flex-wrap: wrap;
 }
 
 .crossword-stat {
@@ -2186,4 +2243,821 @@ path.country.is-dimmed {
 
 .crossword-clue-tick.is-shown {
   opacity: 1;
+}
+
+/* ============================================================
+   Site footer — rendered once in app/layout.js, shows on every page.
+   ============================================================ */
+.site-footer {
+  margin-top: 56px;
+  border-top: 1px solid var(--divider);
+  padding: 40px clamp(16px, 4vw, 40px) 24px;
+}
+
+.site-footer__top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 40px;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.site-footer__brand {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 280px;
+}
+
+.site-footer__tagline {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.site-footer__nav,
+.site-footer__contact {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.site-footer__nav a,
+.site-footer__contact a {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.site-footer__nav a:hover,
+.site-footer__contact a:hover {
+  color: var(--accent);
+}
+
+.site-footer__nav-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+
+.site-footer__bottom {
+  max-width: 1180px;
+  margin: 32px auto 0;
+  padding-top: 20px;
+  border-top: 1px solid var(--divider);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+@media (max-width: 640px) {
+  .site-footer__top {
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  .site-footer__bottom {
+    flex-direction: column;
+  }
+}
+
+/* ============================================================
+   Contact page — ported from a standalone design prototype into the
+   site's layout/tokens/language.
+   ============================================================ */
+.contact-page {
+  display: grid;
+  grid-template-columns: 1fr 480px;
+  gap: 48px;
+  align-items: start;
+  /* Matches .app-hero's top margin so the title sits at the same height
+     as every other page's — this page builds its own hero copy instead
+     of reusing the .app-hero wrapper (it needs the contact-methods grid
+     directly underneath), so the offset has to be replicated here. */
+  margin-top: 28px;
+  padding: 8px clamp(16px, 4vw, 40px) 64px;
+}
+
+@media (max-width: 900px) {
+  .contact-page {
+    grid-template-columns: 1fr;
+  }
+}
+
+.contact-methods {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px 28px;
+  margin-top: 40px;
+  max-width: 480px;
+}
+
+@media (max-width: 480px) {
+  .contact-methods {
+    grid-template-columns: 1fr;
+  }
+}
+
+.contact-method {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.contact-method__icon {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  border-radius: var(--radius-control);
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-ink);
+  font-size: 17px;
+}
+
+.contact-method__label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent-deep);
+}
+
+.contact-method__value {
+  font-size: 14px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+.contact-form {
+  background: var(--accent-deep);
+  border-radius: var(--radius);
+  padding: 40px 36px 44px;
+  display: flex;
+  flex-direction: column;
+}
+
+.contact-form__title {
+  margin: 0 0 28px;
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #fff;
+  line-height: 1.1;
+}
+
+.contact-form__label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.72);
+  margin-bottom: 7px;
+}
+
+.contact-form__label-optional {
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.contact-form__input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0 16px;
+  height: 46px;
+  border: none;
+  border-radius: var(--radius-control);
+  background: #fff;
+  font-size: 15px;
+  font-family: inherit;
+  color: var(--ink);
+  margin-bottom: 18px;
+  outline: none;
+}
+
+.contact-form__input::placeholder {
+  color: var(--muted);
+}
+
+.contact-form__input:focus {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35);
+}
+
+.contact-form__input--textarea {
+  height: 110px;
+  padding: 13px 16px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.contact-form__footer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.contact-form__submit {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border: none;
+  padding: 13px 28px;
+  border-radius: var(--radius-control);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s;
+}
+
+.contact-form__submit:hover {
+  background: var(--sage-light);
+  color: var(--accent-deep);
+}
+
+.contact-form__status {
+  font-size: 13px;
+  color: var(--sage-light);
+}
+
+/* ==========================================================================
+   Share button + popup — a small "three-node" icon (optionally labeled)
+   that opens a modal with social share links and a copyable URL. Reused
+   across the Random Fact card and the Crosswords page. Modeled on the
+   .compare-modal-backdrop / .compare-modal pattern, sized down to match
+   the "Share Popup" reference design.
+   ========================================================================== */
+.share-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 2px solid var(--accent-deep);
+  background: var(--surface);
+  color: var(--accent-deep);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, transform 0.05s;
+}
+
+.share-button:hover {
+  background: var(--sage-bg-strong);
+}
+
+.share-button--icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  justify-content: center;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.share-button--labeled {
+  border-radius: var(--radius-control);
+  padding: 10px 16px;
+  box-shadow: 0 3px 0 var(--accent-deep);
+}
+
+.share-button--labeled:active {
+  transform: translateY(3px);
+  box-shadow: 0 0 0 var(--accent-deep);
+}
+
+.share-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: color-mix(in srgb, var(--ink) 55%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(12px, 3vw, 40px);
+  z-index: 120;
+}
+
+.share-modal {
+  width: min(440px, 100%);
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px 24px 22px;
+}
+
+.share-modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 4px;
+}
+
+.share-modal__header h2 {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--accent-deep);
+}
+
+.share-modal__close {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: var(--divider);
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.share-modal__close:hover {
+  background: var(--sand);
+  color: var(--ink);
+}
+
+.share-modal__subtitle {
+  margin: 0 0 20px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.share-modal__grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.share-modal__option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 12px 3px;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  text-decoration: none;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.share-modal__option:hover {
+  background: var(--sage-bg);
+  border-color: var(--sage);
+}
+
+.share-modal__option-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.share-modal__option span:last-child {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--muted);
+  text-align: center;
+}
+
+.share-modal__link-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.share-modal__link-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.share-modal__link-box {
+  flex: 1;
+  min-width: 0;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  padding: 11px 13px;
+  font-size: 12.5px;
+  font-family: ui-monospace, "SF Mono", monospace;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.share-modal__copy {
+  flex-shrink: 0;
+  border: none;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 11px 16px;
+  border-radius: var(--radius-control);
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.share-modal__copy:hover {
+  background: var(--accent-deep);
+}
+
+@media (max-width: 480px) {
+  .share-modal__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ==========================================================================
+   Guess the Country — hangman-style silhouette guessing game. Reuses the
+   Crosswords page's "playful" visual language (3D-shadow buttons, toast +
+   confetti burst) with its own local tokens so nothing here leaks into
+   :root. Ported from a standalone design prototype ("guessthecountry.html").
+   ========================================================================== */
+.guess-country-game {
+  padding: 8px clamp(16px, 4vw, 40px) 56px;
+}
+
+.guess-country-loading {
+  padding: 80px clamp(16px, 4vw, 40px);
+  text-align: center;
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.guess-country-hero {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+
+.guess-country-hero__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.guess-country-stats {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  /* shrink (not 0 0 auto) so this box can compress below its natural
+     content width on narrow screens, which lets its own flex-wrap
+     actually kick in instead of overflowing the viewport. */
+  flex: 0 1 auto;
+  max-width: 100%;
+  flex-wrap: wrap;
+}
+
+.guess-country-stat {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 16px;
+  box-shadow: 0 3px 0 rgba(7, 79, 87, 0.08);
+}
+
+.guess-country-stat__label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.guess-country-stat__value {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin-top: 2px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.guess-country-panel {
+  max-width: 640px;
+  margin: 0 auto;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 0 rgba(7, 79, 87, 0.06);
+  padding: 26px clamp(18px, 4vw, 34px) 30px;
+}
+
+.guess-country-lives-row {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.guess-country-life {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--sage);
+  transition: background 0.2s, transform 0.2s;
+}
+
+.guess-country-life.is-lost {
+  background: var(--border);
+  transform: scale(0.8);
+}
+
+.guess-country-silhouette-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 180px;
+  margin-bottom: 10px;
+}
+
+.guess-country-silhouette {
+  animation: guess-country-pop 0.35s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+.guess-country-silhouette.is-shake {
+  animation: guess-country-shake 0.4s ease;
+}
+
+@keyframes guess-country-pop {
+  0% {
+    transform: scale(0.85);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes guess-country-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-8px);
+  }
+  40% {
+    transform: translateX(7px);
+  }
+  60% {
+    transform: translateX(-5px);
+  }
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+.guess-country-hint-line {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+
+.guess-country-blanks {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.guess-country-blank,
+.guess-country-blank-space {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 30px;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--ink);
+  border-bottom: 3px solid var(--border-strong);
+}
+
+.guess-country-blank-space {
+  border-bottom: none;
+  width: 14px;
+}
+
+.guess-country-blank.is-filled {
+  border-color: var(--accent);
+  animation: guess-country-pop 0.25s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+.guess-country-message {
+  text-align: center;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+}
+
+.guess-country-message.is-win {
+  color: var(--sage);
+}
+
+.guess-country-message.is-lose {
+  color: var(--crossword-sand-text, #6b3d22);
+}
+
+.guess-country-fact-line {
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+  margin-bottom: 18px;
+}
+
+.guess-country-keyboard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+
+.guess-country-kb-row {
+  display: flex;
+  gap: 5px;
+}
+
+.guess-country-key {
+  width: 30px;
+  height: 36px;
+  border-radius: 8px;
+  border: 2px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.15s;
+}
+
+.guess-country-key:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+}
+
+.guess-country-key:disabled {
+  cursor: default;
+}
+
+.guess-country-key.is-correct {
+  background: var(--sage-light);
+  border-color: var(--sage);
+  color: var(--accent-deep);
+}
+
+.guess-country-key.is-wrong {
+  background: var(--sand);
+  border-color: var(--crossword-sand-border, #c08f70);
+  color: var(--crossword-sand-text, #6b3d22);
+  opacity: 0.7;
+}
+
+@media (max-width: 480px) {
+  .guess-country-key {
+    width: 25px;
+    height: 32px;
+    font-size: 11px;
+  }
+}
+
+.guess-country-btn-row {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.guess-country-pbtn {
+  border: 2px solid var(--accent-deep);
+  background: var(--surface);
+  color: var(--accent-deep);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 10px 16px;
+  border-radius: var(--radius-control);
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 3px 0 var(--accent-deep);
+  transition: background 0.15s, transform 0.05s, opacity 0.15s;
+}
+
+.guess-country-pbtn:hover:not(:disabled) {
+  background: var(--sage-bg-strong);
+}
+
+.guess-country-pbtn:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 0 0 0 var(--accent-deep);
+}
+
+.guess-country-pbtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.guess-country-pbtn--primary {
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.guess-country-pbtn--primary:hover:not(:disabled) {
+  background: var(--accent-deep);
+}
+
+.guess-country-toast {
+  position: absolute;
+  left: 50%;
+  top: -6px;
+  transform: translate(-50%, 0);
+  background: var(--accent-deep);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  padding: 11px 20px;
+  border-radius: var(--radius);
+  box-shadow: 0 4px 0 rgba(7, 79, 87, 0.25);
+  animation: crossword-toast-in 0.28s cubic-bezier(0.2, 1.4, 0.4, 1);
+  white-space: nowrap;
+  z-index: 5;
+}
+
+.guess-country-confetti-dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  pointer-events: none;
+  animation: crossword-burst 1s ease-out forwards;
+}
+
+.guess-country-summary {
+  text-align: center;
+  padding: 30px 10px 10px;
+}
+
+.guess-country-summary__eyebrow {
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+
+.guess-country-summary__score {
+  font-size: 52px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--accent-deep);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.guess-country-summary__sub {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 24px;
 }

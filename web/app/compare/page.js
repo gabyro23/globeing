@@ -9,8 +9,6 @@ import CompareModal from "../../components/CompareModal";
 import { metaForAlpha3 } from "../../lib/countryMeta";
 import { MAX_COMPARE } from "../../lib/constants";
 
-const DEFAULT_COMPARE = ["ARG", "ESP"];
-
 function applyFilters(countries, filters) {
   const term = filters.search.trim().toLowerCase();
   const filtered =
@@ -22,7 +20,7 @@ export default function ComparePage() {
   const [countries, setCountries] = useState([]);
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState({ search: "" });
-  const [compareAlpha3, setCompareAlpha3] = useState(DEFAULT_COMPARE);
+  const [compareAlpha3, setCompareAlpha3] = useState([]);
   const [compareModalOpen, setCompareModalOpen] = useState(false);
 
   useEffect(() => {
@@ -147,10 +145,6 @@ export default function ComparePage() {
           />
         </>
       )}
-
-      <footer className="app-footer">
-        <p>Population, area, and economic data from public sources (World Bank).</p>
-      </footer>
     </>
   );
 }

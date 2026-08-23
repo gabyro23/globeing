@@ -20,22 +20,15 @@ function CrosswordIcon() {
   );
 }
 
-// Small icon for the "Can you guess?" menu item: a question mark in the
-// site's deep-teal accent.
+// Small icon for the "Can you guess?" menu item: a country-shaped
+// silhouette (a jagged coastline blob), in the site's deep-teal accent.
 function GuessIcon() {
   return (
     <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-      <text
-        x="12"
-        y="17.5"
-        textAnchor="middle"
-        fontSize="17"
-        fontWeight="800"
-        fontFamily="Helvetica, Arial, sans-serif"
+      <path
+        d="M4.5 13.6 L5.6 9.4 L8.4 7.6 L7.3 4.6 L11 3.4 L13 6.2 L16.8 5 L19.6 7.8 L17.6 10.6 L19.8 13.4 L15.8 17.6 L12.2 15.6 L9.2 18.6 L6.2 17.4 Z"
         fill="var(--accent-deep)"
-      >
-        ?
-      </text>
+      />
     </svg>
   );
 }
@@ -56,7 +49,7 @@ export default function SiteHeader() {
       <nav className="site-header__nav" aria-label="Main navigation">
         <Link href="/rankings">Rankings</Link>
         <Link href="/compare">Compare</Link>
-        <a href="#by-years">By Years</a>
+        {/* "By Years" hidden for now — not built yet, re-enable when it is. */}
         <Link href="/random-facts">Random Facts</Link>
 
         <div className="site-header__nav-item">
@@ -74,18 +67,18 @@ export default function SiteHeader() {
                 </span>
                 Crosswords
               </Link>
-              <a href="#guess" className="site-header__dropdown-link" role="menuitem">
+              <Link href="/guess-the-country" className="site-header__dropdown-link" role="menuitem">
                 <span className="playmenu-icon playmenu-icon--guess">
                   <GuessIcon />
                 </span>
                 Can you guess?
-              </a>
+              </Link>
             </div>
           </div>
         </div>
 
-        <a href="#about">About us</a>
-        <a href="#contact">Contact</a>
+        {/* "About us" hidden for now — not built yet, re-enable when it is. */}
+        <Link href="/contact">Contact</Link>
       </nav>
     </header>
   );

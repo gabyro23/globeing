@@ -5,14 +5,21 @@ import { INDICATORS } from "../../lib/indicators";
 import { metaForAlpha3 } from "../../lib/countryMeta";
 import { formatCompareValue } from "../../lib/format";
 
+// Display order for the continent filter — real continents first, "Other"
+// (Taiwan, Antarctica-type edge cases) last, and only shown if it's
+// actually present in the loaded data.
+const REGION_ORDER = ["Africa", "Americas", "Asia", "Europe", "Oceania", "Other"];
+
 // Rankings page: pick an indicator (GDP, area, etc.) with the buttons up
 // top and 3 tables get built — the top 10, the bottom 10, and the full
-// list — all sorted by that indicator. The "all countries" table also has
-// its own search box to filter by name without losing the overall rank.
+// list — all sorted by that indicator. A continent filter narrows all
+// three tables at once. The "all countries" table also has its own search
+// box to filter by name without losing the overall rank.
 export default function RankingsPage() {
   const [countries, setCountries] = useState([]);
   const [error, setError] = useState(null);
   const [selectedKey, setSelectedKey] = useState(INDICATORS[0].key);
+  const [regionFilter, setRegionFilter] = useState("All");
   const [allSearch, setAllSearch] = useState("");
 
   useEffect(() => {
@@ -30,13 +37,24 @@ export default function RankingsPage() {
     [selectedKey]
   );
 
+  // Only offer continents that actually have countries in the loaded data.
+  const availableRegions = useMemo(() => {
+    const present = new Set(countries.map((c) => c.region || "Other"));
+    return REGION_ORDER.filter((r) => present.has(r));
+  }, [countries]);
+
+  const regionFilteredCountries = useMemo(
+    () => (regionFilter === "All" ? countries : countries.filter((c) => (c.region || "Other") === regionFilter)),
+    [countries, regionFilter]
+  );
+
   const ranked = useMemo(() => {
     const dir = indicator.betterWhen === "low" ? 1 : -1;
-    return countries
+    return regionFilteredCountries
       .map((c) => ({ ...c, __value: Number(c[indicator.key]) }))
       .filter((c) => c[indicator.key] !== null && c[indicator.key] !== undefined && c[indicator.key] !== "" && !Number.isNaN(c.__value))
       .sort((a, b) => (a.__value - b.__value) * dir);
-  }, [countries, indicator]);
+  }, [regionFilteredCountries, indicator]);
 
   const best10 = useMemo(() => ranked.slice(0, 10).map((c, i) => ({ ...c, rank: i + 1 })), [ranked]);
   const worst10 = useMemo(
@@ -62,7 +80,8 @@ export default function RankingsPage() {
       <div className="app-hero">
         <h1 className="app-hero__title">Rankings</h1>
         <p className="app-hero__subtitle">
-          Pick an indicator and see which countries lead the table — and which ones rank last.
+          Pick an indicator and see which countries lead the table — and which ones rank last. Filter by
+          continent to narrow it down.
         </p>
       </div>
 
@@ -94,6 +113,24 @@ export default function RankingsPage() {
                 {ind.label}
               </button>
             ))}
+          </div>
+
+          <div className="ranking-filters">
+            <span className="ranking-filters__label">Continent</span>
+            <div className="ranking-region-tabs" role="tablist" aria-label="Filter by continent">
+              {["All", ...availableRegions].map((r) => (
+                <button
+                  key={r}
+                  type="button"
+                  role="tab"
+                  aria-selected={r === regionFilter}
+                  className={"ranking-region-tab" + (r === regionFilter ? " is-active" : "")}
+                  onClick={() => setRegionFilter(r)}
+                >
+                  {r}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="ranking-tables">
