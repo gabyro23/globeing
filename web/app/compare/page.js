@@ -90,9 +90,24 @@ export default function ComparePage() {
       </div>
 
       {countries.length === 0 && !error && (
-        <div className="status">
-          <span className="status__spinner" aria-hidden="true" />
-          <span>Loading data and map…</span>
+        <div aria-busy="true" aria-label="Loading countries and map">
+          <div className="search-section">
+            <div className="search-bar">
+              <div className="skeleton compare-skeleton__search" />
+            </div>
+          </div>
+
+          <section className="app-layout__compare">
+            <div className="compare-zone">
+              <div className="skeleton compare-skeleton__zone-line" />
+            </div>
+          </section>
+
+          <section className="map-section">
+            <div className="app-layout__map">
+              <div className="skeleton compare-skeleton__map" />
+            </div>
+          </section>
         </div>
       )}
 

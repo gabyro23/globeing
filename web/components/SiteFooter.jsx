@@ -11,8 +11,8 @@ export default function SiteFooter() {
           <Link className="site-header__brand" href="/" aria-label="Globeing — home">
             <span className="logo-mark" aria-hidden="true" />
             <span className="logo-wordmark">
-              <span className="logo-wordmark__glob">glob</span>
-              <span className="logo-wordmark__eing">eing</span>
+              <span className="logo-wordmark__globe">globe</span>
+              <span className="logo-wordmark__ing">ing</span>
             </span>
           </Link>
           <p className="site-footer__tagline">Made to explore the world, one fact at a time.</p>

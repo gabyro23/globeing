@@ -5,14 +5,14 @@ import { useState } from "react";
 const CONTACT_METHODS = [
   { icon: "✉", label: "Email", value: "gabyro23@gmail.com" },
   { icon: "⌘", label: "Website", value: "globeing.com" },
-  { icon: "◎", label: "Office", value: "Barcelona,Spain" },
+  { icon: "◎", label: "Office", value: "Barcelona, Spain" },
 ];
 
 // Contact page: a short intro + contact details on the left, a message
 // form on the right. Ported from a standalone design prototype into the
 // site's own layout/tokens/language.
 export default function ContactPage() {
-  const [form, setForm] = useState({ name: "", email: "", phone: "", message: "" });
+  const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [status, setStatus] = useState("");
 
   function updateField(key) {
@@ -75,17 +75,6 @@ export default function ContactPage() {
           value={form.email}
           onChange={updateField("email")}
           placeholder="you@email.com"
-        />
-
-        <label className="contact-form__label" htmlFor="contact-phone">
-          Phone <span className="contact-form__label-optional">(optional)</span>
-        </label>
-        <input
-          id="contact-phone"
-          className="contact-form__input"
-          value={form.phone}
-          onChange={updateField("phone")}
-          placeholder="+34 111 000 000"
         />
 
         <label className="contact-form__label" htmlFor="contact-message">

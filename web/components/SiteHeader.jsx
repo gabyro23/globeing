@@ -20,7 +20,7 @@ function CrosswordIcon() {
   );
 }
 
-// Small icon for the "Can you guess?" menu item: a country-shaped
+// Small icon for the "Guess the country" menu item: a country-shaped
 // silhouette (a jagged coastline blob), in the site's deep-teal accent.
 function GuessIcon() {
   return (
@@ -42,8 +42,8 @@ export default function SiteHeader() {
       <Link className="site-header__brand" href="/" aria-label="Globeing — home">
         <span className="logo-mark" aria-hidden="true" />
         <span className="logo-wordmark">
-          <span className="logo-wordmark__glob">glob</span>
-          <span className="logo-wordmark__eing">eing</span>
+          <span className="logo-wordmark__globe">globe</span>
+          <span className="logo-wordmark__ing">ing</span>
         </span>
       </Link>
       <nav className="site-header__nav" aria-label="Main navigation">
@@ -71,7 +71,7 @@ export default function SiteHeader() {
                 <span className="playmenu-icon playmenu-icon--guess">
                   <GuessIcon />
                 </span>
-                Can you guess?
+                Guess the country
               </Link>
             </div>
           </div>

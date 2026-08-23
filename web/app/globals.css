@@ -24,6 +24,20 @@
   --highlight: #077187;
   --highlight-ink: #ffffff;
   --danger: #b91c1c;
+  /* Logo wordmark colors — fixed brand pair per the "Logo Globeing" spec,
+     not tied to --ink/--accent so the logo can't drift when the general UI
+     accent hue changes (as it does in dark mode). */
+  --logo-globe: #1e2a2c;
+  --logo-ing: #077187;
+  /* Homepage "random fact" band — a fixed dark-teal brand treatment, same
+     idea as the logo colors above: it doesn't adapt to dark mode, it's
+     meant to read the same either way. */
+  --fact-band-bg: #074f57;
+  --fact-band-ink: #eaf3f0;
+  --fact-band-eyebrow: #9ece9a;
+  --fact-band-muted: rgba(234, 243, 240, 0.68);
+  --fact-band-border: rgba(158, 206, 154, 0.45);
+  --fact-band-border-hover: rgba(158, 206, 154, 0.14);
   --radius: 14px;
   --radius-control: 9px;
   --radius-chip: 20px;
@@ -69,6 +83,11 @@
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.6);
     --background: var(--bg);
     --foreground: var(--ink);
+    /* "Sobre teal profundo" pairing from the logo spec — the page bg in
+       dark mode is a deep teal, so the wordmark switches to this fixed
+       cream + sage-light pair instead of following --ink/--accent. */
+    --logo-globe: #fbf5ef;
+    --logo-ing: #9ece9a;
   }
 }
 
@@ -113,15 +132,15 @@ body {
   font-family: var(--font-calistoga), Georgia, serif;
   font-size: 26px;
   line-height: 1;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
 }
 
-.logo-wordmark__glob {
-  color: var(--ink);
+.logo-wordmark__globe {
+  color: var(--logo-globe);
 }
 
-.logo-wordmark__eing {
-  color: var(--accent);
+.logo-wordmark__ing {
+  color: var(--logo-ing);
 }
 
 .site-header__nav {
@@ -1279,36 +1298,55 @@ path.country.is-dimmed {
 }
 
 .landing-hero {
-  text-align: center;
-  padding: 56px 0 8px;
+  display: grid;
+  grid-template-columns: minmax(260px, 380px) 1fr;
+  gap: 40px;
+  align-items: center;
+  padding: 48px 0 16px;
+}
+
+.landing-hero__content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 22px;
 }
 
 .landing-hero__title {
-  margin: 0 0 18px;
-  font-size: clamp(36px, 6vw, 64px);
-  line-height: 1.02;
+  margin: 0;
+  font-size: clamp(28px, 2.6vw, 36px);
+  line-height: 1.22;
   font-weight: 800;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.025em;
   color: var(--ink);
-}
-
-.landing-hero__lede {
-  margin: 0 auto;
-  max-width: 560px;
-  font-size: 18px;
-  line-height: 1.55;
-  color: var(--muted);
 }
 
 .landing-hero__cta {
   display: inline-block;
-  margin-top: 32px;
   text-decoration: none;
+}
+
+.landing-hero__note {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.landing-hero__note-icon {
+  width: 17px;
+  height: 42px;
+  flex-shrink: 0;
+}
+
+.landing-hero__note span {
+  font-size: 13px;
+  color: var(--muted);
 }
 
 .landing-map-zone {
   position: relative;
-  margin: 8px 0 0;
+  margin: 0;
+  min-width: 0;
 }
 
 .landing-map__svg {
@@ -1395,19 +1433,7 @@ path.country.is-dimmed {
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 16%, transparent);
 }
 
-.landing-legend {
-  margin: 0;
-  text-align: center;
-  font-size: 13px;
-  color: var(--muted);
-  padding: 8px 0 32px;
-}
-
 @media (max-width: 1100px) {
-  .landing-hero__title {
-    font-size: 40px;
-  }
-
   .landing-pin {
     padding: 8px 14px 8px 10px;
   }
@@ -1418,6 +1444,353 @@ path.country.is-dimmed {
 
   .landing-pin__flag {
     font-size: 20px;
+  }
+}
+
+@media (max-width: 860px) {
+  .landing-hero {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- Homepage: random fact of the day band --- */
+.home-fact {
+  margin: 40px 0 0;
+  padding: 34px clamp(16px, 4vw, 40px);
+  background: var(--fact-band-bg);
+  border-radius: var(--radius);
+}
+
+.home-fact__inner {
+  max-width: 1360px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.home-fact__badge {
+  width: 40px;
+  height: 80px;
+  flex-shrink: 0;
+  animation: home-fact-floaty 4s ease-in-out infinite;
+}
+
+@keyframes home-fact-floaty {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-fact__badge {
+    animation: none;
+  }
+}
+
+.home-fact__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.home-fact__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.home-fact__eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--fact-band-eyebrow);
+}
+
+.home-fact__share {
+  border-color: var(--fact-band-border);
+  background: transparent;
+  color: var(--fact-band-eyebrow);
+}
+
+.home-fact__share:hover {
+  background: var(--fact-band-border-hover);
+}
+
+.home-fact__text {
+  margin: 0;
+  font-size: 19px;
+  line-height: 1.5;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: var(--fact-band-ink);
+}
+
+.home-fact__country {
+  color: var(--fact-band-muted);
+  font-weight: 600;
+}
+
+.home-fact__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.home-fact__source {
+  font-size: 13px;
+  color: var(--fact-band-muted);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+
+.home-fact__source:hover {
+  color: var(--fact-band-ink);
+  border-color: var(--fact-band-muted);
+}
+
+.home-fact__archive-link {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--fact-band-eyebrow);
+  text-decoration: none;
+}
+
+.home-fact__archive-link:hover {
+  text-decoration: underline;
+}
+
+.home-fact__cta {
+  flex-shrink: 0;
+  background: transparent;
+  color: var(--fact-band-eyebrow);
+  border: 1px solid var(--fact-band-border);
+  border-radius: var(--radius-control);
+  padding: 11px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.home-fact__cta:hover {
+  background: var(--fact-band-border-hover);
+}
+
+@media (max-width: 700px) {
+  .home-fact__inner {
+    flex-wrap: wrap;
+  }
+
+  .home-fact__badge {
+    width: 30px;
+    height: 60px;
+  }
+
+  .home-fact__cta {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* --- Homepage: feature cards --- */
+.home-features {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 56px 0;
+}
+
+.home-feature-card {
+  flex: 1 1 220px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 12px 26px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.home-feature-card__icon {
+  width: 64px;
+  height: 128px;
+  margin: -24px 0 -12px;
+  align-self: flex-start;
+}
+
+.home-feature-card__title {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.home-feature-card__text {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+/* --- Homepage: available metrics + example --- */
+.home-explore {
+  display: grid;
+  grid-template-columns: 0.7fr 1.3fr;
+  gap: 40px;
+  align-items: start;
+  border-top: 1px solid var(--divider);
+  padding: 48px 0 64px;
+}
+
+.home-metrics__eyebrow,
+.home-example__eyebrow {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 18px;
+}
+
+.home-metrics__eyebrow {
+  color: var(--accent);
+}
+
+.home-example__eyebrow {
+  color: var(--muted);
+}
+
+.home-metrics__pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.home-metrics__pill {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-chip);
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.home-metrics__pill.is-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 700;
+  box-shadow: 0 6px 14px rgba(7, 113, 135, 0.24);
+}
+
+.home-example {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.home-example__callout {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px 26px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.home-example__callout p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.home-example__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--sage-light);
+  margin-top: 7px;
+  flex-shrink: 0;
+}
+
+.home-example__chart {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px 26px;
+}
+
+.home-example__chart-title {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+
+.home-example__bars {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.home-example__bar-row {
+  display: grid;
+  grid-template-columns: minmax(0, 150px) minmax(60px, 1fr) 92px;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.home-example__bar-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-example__bar-track {
+  height: 18px;
+  border-radius: 999px;
+  background: var(--divider);
+  overflow: hidden;
+  min-width: 0;
+}
+
+.home-example__bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--accent);
+}
+
+.home-example__bar-value {
+  font-size: 13px;
+  color: var(--muted);
+  text-align: right;
+  white-space: nowrap;
+}
+
+@media (max-width: 860px) {
+  .home-explore {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -1836,7 +2209,9 @@ path.country.is-dimmed {
   --crossword-sand-border: #c08f70;
   --crossword-sand-text: #6b3d22;
   --crossword-sel-border: #b9d6c6;
-  padding: 8px clamp(16px, 4vw, 40px) 56px;
+  /* 28px top matches .app-hero's margin-top, so this page's title sits at
+     the same height as every other page's. */
+  padding: 28px clamp(16px, 4vw, 40px) 56px;
 }
 
 @keyframes crossword-toast-in {
@@ -2341,9 +2716,12 @@ path.country.is-dimmed {
   /* Matches .app-hero's top margin so the title sits at the same height
      as every other page's — this page builds its own hero copy instead
      of reusing the .app-hero wrapper (it needs the contact-methods grid
-     directly underneath), so the offset has to be replicated here. */
+     directly underneath), so the offset has to be replicated here.
+     (padding-top is 0, not 8px: with margin-top already at 28px, an 8px
+     padding-top would stack on top of it and push the title 36px down —
+     8px further than every other page.) */
   margin-top: 28px;
-  padding: 8px clamp(16px, 4vw, 40px) 64px;
+  padding: 0 clamp(16px, 4vw, 40px) 64px;
 }
 
 @media (max-width: 900px) {
@@ -2700,7 +3078,9 @@ path.country.is-dimmed {
    :root. Ported from a standalone design prototype ("guessthecountry.html").
    ========================================================================== */
 .guess-country-game {
-  padding: 8px clamp(16px, 4vw, 40px) 56px;
+  /* 28px top matches .app-hero's margin-top, so this page's title sits at
+     the same height as every other page's. */
+  padding: 28px clamp(16px, 4vw, 40px) 56px;
 }
 
 .guess-country-loading {
@@ -3060,4 +3440,98 @@ path.country.is-dimmed {
   font-size: 14px;
   color: var(--muted);
   margin-bottom: 24px;
+}
+
+/* ==========================================================================
+   Loading skeletons — replace plain "Loading…" text with a shimmering
+   placeholder shaped like the content that's about to appear, reusing the
+   real layout classes (search-section, app-layout__compare, ranking-table-
+   card, etc.) so spacing matches exactly and there's no layout jump once
+   data arrives.
+   ========================================================================== */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  display: block;
+  background: var(--divider);
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--surface) 75%, transparent),
+    transparent
+  );
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+}
+
+@keyframes skeleton-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton::after {
+    animation: none;
+  }
+}
+
+/* --- Compare page skeleton --- */
+.compare-skeleton__search {
+  max-width: 320px;
+  height: 46px;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--border-strong);
+}
+
+.compare-skeleton__zone-line {
+  height: 15px;
+  width: 190px;
+  border-radius: 4px;
+}
+
+.compare-skeleton__map {
+  width: 100%;
+  height: 480px;
+}
+
+/* --- Rankings page skeleton --- */
+.rankings-skeleton__tab {
+  height: 34px;
+  border-radius: var(--radius-chip);
+  border: 1px solid var(--border-strong);
+}
+
+.rankings-skeleton__region {
+  height: 28px;
+  width: 78px;
+  border-radius: var(--radius-chip);
+  border: 1px solid var(--border-strong);
+}
+
+.rankings-skeleton__title {
+  height: 15px;
+  width: 150px;
+  border-radius: 4px;
+}
+
+.rankings-skeleton__search {
+  width: 220px;
+  max-width: 100%;
+  height: 34px;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--border-strong);
+}
+
+.rankings-skeleton__cell {
+  display: inline-block;
+  height: 13px;
+  border-radius: 4px;
+  vertical-align: middle;
 }

@@ -86,9 +86,32 @@ export default function RankingsPage() {
       </div>
 
       {countries.length === 0 && !error && (
-        <div className="status">
-          <span className="status__spinner" aria-hidden="true" />
-          <span>Loading data…</span>
+        <div className="rankings-page" aria-busy="true" aria-label="Loading rankings">
+          <div className="ranking-tabs" role="presentation">
+            {INDICATORS.map((ind) => (
+              <span
+                key={ind.key}
+                className="skeleton rankings-skeleton__tab"
+                style={{ width: ind.label.length * 6.5 + 40 }}
+              />
+            ))}
+          </div>
+
+          <div className="ranking-filters">
+            <span className="ranking-filters__label">Continent</span>
+            <div className="ranking-region-tabs">
+              {["All", "Africa", "Americas", "Asia", "Europe", "Oceania"].map((r) => (
+                <span key={r} className="skeleton rankings-skeleton__region" />
+              ))}
+            </div>
+          </div>
+
+          <div className="ranking-tables">
+            <RankingSkeletonCard tone="best" />
+            <RankingSkeletonCard tone="worst" />
+          </div>
+
+          <RankingSkeletonCard tone="all" tall rows={8} withSearch />
         </div>
       )}
 
@@ -160,6 +183,54 @@ export default function RankingsPage() {
         </div>
       )}
     </>
+  );
+}
+
+// Placeholder card shaped exactly like RankingTable below (same header,
+// same table grid), with skeleton bars standing in for the title, search
+// box, and cell text — shown while /api/countries is still loading.
+function RankingSkeletonCard({ tone, tall, rows = 6, withSearch }) {
+  return (
+    <section className={"ranking-table-card ranking-table-card--" + tone}>
+      <div className="ranking-table-card__header">
+        <span className="skeleton rankings-skeleton__title" aria-hidden="true" />
+        {withSearch && <span className="skeleton rankings-skeleton__search" aria-hidden="true" />}
+      </div>
+      <div className={"ranking-table-scroll" + (tall ? " ranking-table-scroll--tall" : "")}>
+        <table className="ranking-table">
+          <thead>
+            <tr>
+              <th className="ranking-table__rank-col">#</th>
+              <th>Country</th>
+              <th className="ranking-table__value-col">&nbsp;</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Array.from({ length: rows }).map((_, i) => (
+              <tr key={i}>
+                <td className="ranking-table__rank-col">
+                  <span className="skeleton rankings-skeleton__cell" style={{ width: 14 }} aria-hidden="true" />
+                </td>
+                <td>
+                  <span
+                    className="skeleton rankings-skeleton__cell"
+                    style={{ width: `${58 - (i % 4) * 8}%` }}
+                    aria-hidden="true"
+                  />
+                </td>
+                <td className="ranking-table__value-col">
+                  <span
+                    className="skeleton rankings-skeleton__cell"
+                    style={{ width: 46, marginLeft: "auto" }}
+                    aria-hidden="true"
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
   );
 }
 
