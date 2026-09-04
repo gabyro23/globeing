@@ -19,9 +19,49 @@ const BOX_SIZE = 260; // px — size of the largest country in the compared set
 // padding the LARGEST country (the one that sets the scale) needs so its
 // 3D edge and shadow don't get clipped or overlap the badge/title.
 const CANVAS_HEIGHT = BOX_SIZE + pictogramViewPad(BOX_SIZE) * 2;
-const BASELINE_KEYS = new Set(["population", "area_km2", "population_density"]);
-const EXTRA_INDICATORS = INDICATORS.filter((i) => !BASELINE_KEYS.has(i.key));
-const DEFAULT_EXTRA_KEYS = ["gdp_per_capita_usd", "life_expectancy_years"];
+
+// Indicators bundled into the "Density" view below, so they aren't also
+// offered as their own (imageless) entries in the selector.
+const DENSITY_BUNDLE_KEYS = new Set(["population", "area_km2", "population_density"]);
+
+// One selectable entry per indicator the comparison screen can show. Only
+// one is active at a time — picking one swaps both the image (when it has
+// one) and the "Key differences" below it. "Density" bundles the three
+// baseline stats (area, population, population density) because that's
+// what the real-silhouette pictogram already visualizes together: the
+// personitas scattered inside each country's true-scale shape read as a
+// literal density map. "GDP" has its own money-bag pictogram. Every other
+// indicator is stats-only for now (no image yet) — flip `hasImage` and add
+// a rendering branch below once its visual is designed.
+const COMPARISON_INDICATORS = [
+  {
+    key: "density",
+    label: "Density",
+    hasImage: true,
+    description: "Real silhouettes at relative scale based on area — the largest country sets the scale.",
+    statKeys: [
+      { key: "area_km2", label: "Area" },
+      { key: "population", label: "Population" },
+      { key: "population_density", label: "Density" },
+    ],
+  },
+  {
+    key: "gdp_usd",
+    label: "GDP",
+    hasImage: true,
+    description: "A stack of money bags per country — each bag represents a fixed share of GDP.",
+    statKeys: [{ key: "gdp_usd", label: "GDP" }],
+  },
+  ...INDICATORS.filter((ind) => !DENSITY_BUNDLE_KEYS.has(ind.key) && ind.key !== "gdp_usd").map((ind) => ({
+    key: ind.key,
+    label: ind.label,
+    hasImage: false,
+    description: `${ind.label} comparison — a dedicated visual is coming soon. For now, here's how the group compares.`,
+    statKeys: [{ key: ind.key, label: ind.label }],
+  })),
+];
+
+const DEFAULT_INDICATOR_KEY = "density";
 
 // "True scale" box: initial size (height in px, for the largest country in
 // the group) and limits for the enlarge/shrink buttons.
@@ -30,23 +70,19 @@ const TRUE_SCALE_MIN = 56;
 const TRUE_SCALE_MAX = 220;
 const TRUE_SCALE_STEP = 24;
 
-// Statistics that are always compared, in addition to whatever the user
-// checks in the extra-indicators checklist.
-const BASELINE_COMPARISON_STATS = [
-  { key: "area_km2", label: "Area" },
-  { key: "population", label: "Population" },
-  { key: "population_density", label: "Density" },
-];
-
-// Dedicated comparison screen: each country's real silhouette at relative
-// scale (the largest sets the scale), with a grid of icons representing
-// population, labeled figures, and a legend. Opens as a full-screen
-// overlay (doesn't change the URL).
+// Dedicated comparison screen: pick one indicator at a time from the chips
+// below — it drives both the image (a real-silhouette population map for
+// "Density", money bags for "GDP", nothing yet for the rest) and the "Key
+// differences" sentences underneath. Opens as a full-screen overlay
+// (doesn't change the URL).
 export default function CompareModal({ open, countries, onClose }) {
   const [featureMap, setFeatureMap] = useState(null);
   const [mapError, setMapError] = useState(null);
-  const [extraKeys, setExtraKeys] = useState(DEFAULT_EXTRA_KEYS);
+  const [activeIndicator, setActiveIndicator] = useState(DEFAULT_INDICATOR_KEY);
   const [trueScaleSize, setTrueScaleSize] = useState(TRUE_SCALE_DEFAULT);
+
+  const activeView =
+    COMPARISON_INDICATORS.find((ind) => ind.key === activeIndicator) ?? COMPARISON_INDICATORS[0];
 
   useEffect(() => {
     if (!open) return undefined;
@@ -83,40 +119,22 @@ export default function CompareModal({ open, countries, onClose }) {
     [countries, maxArea]
   );
 
-  const showGdpPictogram = extraKeys.includes("gdp_usd");
   const maxGdp = useMemo(
     () => Math.max(...countries.map((c) => Number(c.gdp_usd) || 0), 1),
     [countries]
   );
-  const gdpIconValue = useMemo(
-    () => niceIconValue(maxGdp, GDP_TARGET_MAX_ICONS),
-    [maxGdp]
-  );
-  // The dedicated GDP row already shows GDP with its own icons + value, so
-  // drop it from the population row's stat list to avoid showing it twice.
-  const populationRowExtraKeys = useMemo(
-    () => extraKeys.filter((key) => key !== "gdp_usd"),
-    [extraKeys]
-  );
+  const gdpIconValue = useMemo(() => niceIconValue(maxGdp, GDP_TARGET_MAX_ICONS), [maxGdp]);
 
   const comparisonGroups = useMemo(() => {
-    const extraStats = extraKeys
-      .map((key) => INDICATORS.find((i) => i.key === key))
-      .filter(Boolean)
-      .map((ind) => ({ key: ind.key, label: ind.label }));
-
-    return [...BASELINE_COMPARISON_STATS, ...extraStats]
+    return activeView.statKeys
       .map((stat) => ({ ...stat, items: buildStatComparisons(countries, stat.key, stat.label) }))
       .filter((group) => group.items.length > 0);
-  }, [countries, extraKeys]);
-
-  function toggleExtra(key) {
-    setExtraKeys((current) =>
-      current.includes(key) ? current.filter((k) => k !== key) : [...current, key]
-    );
-  }
+  }, [countries, activeView]);
 
   if (!open) return null;
+
+  const needsMap = activeView.hasImage;
+  const mapReady = !needsMap || (featureMap && !mapError);
 
   return (
     <div className="compare-modal-backdrop" role="presentation" onClick={onClose}>
@@ -130,7 +148,7 @@ export default function CompareModal({ open, countries, onClose }) {
         <header className="compare-modal__header">
           <div>
             <h2>Visual comparison</h2>
-            <p>Real silhouettes at relative scale based on area — the largest country sets the scale.</p>
+            <p>{activeView.description}</p>
           </div>
           <button type="button" className="compare-modal__close" aria-label="Close comparison" onClick={onClose}>
             ×
@@ -138,14 +156,15 @@ export default function CompareModal({ open, countries, onClose }) {
         </header>
 
         <div className="compare-modal__indicators">
-          <span className="compare-modal__indicators-label">Extra data to show:</span>
+          <span className="compare-modal__indicators-label">Compare by:</span>
           <div className="compare-modal__indicators-list">
-            {EXTRA_INDICATORS.map((ind) => (
+            {COMPARISON_INDICATORS.map((ind) => (
               <label className="indicator-chip" key={ind.key}>
                 <input
-                  type="checkbox"
-                  checked={extraKeys.includes(ind.key)}
-                  onChange={() => toggleExtra(ind.key)}
+                  type="radio"
+                  name="comparison-indicator"
+                  checked={activeIndicator === ind.key}
+                  onChange={() => setActiveIndicator(ind.key)}
                 />
                 <span>{ind.label}</span>
               </label>
@@ -154,51 +173,51 @@ export default function CompareModal({ open, countries, onClose }) {
         </div>
 
         <div className="compare-modal__body">
-          {mapError && (
+          {needsMap && mapError && (
             <div className="status status--error">
               <span>Couldn&apos;t load the map: {mapError}</span>
             </div>
           )}
 
-          {!mapError && !featureMap && (
+          {needsMap && !mapError && !featureMap && (
             <div className="status">
               <span className="status__spinner" aria-hidden="true" />
               <span>Loading silhouettes…</span>
             </div>
           )}
 
-          {featureMap && (
+          {mapReady && (
             <>
-              <div className="pictogram-row">
-                <TrueScalePanel
-                  countries={countries}
-                  featureMap={featureMap}
-                  maxArea={maxArea}
-                  size={trueScaleSize}
-                  onIncrease={() => setTrueScaleSize((s) => Math.min(s + TRUE_SCALE_STEP, TRUE_SCALE_MAX))}
-                  onDecrease={() => setTrueScaleSize((s) => Math.max(s - TRUE_SCALE_STEP, TRUE_SCALE_MIN))}
-                  canIncrease={trueScaleSize < TRUE_SCALE_MAX}
-                  canDecrease={trueScaleSize > TRUE_SCALE_MIN}
-                />
+              {activeView.key === "density" && (
+                <div className="pictogram-row">
+                  <TrueScalePanel
+                    countries={countries}
+                    featureMap={featureMap}
+                    maxArea={maxArea}
+                    size={trueScaleSize}
+                    onIncrease={() => setTrueScaleSize((s) => Math.min(s + TRUE_SCALE_STEP, TRUE_SCALE_MAX))}
+                    onDecrease={() => setTrueScaleSize((s) => Math.max(s - TRUE_SCALE_STEP, TRUE_SCALE_MIN))}
+                    canIncrease={trueScaleSize < TRUE_SCALE_MAX}
+                    canDecrease={trueScaleSize > TRUE_SCALE_MIN}
+                  />
 
-                <div className="pictogram-countries">
-                  {countries.map((country) => (
-                    <CountryPictogram
-                      key={country.iso3}
-                      country={country}
-                      feature={featureMap.get(country.iso3)}
-                      boxSize={BOX_SIZE}
-                      canvasHeight={CANVAS_HEIGHT}
-                      iconValue={iconValue}
-                      extraIndicatorKeys={populationRowExtraKeys}
-                    />
-                  ))}
+                  <div className="pictogram-countries">
+                    {countries.map((country) => (
+                      <CountryPictogram
+                        key={country.iso3}
+                        country={country}
+                        feature={featureMap.get(country.iso3)}
+                        boxSize={BOX_SIZE}
+                        canvasHeight={CANVAS_HEIGHT}
+                        iconValue={iconValue}
+                      />
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
-              {showGdpPictogram && (
+              {activeView.key === "gdp_usd" && (
                 <div className="pictogram-gdp-row">
-                  <span className="pictogram-gdp-row__label">GDP</span>
                   <div className="pictogram-countries">
                     {countries.map((country) => (
                       <CountryPictogram
@@ -240,15 +259,17 @@ export default function CompareModal({ open, countries, onClose }) {
           )}
         </div>
 
-        <footer className="compare-modal__legend">
-          <span className="compare-modal__legend-icon" aria-hidden="true">
-            🧍
-          </span>
-          <span>
-            Each icon represents {formatNumber(iconValue)} people. Size scale based on the real area
-            of {largestCountry?.name} (the largest in the group).
-          </span>
-        </footer>
+        {activeView.key === "density" && mapReady && (
+          <footer className="compare-modal__legend">
+            <span className="compare-modal__legend-icon" aria-hidden="true">
+              🧍
+            </span>
+            <span>
+              Each icon represents {formatNumber(iconValue)} people. Size scale based on the real area
+              of {largestCountry?.name} (the largest in the group).
+            </span>
+          </footer>
+        )}
       </div>
     </div>
   );
