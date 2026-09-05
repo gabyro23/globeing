@@ -142,7 +142,11 @@ export default function ShareButton({ path, title, text, label, className }) {
                   rel="noopener noreferrer"
                   className="share-modal__option"
                 >
-                  <span className="share-modal__option-icon" style={{ background: t.bg }}>
+                  <span
+                    className="share-modal__option-icon"
+                    style={{ background: t.bg }}
+                    aria-hidden="true"
+                  >
                     {t.glyph}
                   </span>
                   <span>{t.label}</span>

@@ -234,7 +234,12 @@ export default function FillTheCountryPage() {
             </div>
           </div>
 
-          <AreaFillPalette countries={countries} excludeIso3={targetIso3} onAdd={addPoured} />
+          <AreaFillPalette
+            countries={countries}
+            excludeIso3={targetIso3}
+            targetCountry={targetCountry}
+            onAdd={addPoured}
+          />
         </div>
       )}
     </>

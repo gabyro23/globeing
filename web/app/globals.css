@@ -101,6 +101,17 @@ body {
   color: var(--ink);
 }
 
+/* Site-wide content width cap (Guía de estilos, "Layout": ancho útil
+   1440px) — applies to every route via the single <main> in app/layout.js,
+   so pages don't need to repeat it individually. .landing-page also sets
+   its own matching max-width/margin (harmless duplication, kept as-is to
+   avoid touching working code); every other page now gets it for free. */
+main {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
 /* --- Header --- */
 .site-header {
   display: flex;
@@ -595,7 +606,7 @@ body {
 
 path.country {
   fill: var(--sage-light);
-  stroke: #6b7280;
+  stroke: var(--muted);
   stroke-width: 0.6;
   cursor: pointer;
   outline: none;
@@ -1674,7 +1685,7 @@ path.country.is-dimmed {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  margin-bottom: 18px;
+  margin: 0 0 18px;
 }
 
 .home-metrics__eyebrow {
@@ -2221,6 +2232,10 @@ path.country.is-dimmed {
   --crossword-sand-border: #c08f70;
   --crossword-sand-text: #6b3d22;
   --crossword-sel-border: #b9d6c6;
+  /* Default cell border — was a hardcoded #DCE7E3 not tied to any token
+     (and not tinted in dark mode); scoped here alongside the other
+     crossword-only tints instead of hardcoding it in the component. */
+  --crossword-cell-border: #dce7e3;
   /* 28px top matches .app-hero's margin-top, so this page's title sits at
      the same height as every other page's. */
   padding: 28px clamp(16px, 4vw, 40px) 56px;
@@ -2734,6 +2749,16 @@ path.country.is-dimmed {
      8px further than every other page.) */
   margin-top: 28px;
   padding: 0 clamp(16px, 4vw, 40px) 64px;
+}
+
+/* .contact-page__intro has no display/gap rule of its own, so its
+   h1 (app-hero__title) and p (app-hero__subtitle) — both margin:0 —
+   sat flush against each other. Every other page gets the 10px gap
+   between title and subtitle from .app-hero's flex gap; this
+   replicates just that gap here, without touching the spacing above
+   .contact-methods. */
+.contact-page__intro .app-hero__subtitle {
+  margin-top: 10px;
 }
 
 @media (max-width: 900px) {
@@ -3690,13 +3715,21 @@ path.country.is-dimmed {
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   overflow: hidden;
+  display: flex;
+  justify-content: center;
+  padding: 12px;
 }
 
+/* Capped so the whole container country is visible without scrolling —
+   bounded by both viewport height (short/wide windows) and an absolute
+   ceiling (very tall windows), not just the column width. The board is
+   always a 1:1 square (see CANVAS_SIZE's viewBox), so one cap keeps both
+   dimensions in check. */
 .area-fill-canvas__svg {
+  display: block;
   width: 100%;
   height: auto;
-  display: block;
-  touch-action: none;
+  max-width: min(520px, 56vh);
 }
 
 .area-fill-canvas__bg {

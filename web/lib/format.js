@@ -22,6 +22,18 @@ export function formatPopulation(people) {
   return formatNumber(people);
 }
 
+// Share of a target's area, e.g. for "this country is 2.9% of Russia" in
+// the "Fill the country" puzzle. Keeps enough precision for the very
+// small shares that come up a lot there (Vatican-sized slivers of a
+// huge container) without turning into a wall of decimals for the big
+// ones.
+export function formatSharePercent(percent) {
+  if (!Number.isFinite(percent) || percent <= 0) return "0%";
+  if (percent < 0.01) return "<0.01%";
+  if (percent < 1) return `${percent.toFixed(2)}%`;
+  return `${percent.toFixed(1)}%`;
+}
+
 export function formatAreaCompact(km2) {
   return `${formatCompact(km2)} km²`;
 }

@@ -94,7 +94,7 @@ export default function TrueScalePanel({
                 <path d={item.pathD} className="pictogram-mini-silhouette" />
               </svg>
             </div>
-            <span className="true-scale-panel__item-flag">{item.flag}</span>
+            <span className="true-scale-panel__item-flag" aria-hidden="true">{item.flag}</span>
           </div>
         ))}
       </div>

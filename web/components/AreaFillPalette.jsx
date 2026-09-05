@@ -1,15 +1,16 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { formatAreaCompact } from "../lib/format";
+import { formatAreaCompact, formatSharePercent } from "../lib/format";
 
 // The list of countries you can pour into the container: search, then
 // click a row (or its + button) to add one to the mix. Each click adds
 // that country's real area to the running total that raises the water
 // level in AreaFillCanvas — the same country can be added more than
 // once (two Panamas' worth of area is a perfectly good amount to pour).
-export default function AreaFillPalette({ countries, excludeIso3, onAdd }) {
+export default function AreaFillPalette({ countries, excludeIso3, targetCountry, onAdd }) {
   const [search, setSearch] = useState("");
+  const targetArea = Number(targetCountry?.area_km2) || 0;
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -76,6 +77,15 @@ export default function AreaFillPalette({ countries, excludeIso3, onAdd }) {
                   <dt>Area</dt>
                   <dd>{formatAreaCompact(country.area_km2)}</dd>
                 </div>
+                {targetArea > 0 && (
+                  <div>
+                    <dt>Share</dt>
+                    <dd>
+                      {formatSharePercent((Number(country.area_km2) / targetArea) * 100)} of{" "}
+                      {targetCountry.name}
+                    </dd>
+                  </div>
+                )}
               </dl>
             </div>
             <span className="country-card__check" aria-hidden="true">

@@ -65,11 +65,11 @@ export default function Home() {
 
       <HomeFactBand facts={facts} />
 
-      <section className="home-features">
+      <section className="home-features" aria-label="How Globeing works">
         {FEATURES.map(({ key, Icon, title, text }) => (
           <div className="home-feature-card" key={key}>
             <Icon />
-            <h3 className="home-feature-card__title">{title}</h3>
+            <h2 className="home-feature-card__title">{title}</h2>
             <p className="home-feature-card__text">{text}</p>
           </div>
         ))}
@@ -77,7 +77,7 @@ export default function Home() {
 
       <section className="home-explore">
         <div className="home-metrics">
-          <span className="home-metrics__eyebrow">Available metrics</span>
+          <h2 className="home-metrics__eyebrow">Available metrics</h2>
           <div className="home-metrics__pills">
             {INDICATORS.map((ind) => (
               <span
@@ -91,7 +91,7 @@ export default function Home() {
         </div>
 
         <div className="home-example">
-          <span className="home-example__eyebrow">Example</span>
+          <h2 className="home-example__eyebrow">Example</h2>
           <div className="home-example__callout">
             <span className="home-example__dot" aria-hidden="true" />
             <p>United Kingdom has 1.5× more GDP per capita than Spain.</p>

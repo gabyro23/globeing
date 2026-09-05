@@ -219,20 +219,21 @@ export default function GuessCountryGame() {
                 width={Math.min(340, current.width)}
                 height={Math.min(230, current.height)}
                 className={"guess-country-silhouette" + (shake ? " is-shake" : "")}
+                role="img"
                 aria-label={`Silhouette of ${state.roundOver ? current.name : "a mystery country"}`}
               >
                 <defs>
                   <linearGradient id="guess-ctry-fill" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#9ECE9A" />
-                    <stop offset="55%" stopColor="#077187" />
-                    <stop offset="100%" stopColor="#074F57" />
+                    <stop offset="0%" stopColor="var(--sage-light)" />
+                    <stop offset="55%" stopColor="var(--accent)" />
+                    <stop offset="100%" stopColor="var(--accent-deep)" />
                   </linearGradient>
                   <filter id="guess-ctry-shadow" x="-50%" y="-50%" width="200%" height="200%">
                     <feGaussianBlur stdDeviation="4" />
                   </filter>
                 </defs>
-                <path d={current.path} fill="#1E2A2C" opacity="0.2" filter="url(#guess-ctry-shadow)" transform="translate(4 6)" />
-                <path d={current.path} fill="url(#guess-ctry-fill)" stroke="#074F57" strokeWidth="1.2" strokeLinejoin="round" />
+                <path d={current.path} fill="var(--ink)" opacity="0.2" filter="url(#guess-ctry-shadow)" transform="translate(4 6)" />
+                <path d={current.path} fill="url(#guess-ctry-fill)" stroke="var(--accent-deep)" strokeWidth="1.2" strokeLinejoin="round" />
               </svg>
 
               {toast && (

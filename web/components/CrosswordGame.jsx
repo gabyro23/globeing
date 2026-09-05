@@ -278,7 +278,7 @@ export default function CrosswordGame() {
                     const inActiveWord = activeKeys.has(key);
 
                     let bg = "var(--surface)";
-                    let border = "#DCE7E3";
+                    let border = "var(--crossword-cell-border)";
                     let color = "var(--ink)";
                     let shadow = "0 2px 0 rgba(7,79,87,.10)";
                     let transform = "none";
@@ -423,7 +423,7 @@ function ClueButton({ word, activeWord, letters, onSelect }) {
       <span className={"crossword-clue-text" + (solved ? " is-solved" : "")}>
         {word.clue} <span className="crossword-clue-len">({word.answer.length})</span>
       </span>
-      <span className={"crossword-clue-tick" + (solved ? " is-shown" : "")}>✓</span>
+      <span className={"crossword-clue-tick" + (solved ? " is-shown" : "")} aria-hidden="true">✓</span>
     </button>
   );
 }
