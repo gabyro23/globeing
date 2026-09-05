@@ -1198,6 +1198,18 @@ path.country.is-dimmed {
   white-space: nowrap;
 }
 
+/* --- GDP per capita view: one personita next to a stack of money bags,
+   inside the same .pictogram-column / .pictogram-canvas / .pictogram-stats
+   / .pictogram-icon-count structure as CountryPictogram (Density and GDP),
+   so the title-to-image spacing and the stats/caption placement match
+   exactly. .gpc-figures only adds the gap between the two icons — sizing,
+   centering and bottom-alignment all come from .pictogram-canvas. --- */
+.gpc-figures {
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+}
+
 .compare-insights {
   margin-top: 28px;
   padding-top: 20px;
@@ -3534,4 +3546,250 @@ path.country.is-dimmed {
   height: 13px;
   border-radius: 4px;
   vertical-align: middle;
+}
+
+/* ============================================================
+   "Fill the country" — area puzzle: drag real, area-scaled
+   silhouettes onto a target country's outline until they add up
+   to its full surface area.
+   ============================================================ */
+.area-fill-status {
+  margin: 16px clamp(16px, 4vw, 40px) 0;
+}
+
+.area-fill-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 20px;
+  align-items: start;
+  padding: 16px clamp(16px, 4vw, 40px) 40px;
+}
+
+@media (max-width: 900px) {
+  .area-fill-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.area-fill-main {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+
+.area-fill-target-picker {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.area-fill-target-picker label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.area-fill-target-picker select {
+  padding: 10px 12px;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 14px;
+  font-family: inherit;
+  min-width: 220px;
+}
+
+.area-fill-target-picker select:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* --- Text-only button (style guide §03, "Clear filters") --- */
+.btn-text {
+  background: none;
+  border: none;
+  color: var(--accent-deep);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 6px 0;
+  font-family: inherit;
+}
+
+.btn-text:hover:not(:disabled) {
+  color: var(--accent);
+}
+
+.btn-text:disabled {
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+.area-fill-progress {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.area-fill-progress__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.area-fill-progress__label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.area-fill-progress__value {
+  font-size: 13px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.area-fill-progress__bar {
+  height: 10px;
+  border-radius: 6px;
+  background: var(--divider);
+  overflow: hidden;
+}
+
+.area-fill-progress__fill {
+  height: 100%;
+  border-radius: 6px;
+  background: var(--accent);
+  transition: width 0.25s ease, background-color 0.25s ease;
+}
+
+.area-fill-progress__fill.is-complete {
+  background: var(--sage);
+}
+
+.area-fill-progress__note {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.area-fill-canvas {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.area-fill-canvas__svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  touch-action: none;
+}
+
+.area-fill-canvas__bg {
+  fill: var(--bg);
+}
+
+.area-fill-canvas__target {
+  fill: var(--sage-bg-strong);
+  stroke: var(--sage);
+  stroke-width: 2;
+  stroke-dasharray: 5 4;
+}
+
+/* The "water": the part of the container's own outline that falls below
+   the fill line — see lib/liquidFill.js. Deliberately no stroke of its
+   own so it reads as liquid sitting inside the dashed container, not as
+   a separate shape stacked on top of it. */
+.area-fill-canvas__water {
+  fill: var(--accent);
+  fill-opacity: 0.82;
+  transition: d 0.2s ease;
+}
+
+.area-fill-used {
+  margin-top: 2px;
+}
+
+.area-fill-used__title {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.area-fill-palette {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 760px;
+}
+
+.area-fill-palette__hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.area-fill-palette__list {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.area-fill-palette__item {
+  cursor: pointer;
+}
+
+/* --- Compare section sub-nav (tabs shared by /compare and its sub-pages,
+   e.g. the area-fill puzzle) --- */
+.compare-subnav {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 0 clamp(16px, 4vw, 40px);
+  margin: 2px 0 4px;
+}
+
+.compare-subnav__tab {
+  padding: 8px 16px;
+  border-radius: var(--radius-chip);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.compare-subnav__tab:hover {
+  border-color: var(--accent);
+  color: var(--accent-deep);
+}
+
+.compare-subnav__tab.is-active {
+  background: var(--sage-bg-strong);
+  border-color: var(--sage-light);
+  color: var(--accent-deep);
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import CompareSubNav from "../../components/CompareSubNav";
 import WorldMap from "../../components/WorldMap";
 import SearchBar from "../../components/SearchBar";
 import SelectedCountries from "../../components/SelectedCountries";
@@ -88,6 +89,8 @@ export default function ComparePage() {
           <span className="app-hero__stat">{countries.length} countries · public data</span>
         )}
       </div>
+
+      <CompareSubNav />
 
       {countries.length === 0 && !error && (
         <div aria-busy="true" aria-label="Loading countries and map">

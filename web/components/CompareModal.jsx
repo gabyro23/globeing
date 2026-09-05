@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import CountryPictogram from "./CountryPictogram";
+import GdpPerCapitaPictogram from "./GdpPerCapitaPictogram";
 import TrueScalePanel from "./TrueScalePanel";
 import { INDICATORS } from "../lib/indicators";
 import { loadWorld, featuresByAlpha3 } from "../lib/worldAtlas";
@@ -14,6 +15,11 @@ import { formatNumber, formatIndicatorValue } from "../lib/format";
 // than a personita.
 const GDP_TARGET_MAX_ICONS = 90;
 
+// Same idea for the "GDP per capita" view, but capped lower: it's one
+// personita next to its own stack of bags, so there's much less room and
+// no need for as many icons to read clearly.
+const GDP_PER_CAPITA_TARGET_MAX_ICONS = 20;
+
 const BOX_SIZE = 260; // px — size of the largest country in the compared set
 // Height reserved for each country's canvas: the reference size plus the
 // padding the LARGEST country (the one that sets the scale) needs so its
@@ -24,20 +30,29 @@ const CANVAS_HEIGHT = BOX_SIZE + pictogramViewPad(BOX_SIZE) * 2;
 // offered as their own (imageless) entries in the selector.
 const DENSITY_BUNDLE_KEYS = new Set(["population", "area_km2", "population_density"]);
 
+// Keys with their own explicit entry below (a bundle or a custom image),
+// so they're skipped when the generic "everything else" entries are
+// derived from INDICATORS further down.
+const CUSTOM_VIEW_KEYS = new Set([...DENSITY_BUNDLE_KEYS, "gdp_usd", "gdp_per_capita_usd"]);
+
 // One selectable entry per indicator the comparison screen can show. Only
 // one is active at a time — picking one swaps both the image (when it has
 // one) and the "Key differences" below it. "Density" bundles the three
 // baseline stats (area, population, population density) because that's
 // what the real-silhouette pictogram already visualizes together: the
 // personitas scattered inside each country's true-scale shape read as a
-// literal density map. "GDP" has its own money-bag pictogram. Every other
-// indicator is stats-only for now (no image yet) — flip `hasImage` and add
-// a rendering branch below once its visual is designed.
+// literal density map. "GDP" and "GDP per capita" have their own
+// money-bag pictograms. Every other indicator is stats-only for now (no
+// image yet) — flip `hasImage` and add a rendering branch below once its
+// visual is designed. `needsMap` gates the "Loading silhouettes…" wait on
+// only the views that actually draw a country silhouette from the world
+// atlas — GDP per capita's personita + bags doesn't need it.
 const COMPARISON_INDICATORS = [
   {
     key: "density",
     label: "Density",
     hasImage: true,
+    needsMap: true,
     description: "Real silhouettes at relative scale based on area — the largest country sets the scale.",
     statKeys: [
       { key: "area_km2", label: "Area" },
@@ -49,13 +64,23 @@ const COMPARISON_INDICATORS = [
     key: "gdp_usd",
     label: "GDP",
     hasImage: true,
+    needsMap: true,
     description: "A stack of money bags per country — each bag represents a fixed share of GDP.",
     statKeys: [{ key: "gdp_usd", label: "GDP" }],
   },
-  ...INDICATORS.filter((ind) => !DENSITY_BUNDLE_KEYS.has(ind.key) && ind.key !== "gdp_usd").map((ind) => ({
+  {
+    key: "gdp_per_capita_usd",
+    label: "GDP per capita",
+    hasImage: true,
+    needsMap: false,
+    description: "One personita per country, next to a stack of money bags sized to its GDP per capita.",
+    statKeys: [{ key: "gdp_per_capita_usd", label: "GDP per capita" }],
+  },
+  ...INDICATORS.filter((ind) => !CUSTOM_VIEW_KEYS.has(ind.key)).map((ind) => ({
     key: ind.key,
     label: ind.label,
     hasImage: false,
+    needsMap: false,
     description: `${ind.label} comparison — a dedicated visual is coming soon. For now, here's how the group compares.`,
     statKeys: [{ key: ind.key, label: ind.label }],
   })),
@@ -125,6 +150,15 @@ export default function CompareModal({ open, countries, onClose }) {
   );
   const gdpIconValue = useMemo(() => niceIconValue(maxGdp, GDP_TARGET_MAX_ICONS), [maxGdp]);
 
+  const maxGdpPerCapita = useMemo(
+    () => Math.max(...countries.map((c) => Number(c.gdp_per_capita_usd) || 0), 1),
+    [countries]
+  );
+  const gdpPerCapitaIconValue = useMemo(
+    () => niceIconValue(maxGdpPerCapita, GDP_PER_CAPITA_TARGET_MAX_ICONS),
+    [maxGdpPerCapita]
+  );
+
   const comparisonGroups = useMemo(() => {
     return activeView.statKeys
       .map((stat) => ({ ...stat, items: buildStatComparisons(countries, stat.key, stat.label) }))
@@ -133,7 +167,7 @@ export default function CompareModal({ open, countries, onClose }) {
 
   if (!open) return null;
 
-  const needsMap = activeView.hasImage;
+  const needsMap = activeView.needsMap;
   const mapReady = !needsMap || (featureMap && !mapError);
 
   return (
@@ -234,6 +268,24 @@ export default function CompareModal({ open, countries, onClose }) {
                   </div>
                   <p className="pictogram-row__legend">
                     💰 Each bag represents {formatIndicatorValue(gdpIconValue, "US$")} of GDP.
+                  </p>
+                </div>
+              )}
+
+              {activeView.key === "gdp_per_capita_usd" && (
+                <div className="pictogram-gdp-row">
+                  <div className="pictogram-countries">
+                    {countries.map((country) => (
+                      <GdpPerCapitaPictogram
+                        key={country.iso3}
+                        country={country}
+                        iconValue={gdpPerCapitaIconValue}
+                        canvasHeight={CANVAS_HEIGHT}
+                      />
+                    ))}
+                  </div>
+                  <p className="pictogram-row__legend">
+                    💰 Each bag represents {formatIndicatorValue(gdpPerCapitaIconValue, "US$")} of GDP per capita.
                   </p>
                 </div>
               )}
