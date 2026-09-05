@@ -4,10 +4,18 @@ import HomeFactBand from "../components/HomeFactBand";
 import { ChooseIcon, CompareIcon, LearnIcon, HumanScaleIcon } from "../components/HomeIcons";
 import { getAccumulatedFacts } from "../lib/dailyFact";
 import { INDICATORS } from "../lib/indicators";
+import { pageMetadata } from "../lib/seo";
 
 // Regenerate at most hourly so "today's fact" rolls over to the next day
 // without needing the whole page to be dynamically rendered on every request.
 export const revalidate = 3600;
+
+export const metadata = pageMetadata({
+  absoluteTitle: "Globeing — Compare Countries Side by Side",
+  description:
+    "Compare any two countries by population, GDP, area, and more, drawn at real, human scale so the numbers actually make sense.",
+  path: "/",
+});
 
 const FEATURES = [
   {

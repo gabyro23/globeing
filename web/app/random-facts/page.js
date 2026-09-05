@@ -1,9 +1,17 @@
 import { getAccumulatedFacts } from "../../lib/dailyFact";
 import { flagForCountryName } from "../../lib/randomFactFlags";
+import { pageMetadata } from "../../lib/seo";
 
 // Regenerate at most hourly so the archive picks up each new day's fact
 // without needing the whole page to be dynamically rendered on every request.
 export const revalidate = 3600;
+
+export const metadata = pageMetadata({
+  title: "Random Country Facts",
+  description:
+    "A new country fact every day, with a growing archive of past facts about population, geography, economies, and more.",
+  path: "/random-facts",
+});
 
 function factDateLabel(day) {
   const date = new Date(new Date().getFullYear(), 0, day);

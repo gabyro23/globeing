@@ -1,9 +1,11 @@
 import GuessCountryGameClientOnly from "../../components/GuessCountryGameClientOnly";
+import { pageMetadata } from "../../lib/seo";
 
-export const metadata = {
-  title: "Globeing — Guess the Country",
-  description: "Ten country silhouettes, five lives each — guess the country letter by letter.",
-};
+export const metadata = pageMetadata({
+  title: "Guess the Country",
+  description: "Guess the country from its silhouette, letter by letter, with five lives — ten countries per round.",
+  path: "/guess-the-country",
+});
 
 export default function GuessTheCountryPage() {
   return <GuessCountryGameClientOnly />;
