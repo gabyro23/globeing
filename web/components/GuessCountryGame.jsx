@@ -4,14 +4,15 @@ import { useEffect, useRef, useState } from "react";
 import ShareButton from "./ShareButton";
 import { GUESS_COUNTRIES } from "../lib/guessCountryData";
 import {
-  MAX_LIVES,
   TOTAL_ROUNDS,
+  GUESS_START_SCORE,
+  HINT_PENALTY,
+  REVEAL_LETTER_PENALTY,
   QWERTY_ROWS,
   GUESS_CONFETTI_COLORS,
   pickRoundOrder,
   letterCells,
   isNameGuessed,
-  roundScore,
 } from "../lib/guessCountryEngine";
 
 function newRoundOrder() {
@@ -23,23 +24,24 @@ function initialGameState() {
     order: newRoundOrder(),
     roundIndex: 0,
     guessed: new Set(),
-    wrongCount: 0,
     hintUsed: false,
     capitalHintUsed: false,
     roundOver: false,
     finished: false,
-    score: 0,
-    streak: 0,
+    score: GUESS_START_SCORE,
+    seconds: 0,
     correctCount: 0,
   };
 }
 
 // Ten-round hangman-style guessing game: a country silhouette is revealed,
-// the player guesses letters (keyboard clicks or their physical keyboard)
-// with five lives, optional continent/capital hints, and a "reveal a
-// letter" option that costs a life. Ported from a standalone design
-// prototype ("guessthecountry.html") into the site's component/CSS-variable
-// system, reusing the same playful toast + confetti language as Crosswords.
+// the player guesses letters (keyboard clicks or their physical keyboard).
+// There are no lives — hints (continent, capital, revealing a letter) cost
+// points instead, same "protect your score" framing as Crosswords, and the
+// two games share the same stat tiles (Solved / Score / Time) and the same
+// pill-row progress indicator. Ported from a standalone design prototype
+// ("guessthecountry.html") into the site's component/CSS-variable system,
+// reusing the same playful toast + confetti language as Crosswords.
 export default function GuessCountryGame() {
   const [state, setState] = useState(initialGameState);
   const [toast, setToast] = useState(null); // { id, text }
@@ -62,6 +64,15 @@ export default function GuessCountryGame() {
     };
   }, []);
 
+  // One clock for the whole ten-round game (mirrors Crosswords' per-board
+  // timer) — ticks until the game is finished, then New game resets it.
+  useEffect(() => {
+    const id = setInterval(() => {
+      setState((s) => (s.finished ? s : { ...s, seconds: s.seconds + 1 }));
+    }, 1000);
+    return () => clearInterval(id);
+  }, []);
+
   function triggerShake() {
     setShake(true);
     if (shakeTimeoutRef.current) clearTimeout(shakeTimeoutRef.current);
@@ -70,17 +81,12 @@ export default function GuessCountryGame() {
 
   function finishGuess(next) {
     if (isNameGuessed(current.name, next.guessed)) {
-      const gained = roundScore(next.wrongCount);
       setState({
         ...next,
         roundOver: true,
-        score: next.score + gained,
-        streak: next.streak + 1,
         correctCount: next.correctCount + 1,
       });
       setToast({ id: `${current.name}-${next.roundIndex}-win`, text: `Correct! ${current.flag} ${current.name}` });
-    } else if (next.wrongCount >= MAX_LIVES) {
-      setState({ ...next, roundOver: true, streak: 0 });
     } else {
       setState(next);
     }
@@ -91,30 +97,33 @@ export default function GuessCountryGame() {
     const guessed = new Set(state.guessed);
     guessed.add(ch);
     const correct = current.name.includes(ch);
-    const wrongCount = state.wrongCount + (correct ? 0 : 1);
     if (!correct) triggerShake();
-    finishGuess({ ...state, guessed, wrongCount });
+    finishGuess({ ...state, guessed });
   }
 
   function revealLetter() {
     if (!current || state.roundOver || state.finished) return;
-    if (state.wrongCount >= MAX_LIVES - 1) return;
     const remaining = letterCells(current.name).filter((ch) => ch !== " " && !state.guessed.has(ch));
     if (!remaining.length) return;
     const ch = remaining[Math.floor(Math.random() * remaining.length)];
     const guessed = new Set(state.guessed);
     guessed.add(ch);
-    finishGuess({ ...state, guessed, wrongCount: state.wrongCount + 1 });
+    finishGuess({ ...state, guessed, score: Math.max(0, state.score - REVEAL_LETTER_PENALTY) });
   }
 
   function useContinentHint() {
     if (state.hintUsed || state.roundOver) return;
-    setState((s) => ({ ...s, hintUsed: true }));
+    setState((s) => ({ ...s, hintUsed: true, score: Math.max(0, s.score - HINT_PENALTY) }));
   }
 
   function useCapitalHint() {
     if (state.capitalHintUsed || state.roundOver) return;
-    setState((s) => ({ ...s, capitalHintUsed: true }));
+    setState((s) => ({ ...s, capitalHintUsed: true, score: Math.max(0, s.score - HINT_PENALTY) }));
+  }
+
+  function skipRound() {
+    if (!current || state.roundOver || state.finished) return;
+    setState((s) => ({ ...s, roundOver: true }));
   }
 
   function nextRound() {
@@ -126,7 +135,6 @@ export default function GuessCountryGame() {
         ...s,
         roundIndex: nextIndex,
         guessed: new Set(),
-        wrongCount: 0,
         hintUsed: false,
         capitalHintUsed: false,
         roundOver: false,
@@ -156,6 +164,14 @@ export default function GuessCountryGame() {
   const hintLine = [state.hintUsed && current.continent, state.capitalHintUsed && `Capital: ${current.capital}`]
     .filter(Boolean)
     .join(" · ");
+  const progressCopy =
+    state.correctCount === 0
+      ? "Guess the country to get started"
+      : state.correctCount === state.order.length
+        ? "All countries guessed, nice work"
+        : `${state.correctCount} of ${state.order.length} countries — keep going`;
+  const mm = String(Math.floor(state.seconds / 60)).padStart(2, "0");
+  const ss = String(state.seconds % 60).padStart(2, "0");
 
   return (
     <div className="guess-country-game">
@@ -163,14 +179,14 @@ export default function GuessCountryGame() {
         <div className="guess-country-hero__copy">
           <h1 className="app-hero__title">Guess the country</h1>
           <p className="app-hero__subtitle">
-            Ten silhouettes, five lives each. Type a letter or tap the keyboard to guess.
+            Ten silhouettes. Type a letter or tap the keyboard — hints cost you points, not lives.
           </p>
         </div>
         <div className="guess-country-stats">
           <div className="guess-country-stat">
-            <div className="guess-country-stat__label">Round</div>
+            <div className="guess-country-stat__label">Solved</div>
             <div className="guess-country-stat__value">
-              {Math.min(state.roundIndex + 1, state.order.length)}/{state.order.length}
+              {state.correctCount}/{state.order.length}
             </div>
           </div>
           <div className="guess-country-stat">
@@ -178,8 +194,10 @@ export default function GuessCountryGame() {
             <div className="guess-country-stat__value">{state.score}</div>
           </div>
           <div className="guess-country-stat">
-            <div className="guess-country-stat__label">Streak</div>
-            <div className="guess-country-stat__value">{state.streak}</div>
+            <div className="guess-country-stat__label">Time</div>
+            <div className="guess-country-stat__value">
+              {mm}:{ss}
+            </div>
           </div>
           <ShareButton
             path="/guess-the-country"
@@ -206,12 +224,19 @@ export default function GuessCountryGame() {
             </button>
           </div>
         ) : (
-          <div className="guess-country-area">
-            <div className="guess-country-lives-row">
-              {Array.from({ length: MAX_LIVES }).map((_, i) => (
-                <span key={i} className={"guess-country-life" + (i < state.wrongCount ? " is-lost" : "")} />
+          <div className="guess-country-layout">
+          <div className="guess-country-board">
+            <div className="crossword-pills guess-country-pills">
+              {state.order.map((_, i) => (
+                <div
+                  key={i}
+                  className={
+                    "crossword-pill" + (i < state.roundIndex ? (i === state.roundIndex - 1 ? " is-last" : " is-done") : "")
+                  }
+                />
               ))}
             </div>
+            <div className="crossword-progress-copy">{progressCopy}</div>
 
             <div className="guess-country-silhouette-wrap">
               <svg
@@ -307,35 +332,51 @@ export default function GuessCountryGame() {
               ))}
             </div>
 
-            <div className="guess-country-btn-row">
-              <button
-                type="button"
-                className="guess-country-pbtn"
-                disabled={state.hintUsed || state.roundOver}
-                onClick={useContinentHint}
-              >
-                Continent hint
-              </button>
-              <button
-                type="button"
-                className="guess-country-pbtn"
-                disabled={state.capitalHintUsed || state.roundOver}
-                onClick={useCapitalHint}
-              >
-                Capital hint
-              </button>
-              <button
-                type="button"
-                className="guess-country-pbtn"
-                disabled={state.roundOver || state.wrongCount >= MAX_LIVES - 1}
-                onClick={revealLetter}
-              >
-                Reveal a letter (−1 life)
-              </button>
-              <button type="button" className="guess-country-pbtn guess-country-pbtn--primary" onClick={nextRound}>
-                {state.roundIndex === state.order.length - 1 ? "See results →" : "Next country →"}
-              </button>
-            </div>
+          </div>
+
+          <div className="guess-country-actions">
+            <div className="guess-country-actions__title">Hints</div>
+            <button
+              type="button"
+              className="guess-country-pbtn"
+              disabled={state.hintUsed || state.roundOver}
+              onClick={useContinentHint}
+            >
+              {`Continent hint (−${HINT_PENALTY} pts)`}
+            </button>
+            <button
+              type="button"
+              className="guess-country-pbtn"
+              disabled={state.capitalHintUsed || state.roundOver}
+              onClick={useCapitalHint}
+            >
+              {`Capital hint (−${HINT_PENALTY} pts)`}
+            </button>
+            <button
+              type="button"
+              className="guess-country-pbtn"
+              disabled={state.roundOver}
+              onClick={revealLetter}
+            >
+              {`Reveal a letter (−${REVEAL_LETTER_PENALTY} pts)`}
+            </button>
+            <button
+              type="button"
+              className="guess-country-pbtn"
+              disabled={state.roundOver}
+              onClick={skipRound}
+            >
+              Skip
+            </button>
+            <button
+              type="button"
+              className="guess-country-pbtn guess-country-pbtn--primary guess-country-actions__next"
+              disabled={!state.roundOver}
+              onClick={nextRound}
+            >
+              {state.roundIndex === state.order.length - 1 ? "See results →" : "Next country →"}
+            </button>
+          </div>
           </div>
         )}
       </div>

@@ -44,3 +44,13 @@ export function activeWordFor(grid, words, active) {
   if (!cell) return words[0];
   return cell.words[active.dir] || cell.words[active.dir === "A" ? "D" : "A"];
 }
+
+// The word a fresh board opens on. Always prefers the lowest-numbered
+// Down clue — so every puzzle starts at "1 Down", top of the grid —
+// falling back to the lowest-numbered clue overall for the rare puzzle
+// whose first clue happens to be Across.
+export function defaultActiveWord(words) {
+  const downs = words.filter((w) => w.dir === "D");
+  const pool = downs.length ? downs : words;
+  return pool.reduce((best, w) => (w.n < best.n ? w : best), pool[0]);
+}

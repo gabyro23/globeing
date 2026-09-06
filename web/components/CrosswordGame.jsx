@@ -2,19 +2,35 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { CROSSWORD_PUZZLES, CROSSWORD_CONFETTI_COLORS } from "../lib/crosswordPuzzles";
-import { buildCrosswordGrid, cellsOfWord, isWordSolved, activeWordFor } from "../lib/crosswordEngine";
+import { buildCrosswordGrid, cellsOfWord, isWordSolved, activeWordFor, defaultActiveWord } from "../lib/crosswordEngine";
 import ShareButton from "./ShareButton";
 
 const LETTER_PATTERN = /[^A-ZÑÁÉÍÓÚ]/g;
 
+// One fixed cell size for every board. This used to be computed per
+// puzzle from the board width (600 / width, clamped 28–52px), which made
+// some boards render at ~37px and others at ~52px — inconsistent from
+// tab to tab. Locked to the smaller end of that range so every board
+// reads the same.
+const CROSSWORD_CELL_SIZE = 40;
+
+// Score starts at a par value and loses points for mistakes and help,
+// rather than building up from zero — the framing is "protect your
+// score", same idea as golf or a driving test.
+const CROSSWORD_START_SCORE = 1000;
+const CROSSWORD_MISTAKE_PENALTY = 10;
+const CROSSWORD_HINT_PENALTY = 25;
+const CROSSWORD_CHECK_PENALTY = 5;
+
 function initialPuzzleState(puzzle) {
-  const first = puzzle.words[0];
+  const first = defaultActiveWord(puzzle.words);
   return {
     letters: {},
     active: { r: first.row, c: first.col, dir: first.dir },
     checked: false,
     seconds: 0,
-    running: false,
+    started: false,
+    score: CROSSWORD_START_SCORE,
   };
 }
 
@@ -36,6 +52,7 @@ export default function CrosswordGame() {
   const puzzle = puzzles[current];
   const state = puzzleStates[current];
   const activeWord = activeWordFor(puzzle.grid, puzzle.words, state.active);
+  const locked = !state.started;
 
   const solvedWords = useMemo(
     () => puzzle.words.filter((w) => isWordSolved(w, state.letters)),
@@ -58,19 +75,21 @@ export default function CrosswordGame() {
   // Keep the focused DOM cell in sync with "active" — simpler and less
   // error-prone than calling .focus() from inside every event handler.
   useEffect(() => {
+    if (locked) return;
     const el = cellRefs.current[`${state.active.r}-${state.active.c}`];
     if (el && document.activeElement !== el) {
       el.focus();
       el.select?.();
     }
-  }, [current, state.active.r, state.active.c]);
+  }, [current, state.active.r, state.active.c, locked]);
 
   // One shared clock, ticking whichever puzzle is currently open and
-  // running (each board keeps its own elapsed time independently).
+  // started (each board keeps its own elapsed time independently). The
+  // clock only runs once the player presses Start.
   useEffect(() => {
     const id = setInterval(() => {
       setPuzzleStates((prev) => {
-        if (!prev[current].running) return prev;
+        if (!prev[current].started) return prev;
         const next = prev.slice();
         next[current] = { ...next[current], seconds: next[current].seconds + 1 };
         return next;
@@ -94,7 +113,12 @@ export default function CrosswordGame() {
     });
   }
 
+  function handleStart() {
+    updateCurrent((s) => ({ ...s, started: true }));
+  }
+
   function select(r, c, dirPref, allowToggle) {
+    if (locked) return;
     const cell = puzzle.grid[`${r}-${c}`];
     if (!cell) return;
     updateCurrent((s) => {
@@ -108,6 +132,7 @@ export default function CrosswordGame() {
   }
 
   function selectWord(w) {
+    if (locked) return;
     updateCurrent((s) => ({ ...s, active: { r: w.row, c: w.col, dir: w.dir } }));
   }
 
@@ -131,13 +156,23 @@ export default function CrosswordGame() {
   }
 
   function write(r, c, ch) {
+    if (locked) return;
     const key = `${r}-${c}`;
     const beforeSolved = new Set(puzzle.words.filter((w) => isWordSolved(w, state.letters)));
     const letters = { ...state.letters };
     if (ch) letters[key] = ch;
     else delete letters[key];
 
-    updateCurrent((s) => ({ ...s, letters, checked: false, running: true }));
+    // A wrong letter costs points — right away, not just on Check — so
+    // careless typing has a cost even if the player never hits Check.
+    const isMistake = Boolean(ch) && puzzle.grid[key] && ch !== puzzle.grid[key].answer;
+
+    updateCurrent((s) => ({
+      ...s,
+      letters,
+      checked: false,
+      score: isMistake ? Math.max(0, s.score - CROSSWORD_MISTAKE_PENALTY) : s.score,
+    }));
 
     if (ch) {
       const justSolved = puzzle.words.find((w) => !beforeSolved.has(w) && isWordSolved(w, letters));
@@ -147,11 +182,12 @@ export default function CrosswordGame() {
   }
 
   function hint() {
-    if (!activeWord) return;
+    if (locked || !activeWord) return;
     const pts = cellsOfWord(activeWord);
     for (let i = 0; i < pts.length; i++) {
       const k = `${pts[i].r}-${pts[i].c}`;
       if ((state.letters[k] || "") !== activeWord.answer[i]) {
+        updateCurrent((s) => ({ ...s, score: Math.max(0, s.score - CROSSWORD_HINT_PENALTY) }));
         write(pts[i].r, pts[i].c, activeWord.answer[i]);
         return;
       }
@@ -159,21 +195,32 @@ export default function CrosswordGame() {
   }
 
   function handleCheck() {
-    updateCurrent((s) => ({ ...s, checked: true, running: true }));
+    if (locked) return;
+    updateCurrent((s) => ({ ...s, checked: true, score: Math.max(0, s.score - CROSSWORD_CHECK_PENALTY) }));
   }
 
   function handleClear() {
-    updateCurrent((s) => ({ ...s, letters: {}, checked: false, seconds: 0, running: false }));
+    const first = defaultActiveWord(puzzle.words);
+    updateCurrent((s) => ({
+      ...s,
+      letters: {},
+      checked: false,
+      seconds: 0,
+      started: false,
+      score: CROSSWORD_START_SCORE,
+      active: { r: first.row, c: first.col, dir: first.dir },
+    }));
   }
 
-  const cellSize = Math.max(28, Math.min(52, Math.floor(600 / puzzle.width)));
-  const progressCopy =
-    solvedCount === 0
+  const cellSize = CROSSWORD_CELL_SIZE;
+  const progressCopy = locked
+    ? "Press Start to reveal the clues"
+    : solvedCount === 0
       ? "Tap a cell to get started"
       : solvedCount === puzzle.words.length
         ? "Board complete, nice work"
         : `${solvedCount} of ${puzzle.words.length} words — keep going`;
-  const hintLine = activeWord
+  const hintLine = !locked && activeWord
     ? `${activeWord.n} ${activeWord.dir === "A" ? "across" : "down"} · ${activeWord.clue} (${activeWord.answer.length} letters)`
     : "";
   const mm = String(Math.floor(state.seconds / 60)).padStart(2, "0");
@@ -184,7 +231,7 @@ export default function CrosswordGame() {
       <div className="crossword-hero">
         <div className="crossword-hero__copy">
           <h1 className="app-hero__title">Crosswords of the world</h1>
-          <p className="app-hero__subtitle">Five geopolitics boards. Pick one, tap a cell, and start typing.</p>
+          <p className="app-hero__subtitle">Five geopolitics boards. Pick one, hit Start, and start typing.</p>
         </div>
         <div className="crossword-stats">
           <div className="crossword-stat">
@@ -192,6 +239,10 @@ export default function CrosswordGame() {
             <div className="crossword-stat__value">
               {solvedCount}/{puzzle.words.length}
             </div>
+          </div>
+          <div className="crossword-stat">
+            <div className="crossword-stat__label">Score</div>
+            <div className="crossword-stat__value">{state.score}</div>
           </div>
           <div className="crossword-stat">
             <div className="crossword-stat__label">Time</div>
@@ -243,10 +294,10 @@ export default function CrosswordGame() {
               <div className="crossword-progress-copy">{progressCopy}</div>
             </div>
             <div className="crossword-btn-row">
-              <button type="button" className="crossword-btn" onClick={hint}>
+              <button type="button" className="crossword-btn" onClick={hint} disabled={locked}>
                 Hint
               </button>
-              <button type="button" className="crossword-btn" onClick={handleCheck}>
+              <button type="button" className="crossword-btn" onClick={handleCheck} disabled={locked}>
                 Check
               </button>
               <button type="button" className="crossword-btn crossword-btn--primary" onClick={handleClear}>
@@ -284,9 +335,9 @@ export default function CrosswordGame() {
                     let transform = "none";
 
                     if (solved) {
-                      bg = "var(--sage-light)";
-                      border = "var(--sage)";
-                      color = "var(--accent-deep)";
+                      bg = "var(--crossword-solved-bg)";
+                      border = "var(--crossword-solved-border)";
+                      color = "var(--crossword-solved-text)";
                       shadow = "0 2px 0 rgba(7,79,87,.16)";
                       transform = `rotate(${(r + c) % 2 ? -1.5 : 1.5}deg)`;
                     }
@@ -319,6 +370,7 @@ export default function CrosswordGame() {
                           }}
                           maxLength={1}
                           autoComplete="off"
+                          disabled={locked}
                           aria-label={`Row ${r + 1}, column ${c + 1}`}
                           value={value}
                           style={{
@@ -385,14 +437,22 @@ export default function CrosswordGame() {
           <div className="crossword-hint-line">{hintLine}</div>
         </div>
 
-        <div className="crossword-panel crossword-clue-panel">
+        <div className={"crossword-panel crossword-clue-panel" + (locked ? " is-locked" : "")}>
           <div className="crossword-clue-title">Across</div>
           <div className="crossword-clue-group">
             {puzzle.words
               .filter((w) => w.dir === "A")
               .sort((a, b) => a.n - b.n)
-              .map((w) => (
-                <ClueButton key={`A-${w.n}-${w.row}-${w.col}`} word={w} activeWord={activeWord} letters={state.letters} onSelect={selectWord} />
+              .map((w, i) => (
+                <ClueButton
+                  key={`A-${w.n}-${w.row}-${w.col}`}
+                  word={w}
+                  activeWord={activeWord}
+                  letters={state.letters}
+                  onSelect={selectWord}
+                  locked={locked}
+                  isPreview={i === 0}
+                />
               ))}
           </div>
           <div className="crossword-clue-title">Down</div>
@@ -401,23 +461,42 @@ export default function CrosswordGame() {
               .filter((w) => w.dir === "D")
               .sort((a, b) => a.n - b.n)
               .map((w) => (
-                <ClueButton key={`D-${w.n}-${w.row}-${w.col}`} word={w} activeWord={activeWord} letters={state.letters} onSelect={selectWord} />
+                <ClueButton
+                  key={`D-${w.n}-${w.row}-${w.col}`}
+                  word={w}
+                  activeWord={activeWord}
+                  letters={state.letters}
+                  onSelect={selectWord}
+                  locked={locked}
+                />
               ))}
           </div>
+
+          {locked && (
+            <div className="crossword-start-overlay">
+              <button type="button" className="crossword-btn crossword-btn--primary crossword-start-btn" onClick={handleStart}>
+                Start
+              </button>
+              <div className="crossword-start-copy">Reveal every clue &amp; start the clock</div>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
 }
 
-function ClueButton({ word, activeWord, letters, onSelect }) {
+function ClueButton({ word, activeWord, letters, onSelect, locked, isPreview = false }) {
   const solved = isWordSolved(word, letters);
   const isActive = activeWord && activeWord.n === word.n && activeWord.dir === word.dir;
+  const blurred = locked && !isPreview;
   return (
     <button
       type="button"
-      className={"crossword-clue-btn" + (isActive ? " is-active" : "")}
+      className={"crossword-clue-btn" + (isActive ? " is-active" : "") + (blurred ? " is-blurred" : "")}
       onClick={() => onSelect(word)}
+      disabled={locked}
+      tabIndex={blurred ? -1 : 0}
     >
       <span className={"crossword-clue-num" + (solved ? " is-solved" : "")}>{word.n}</span>
       <span className={"crossword-clue-text" + (solved ? " is-solved" : "")}>

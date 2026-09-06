@@ -20,6 +20,14 @@
   --sage-bg: #e7f0ec;
   --sage-bg-strong: #eef5f0;
   --sand: #e4c5af;
+  /* "Solved"/"correct" bg+text pairing, shared by Crosswords' solved
+     cells and Guess the Country's correct keys. Its own tokens rather
+     than reusing --sage-light/--accent-deep directly: those two collapse
+     to the same color in dark mode (see below), which made solved
+     letters disappear into their own background. */
+  --crossword-solved-bg: #9ece9a;
+  --crossword-solved-border: #74a57f;
+  --crossword-solved-text: #074f57;
   --accent-ink: #ffffff;
   --highlight: #077187;
   --highlight-ink: #ffffff;
@@ -77,6 +85,9 @@
     --sage-bg: #24413c;
     --sage-bg-strong: #2c4c46;
     --sand: #c79c82;
+    --crossword-solved-bg: #2f5240;
+    --crossword-solved-border: #9ece9a;
+    --crossword-solved-text: #eaf4f3;
     --accent-ink: #0c1f22;
     --highlight: #3fb6c2;
     --highlight-ink: #0c1f22;
@@ -2236,6 +2247,8 @@ path.country.is-dimmed {
      (and not tinted in dark mode); scoped here alongside the other
      crossword-only tints instead of hardcoding it in the component. */
   --crossword-cell-border: #dce7e3;
+  /* --crossword-solved-bg/border/text are defined on :root (see top of
+     this file) — shared with Guess the Country's "correct key" state. */
   /* 28px top matches .app-hero's margin-top, so this page's title sits at
      the same height as every other page's. */
   padding: 28px clamp(16px, 4vw, 40px) 56px;
@@ -2323,6 +2336,7 @@ path.country.is-dimmed {
   flex-wrap: nowrap;
   overflow-x: auto;
   margin-bottom: 22px;
+  padding-top: 4px;
   padding-bottom: 4px;
 }
 
@@ -2402,6 +2416,7 @@ path.country.is-dimmed {
 
 .crossword-clue-panel {
   padding: 20px 18px 24px;
+  position: relative;
 }
 
 .crossword-toolbar {
@@ -2479,6 +2494,17 @@ path.country.is-dimmed {
   background: var(--accent-deep);
 }
 
+.crossword-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.crossword-btn:disabled:hover {
+  background: var(--surface);
+}
+
 /* --- Board --- */
 .crossword-board-wrap {
   position: relative;
@@ -2512,6 +2538,11 @@ path.country.is-dimmed {
   padding: 0;
   caret-color: transparent;
   transition: background 0.18s, border-color 0.18s, box-shadow 0.18s, transform 0.18s;
+}
+
+.crossword-cellwrap input:disabled {
+  cursor: default;
+  opacity: 0.5;
 }
 
 .crossword-cellnum {
@@ -2645,6 +2676,43 @@ path.country.is-dimmed {
 
 .crossword-clue-tick.is-shown {
   opacity: 1;
+}
+
+/* --- Locked state (before Start is pressed) --- */
+.crossword-clue-btn:disabled {
+  cursor: default;
+}
+
+.crossword-clue-btn.is-blurred {
+  filter: blur(5px);
+  opacity: 0.65;
+  user-select: none;
+}
+
+.crossword-start-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px;
+  text-align: center;
+  background: linear-gradient(to bottom, transparent, var(--surface) 62%);
+  border-radius: var(--radius);
+}
+
+.crossword-start-btn {
+  padding: 14px 34px;
+  font-size: 16px;
+}
+
+.crossword-start-copy {
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 600;
+  max-width: 220px;
 }
 
 /* ============================================================
@@ -3181,7 +3249,7 @@ path.country.is-dimmed {
 }
 
 .guess-country-panel {
-  max-width: 640px;
+  max-width: 860px;
   margin: 0 auto;
   background: var(--surface);
   border: 2px solid var(--border);
@@ -3190,24 +3258,65 @@ path.country.is-dimmed {
   padding: 26px clamp(18px, 4vw, 34px) 30px;
 }
 
-.guess-country-lives-row {
+/* Board (silhouette + keyboard) on the left, hint/skip/next buttons
+   collected into their own right-hand rail instead of wrapping in a
+   centered row below the keyboard — makes use of the extra width above
+   and keeps the primary "Next country" action in a fixed, predictable
+   spot. */
+.guess-country-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 230px;
+  gap: 28px;
+  align-items: stretch;
+}
+
+@media (max-width: 860px) {
+  .guess-country-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.guess-country-board {
+  min-width: 0;
+}
+
+.guess-country-actions {
   display: flex;
-  justify-content: center;
-  gap: 8px;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.guess-country-actions__title {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 2px;
+}
+
+.guess-country-actions .guess-country-pbtn {
+  width: 100%;
+  text-align: center;
+}
+
+/* Pins "Next country" to the bottom of the rail so it lines up with
+   wherever the board column ends up being tallest. */
+.guess-country-actions__next {
+  margin-top: auto;
+}
+
+/* Reuses .crossword-pills/.crossword-pill as-is (see Crosswords, above)
+   for the round-progress row that replaced the life dots — just
+   recentered to match where the life row used to sit. */
+.guess-country-pills {
+  justify-content: flex-start;
+  margin-bottom: 8px;
+}
+
+.guess-country-board .crossword-progress-copy {
   margin-bottom: 14px;
-}
-
-.guess-country-life {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background: var(--sage);
-  transition: background 0.2s, transform 0.2s;
-}
-
-.guess-country-life.is-lost {
-  background: var(--border);
-  transform: scale(0.8);
 }
 
 .guess-country-silhouette-wrap {
@@ -3357,9 +3466,9 @@ path.country.is-dimmed {
 }
 
 .guess-country-key.is-correct {
-  background: var(--sage-light);
-  border-color: var(--sage);
-  color: var(--accent-deep);
+  background: var(--crossword-solved-bg);
+  border-color: var(--crossword-solved-border);
+  color: var(--crossword-solved-text);
 }
 
 .guess-country-key.is-wrong {
@@ -3375,13 +3484,6 @@ path.country.is-dimmed {
     height: 32px;
     font-size: 11px;
   }
-}
-
-.guess-country-btn-row {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  flex-wrap: wrap;
 }
 
 .guess-country-pbtn {
@@ -3714,26 +3816,21 @@ path.country.is-dimmed {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  overflow: hidden;
-  display: flex;
-  justify-content: center;
-  padding: 12px;
+  padding: 20px;
 }
 
-/* Capped so the whole container country is visible without scrolling —
-   bounded by both viewport height (short/wide windows) and an absolute
-   ceiling (very tall windows), not just the column width. The board is
-   always a 1:1 square (see CANVAS_SIZE's viewBox), so one cap keeps both
-   dimensions in check. */
+/* Same idea as .guess-country-silhouette-wrap: just centers whatever
+   size the SVG ends up being (see AreaFillCanvas's MAX_WIDTH/MAX_HEIGHT)
+   — the country's own shape sets the footprint, this doesn't stretch it. */
+.area-fill-canvas__svg-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 180px;
+}
+
 .area-fill-canvas__svg {
   display: block;
-  width: 100%;
-  height: auto;
-  max-width: min(520px, 56vh);
-}
-
-.area-fill-canvas__bg {
-  fill: var(--bg);
 }
 
 .area-fill-canvas__target {

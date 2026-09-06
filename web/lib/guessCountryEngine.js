@@ -3,8 +3,18 @@
 // crosswordEngine.js: small, testable functions the component calls
 // straight from render/handlers.
 
-export const MAX_LIVES = 5;
 export const TOTAL_ROUNDS = 10;
+
+// Same "protect your score" framing as Crosswords: the whole ten-round
+// game starts at a par value and only loses points from there — winning a
+// round doesn't add anything back, it just means that round cost nothing.
+export const GUESS_START_SCORE = 1000;
+
+// Hints cost points instead of lives: continent/capital hints are a small
+// nudge, revealing a whole letter is worth more so it stays a real choice
+// rather than a free way to grind out the answer.
+export const HINT_PENALTY = 15;
+export const REVEAL_LETTER_PENALTY = 25;
 
 export const GUESS_CONFETTI_COLORS = [
   "#74A57F",
@@ -45,9 +55,4 @@ export function letterCells(name) {
 // True once every non-space character in `name` has been guessed.
 export function isNameGuessed(name, guessedSet) {
   return letterCells(name).every((ch) => ch === " " || guessedSet.has(ch));
-}
-
-// Points awarded for a round win: fewer wrong guesses -> more points, floor of 1.
-export function roundScore(wrongCount) {
-  return Math.max(1, MAX_LIVES - wrongCount);
 }
