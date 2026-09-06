@@ -5,20 +5,24 @@
 
 const SIMILAR_THRESHOLD = 1.05; // below this ratio, countries are considered "similar"
 
-function formatMultiplier(ratio) {
+export function formatMultiplier(ratio) {
   if (!Number.isFinite(ratio) || ratio < SIMILAR_THRESHOLD) return null;
   const decimals = ratio < 10 ? 1 : 0;
   return `${ratio.toFixed(decimals)}×`;
 }
 
 // Sentence per statistic type: "area" reads as size ("bigger/smaller"),
-// everything else reads as a quantity ("has N× more <indicator>").
+// everything else reads as a quantity ("has N× more <indicator>"). Some
+// World Bank names already end in a period (e.g. "Korea, Rep.", "Egypt,
+// Arab Rep.") — the final `.endsWith` check avoids a jarring double
+// period ("...Korea, Rep..") for those instead of always appending one.
 function sentenceFor(statKey, label, referenceName, subjectName, mult) {
-  if (!mult) return `${referenceName} and ${subjectName} have a similar ${label.toLowerCase()}.`;
-  if (statKey === "area_km2") {
-    return `${referenceName} is ${mult} bigger than ${subjectName} in area.`;
-  }
-  return `${referenceName} has ${mult} more ${label.toLowerCase()} than ${subjectName}.`;
+  const body = !mult
+    ? `${referenceName} and ${subjectName} have a similar ${label.toLowerCase()}`
+    : statKey === "area_km2"
+      ? `${referenceName} is ${mult} bigger than ${subjectName} in area`
+      : `${referenceName} has ${mult} more ${label.toLowerCase()} than ${subjectName}`;
+  return body.endsWith(".") ? body : `${body}.`;
 }
 
 // Returns [{ key, text }] comparing each country against the one with the

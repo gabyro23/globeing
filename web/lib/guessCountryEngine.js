@@ -16,6 +16,10 @@ export const GUESS_START_SCORE = 1000;
 export const HINT_PENALTY = 15;
 export const REVEAL_LETTER_PENALTY = 25;
 
+// Bailing on a round costs the most of all — it's the one action that
+// guarantees you won't solve it, so it should sting more than any hint.
+export const SKIP_PENALTY = 100;
+
 export const GUESS_CONFETTI_COLORS = [
   "#74A57F",
   "#9ECE9A",

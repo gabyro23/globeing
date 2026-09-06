@@ -2450,6 +2450,13 @@ path.country.is-dimmed {
   background: var(--accent);
 }
 
+/* Guess the Country only: a round that was skipped/lost instead of
+   solved — same "wrong" sand tone used elsewhere on the site, so it
+   never reads as a green "done" pill. */
+.crossword-pill.is-skipped {
+  background: var(--sand);
+}
+
 .crossword-progress-copy {
   font-size: 13px;
   color: var(--muted);
@@ -4101,4 +4108,276 @@ path.country.is-dimmed {
   background: var(--sage-bg-strong);
   border-color: var(--sage-light);
   color: var(--accent-deep);
+}
+
+/* ============================================================
+   /country/[slug] — country profile pages
+   Style guide tokens only (--surface/--border/--radius/--shadow/etc.)
+   so these follow dark mode automatically, same as the rest of the app.
+   ============================================================ */
+
+.country-breadcrumb {
+  padding: var(--space-3) clamp(16px, 4vw, 40px) 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.country-breadcrumb a {
+  color: var(--muted);
+}
+.country-breadcrumb a:hover {
+  color: var(--accent);
+}
+
+.country-hero {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 20px;
+}
+.country-hero__flag {
+  font-size: 64px;
+  line-height: 1;
+}
+.country-hero__official {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 2px 0 10px;
+}
+.country-hero__meta {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 10px;
+}
+
+.country-section {
+  margin: var(--space-6) clamp(16px, 4vw, 40px) 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+  box-shadow: var(--shadow);
+}
+.country-section__title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0 0 var(--space-2);
+}
+
+.country-quickfacts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-2) var(--space-3);
+  margin: 0;
+}
+.country-quickfacts > div {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--divider);
+}
+.country-quickfacts dt {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin: 0 0 4px;
+}
+.country-quickfacts dd {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.country-section--pictogram {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.country-rank-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.country-rank-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--bg);
+}
+.country-rank-item__label {
+  font-weight: 600;
+  flex: 1 1 160px;
+}
+.country-rank-item__value {
+  font-weight: 800;
+  color: var(--accent-deep);
+}
+.country-rank-item__link {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.country-rank-item__link:hover {
+  color: var(--accent-deep);
+}
+
+.country-comparisons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-2);
+}
+.country-comparison-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  text-decoration: none;
+  color: inherit;
+  background: var(--bg);
+  transition: border-color 0.15s ease;
+}
+.country-comparison-card:hover {
+  border-color: var(--accent);
+}
+.country-comparison-card__flags {
+  font-size: 24px;
+}
+.country-comparison-card__title {
+  font-weight: 700;
+  font-size: 14px;
+}
+.country-comparison-card__stat {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.country-neighbors-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+.country-neighbor-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-chip);
+  text-decoration: none;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  background: var(--bg);
+}
+.country-neighbor-card:hover {
+  border-color: var(--accent);
+  color: var(--accent-deep);
+}
+.country-neighbor-card span:first-child {
+  font-size: 18px;
+}
+
+.country-faq {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.country-faq-item__question {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+.country-faq-item__answer {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.country-cta {
+  margin: var(--space-6) clamp(16px, 4vw, 40px) 0;
+  padding: var(--space-4);
+  border-radius: var(--radius);
+  background: var(--accent-deep);
+  color: #fff;
+  text-align: center;
+}
+.country-cta__title {
+  font-size: 24px;
+  font-weight: 800;
+  margin: 0 0 8px;
+}
+.country-cta__subtitle {
+  font-size: 15px;
+  opacity: 0.85;
+  margin: 0 0 18px;
+}
+.country-cta__button {
+  display: inline-block;
+  background: #fff;
+  color: var(--accent-deep);
+  font-weight: 700;
+  padding: 12px 22px;
+  border-radius: var(--radius-control);
+  text-decoration: none;
+}
+.country-cta__button:hover {
+  background: var(--sand);
+}
+
+.country-source-note {
+  text-align: center;
+  font-size: 12px;
+  color: var(--muted);
+  margin: var(--space-4) clamp(16px, 4vw, 40px) var(--space-6);
+}
+
+.country-hero-pictogram__loading {
+  width: 340px;
+  max-width: 100%;
+  border-radius: var(--radius);
+}
+
+/* /country hub */
+.country-index-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-2);
+  margin: var(--space-4) clamp(16px, 4vw, 40px) var(--space-6);
+}
+.country-index-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: var(--space-2);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease;
+}
+.country-index-card:hover {
+  border-color: var(--accent);
+}
+.country-index-card__flag {
+  font-size: 32px;
+}
+.country-index-card__name {
+  font-weight: 700;
+  font-size: 16px;
+}
+.country-index-card__stats {
+  font-size: 13px;
+  color: var(--muted);
 }

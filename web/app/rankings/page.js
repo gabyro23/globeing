@@ -15,10 +15,23 @@ const REGION_ORDER = ["Africa", "Americas", "Asia", "Europe", "Oceania", "Other"
 // list — all sorted by that indicator. A continent filter narrows all
 // three tables at once. The "all countries" table also has its own search
 // box to filter by name without losing the overall rank.
+// Deep-link support: /rankings?indicator=population preselects that tab,
+// so a link like "See full ranking" from a /country/[slug] page opens
+// straight to the relevant table instead of the default one. Read once
+// as the initial state rather than in an effect: the loading skeleton
+// (rendered on the server, and on the client before /api/countries
+// resolves) shows the same placeholder tabs regardless of selectedKey,
+// so there's nothing for this to mismatch during hydration.
+function initialIndicatorKeyFromUrl() {
+  if (typeof window === "undefined") return INDICATORS[0].key;
+  const requested = new URLSearchParams(window.location.search).get("indicator");
+  return requested && INDICATORS.some((ind) => ind.key === requested) ? requested : INDICATORS[0].key;
+}
+
 export default function RankingsPage() {
   const [countries, setCountries] = useState([]);
   const [error, setError] = useState(null);
-  const [selectedKey, setSelectedKey] = useState(INDICATORS[0].key);
+  const [selectedKey, setSelectedKey] = useState(initialIndicatorKeyFromUrl);
   const [regionFilter, setRegionFilter] = useState("All");
   const [allSearch, setAllSearch] = useState("");
 

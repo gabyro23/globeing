@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import * as d3 from "d3";
 import { buildLiquidFill } from "../lib/liquidFill";
+import { mainLandmassFeature } from "../lib/mainLandmass";
 
 // Same normalization "Guess the country" uses for its silhouettes:
 // project into a generous reference box, then let the actual rendered
@@ -26,20 +27,30 @@ const MAX_HEIGHT = 300;
 // is never a reprojection of the poured countries onto the container —
 // just their combined amount of area, rising inside it.
 export default function AreaFillCanvas({ targetCountry, targetFeature, filledFraction }) {
+  // Drop far-off overseas exclaves (mainland France + French Guiana is
+  // the textbook case) before doing anything else with the geometry —
+  // otherwise they blow out the bounding box and drag the projection's
+  // center out into open ocean, shrinking the actual shape we care about
+  // into a corner. See lib/mainLandmass.js.
+  const mainFeature = useMemo(
+    () => (targetFeature ? mainLandmassFeature(targetFeature) : null),
+    [targetFeature]
+  );
+
   const projection = useMemo(() => {
-    if (!targetFeature) return null;
-    const centroid = d3.geoCentroid(targetFeature);
+    if (!mainFeature) return null;
+    const centroid = d3.geoCentroid(mainFeature);
     return d3
       .geoAzimuthalEqualArea()
       .rotate([-centroid[0], -centroid[1]])
-      .fitSize([REFERENCE_BOX, REFERENCE_BOX], targetFeature);
-  }, [targetFeature]);
+      .fitSize([REFERENCE_BOX, REFERENCE_BOX], mainFeature);
+  }, [mainFeature]);
 
   const outline = useMemo(() => {
-    if (!targetFeature || !projection) return null;
+    if (!mainFeature || !projection) return null;
     const pathGenerator = d3.geoPath(projection);
-    const pathD = pathGenerator(targetFeature);
-    const bounds = pathGenerator.bounds(targetFeature);
+    const pathD = pathGenerator(mainFeature);
+    const bounds = pathGenerator.bounds(mainFeature);
     if (!pathD || !bounds) return null;
     const [[x0, y0], [x1, y1]] = bounds;
     return {
@@ -48,12 +59,12 @@ export default function AreaFillCanvas({ targetCountry, targetFeature, filledFra
       width: x1 - x0 + PAD * 2,
       height: y1 - y0 + PAD * 2,
     };
-  }, [targetFeature, projection]);
+  }, [mainFeature, projection]);
 
   const liquid = useMemo(() => {
-    if (!targetFeature || !projection) return null;
-    return buildLiquidFill(targetFeature, projection);
-  }, [targetFeature, projection]);
+    if (!mainFeature || !projection) return null;
+    return buildLiquidFill(mainFeature, projection);
+  }, [mainFeature, projection]);
 
   const waterPathD = useMemo(() => {
     if (!liquid) return null;

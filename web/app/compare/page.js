@@ -17,11 +17,29 @@ function applyFilters(countries, filters) {
   return [...filtered].sort((a, b) => a.name.localeCompare(b.name));
 }
 
+// Deep-link support: /compare?countries=JPN,KOR preselects those
+// countries so a link like "Compare Japan vs South Korea" (e.g. from a
+// /country/[slug] page) opens the comparator ready to go instead of
+// making the visitor search for both countries again. Read once as the
+// initial state (not in an effect) — this only ever affects the render
+// that happens *after* /api/countries has loaded (the loading skeleton
+// that renders first, on the server and on the client, doesn't reference
+// compareAlpha3 at all), so there's no hydration mismatch to worry about.
+// Anything invalid/unknown in the URL is silently dropped downstream
+// wherever compareAlpha3 is resolved through byAlpha3.get(...).filter(Boolean).
+function initialCompareAlpha3FromUrl() {
+  if (typeof window === "undefined") return [];
+  const raw = new URLSearchParams(window.location.search).get("countries");
+  if (!raw) return [];
+  const codes = [...new Set(raw.split(",").map((code) => code.trim().toUpperCase()).filter(Boolean))];
+  return codes.slice(0, MAX_COMPARE);
+}
+
 export default function ComparePage() {
   const [countries, setCountries] = useState([]);
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState({ search: "" });
-  const [compareAlpha3, setCompareAlpha3] = useState([]);
+  const [compareAlpha3, setCompareAlpha3] = useState(initialCompareAlpha3FromUrl);
   const [compareModalOpen, setCompareModalOpen] = useState(false);
 
   useEffect(() => {

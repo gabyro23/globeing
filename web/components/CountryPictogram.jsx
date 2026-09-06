@@ -14,6 +14,7 @@ import {
 import { POSES, POSE_NAMES, BAG, renderPrimitives } from "../lib/pictogramIcons";
 import { formatArea, formatPopulation, formatIndicatorValue } from "../lib/format";
 import { INDICATORS } from "../lib/indicators";
+import { mainLandmassFeature } from "../lib/mainLandmass";
 
 const EXTRUSION_STEPS = 10; // thin stacked layers that build the silhouette's 3D "edge"
 
@@ -49,22 +50,30 @@ export default function CountryPictogram({
   const layout = useMemo(() => {
     if (!feature) return null;
 
+    // Drop far-off overseas exclaves (mainland France + French Guiana,
+    // ~7,000km apart, is the textbook case) before projecting — left in,
+    // they blow out the bounding box and drag the projection's center
+    // out into open ocean. See lib/mainLandmass.js. The icon sampling
+    // below uses this same cleaned geometry, so the personitas land
+    // inside the shape that's actually drawn.
+    const mainFeature = mainLandmassFeature(feature);
+
     const targetBoxPx = boxSize; // same canvas size for every country
     const depth = pictogramExtrusionDepth(targetBoxPx); // thickness of the 3D edge
     const viewPad = pictogramViewPad(targetBoxPx); // leaves room for the edge + soft shadow
 
-    const centroid = d3.geoCentroid(feature);
+    const centroid = d3.geoCentroid(mainFeature);
     const projection = d3
       .geoAzimuthalEqualArea()
       .rotate([-centroid[0], -centroid[1]])
-      .fitSize([targetBoxPx, targetBoxPx], feature);
+      .fitSize([targetBoxPx, targetBoxPx], mainFeature);
     const pathGenerator = d3.geoPath(projection);
-    const pathD = pathGenerator(feature);
-    const bounds = pathGenerator.bounds(feature);
+    const pathD = pathGenerator(mainFeature);
+    const bounds = pathGenerator.bounds(mainFeature);
     if (!pathD || !bounds) return null;
 
     const [[x0, y0], [x1, y1]] = bounds;
-    const polygons = extractPolygons(feature.geometry, projection);
+    const polygons = extractPolygons(mainFeature.geometry, projection);
     const iconCount = iconCountForValue(metricValue, iconValue);
     const points = samplePictogramPoints({
       polygons,

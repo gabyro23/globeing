@@ -8,6 +8,7 @@ import {
   GUESS_START_SCORE,
   HINT_PENALTY,
   REVEAL_LETTER_PENALTY,
+  SKIP_PENALTY,
   QWERTY_ROWS,
   GUESS_CONFETTI_COLORS,
   pickRoundOrder,
@@ -31,6 +32,7 @@ function initialGameState() {
     score: GUESS_START_SCORE,
     seconds: 0,
     correctCount: 0,
+    roundResults: {}, // { [roundIndex]: true | false } — true only for an actual win
   };
 }
 
@@ -85,6 +87,7 @@ export default function GuessCountryGame() {
         ...next,
         roundOver: true,
         correctCount: next.correctCount + 1,
+        roundResults: { ...next.roundResults, [next.roundIndex]: true },
       });
       setToast({ id: `${current.name}-${next.roundIndex}-win`, text: `Correct! ${current.flag} ${current.name}` });
     } else {
@@ -123,7 +126,12 @@ export default function GuessCountryGame() {
 
   function skipRound() {
     if (!current || state.roundOver || state.finished) return;
-    setState((s) => ({ ...s, roundOver: true }));
+    setState((s) => ({
+      ...s,
+      roundOver: true,
+      score: Math.max(0, s.score - SKIP_PENALTY),
+      roundResults: { ...s.roundResults, [s.roundIndex]: false },
+    }));
   }
 
   function nextRound() {
@@ -227,14 +235,17 @@ export default function GuessCountryGame() {
           <div className="guess-country-layout">
           <div className="guess-country-board">
             <div className="crossword-pills guess-country-pills">
-              {state.order.map((_, i) => (
-                <div
-                  key={i}
-                  className={
-                    "crossword-pill" + (i < state.roundIndex ? (i === state.roundIndex - 1 ? " is-last" : " is-done") : "")
-                  }
-                />
-              ))}
+              {state.order.map((_, i) => {
+                const modifier =
+                  i >= state.roundIndex
+                    ? ""
+                    : state.roundResults[i]
+                      ? i === state.roundIndex - 1
+                        ? " is-last"
+                        : " is-done"
+                      : " is-skipped";
+                return <div key={i} className={"crossword-pill" + modifier} />;
+              })}
             </div>
             <div className="crossword-progress-copy">{progressCopy}</div>
 
@@ -366,7 +377,7 @@ export default function GuessCountryGame() {
               disabled={state.roundOver}
               onClick={skipRound}
             >
-              Skip
+              {`Skip (−${SKIP_PENALTY} pts)`}
             </button>
             <button
               type="button"

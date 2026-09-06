@@ -22,6 +22,7 @@ export default function SiteFooter() {
           <span className="site-footer__nav-title">Explore</span>
           <Link href="/compare">Compare</Link>
           <Link href="/rankings">Rankings</Link>
+          <Link href="/country">Countries</Link>
           <Link href="/random-facts">Random Facts</Link>
           <Link href="/crosswords">Crosswords</Link>
         </nav>

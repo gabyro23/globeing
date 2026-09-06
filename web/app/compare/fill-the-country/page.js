@@ -59,6 +59,16 @@ export default function FillTheCountryPage() {
     () => [...countries].sort((a, b) => a.name.localeCompare(b.name)),
     [countries]
   );
+  // The container needs an actual outline to pour into: some rows in the
+  // countries table (small dependencies, disputed territories) don't have
+  // a matching shape in the world atlas, so they'd break the map if
+  // picked as the container. Filter them out of that picker specifically
+  // — while featureMap is still loading, fall back to the full list so
+  // the dropdown isn't empty for a moment.
+  const containerOptions = useMemo(() => {
+    if (!featureMap) return sortedCountries;
+    return sortedCountries.filter((c) => featureMap.has(c.iso3));
+  }, [sortedCountries, featureMap]);
   const targetCountry = countriesByIso3.get(targetIso3) || null;
   const targetFeature = featureMap && targetCountry ? featureMap.get(targetCountry.iso3) : null;
 
@@ -141,7 +151,7 @@ export default function FillTheCountryPage() {
                   value={targetIso3}
                   onChange={(e) => handleSelectTarget(e.target.value)}
                 >
-                  {sortedCountries.map((c) => (
+                  {containerOptions.map((c) => (
                     <option key={c.iso3} value={c.iso3}>
                       {c.flag} {c.name}
                     </option>
