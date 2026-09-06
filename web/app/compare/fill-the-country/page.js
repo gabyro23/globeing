@@ -132,20 +132,22 @@ export default function FillTheCountryPage() {
 
       {!loading && !error && (
         <div className="area-fill-layout">
-          <div className="area-fill-main">
-            <div className="area-fill-target-picker">
-              <label htmlFor="area-fill-target">Container country</label>
-              <select
-                id="area-fill-target"
-                value={targetIso3}
-                onChange={(e) => handleSelectTarget(e.target.value)}
-              >
-                {sortedCountries.map((c) => (
-                  <option key={c.iso3} value={c.iso3}>
-                    {c.flag} {c.name}
-                  </option>
-                ))}
-              </select>
+          <div className="area-fill-panel">
+            <div className="area-fill-panel__section area-fill-panel__section--header">
+              <div className="area-fill-target-picker">
+                <label htmlFor="area-fill-target">Container country</label>
+                <select
+                  id="area-fill-target"
+                  value={targetIso3}
+                  onChange={(e) => handleSelectTarget(e.target.value)}
+                >
+                  {sortedCountries.map((c) => (
+                    <option key={c.iso3} value={c.iso3}>
+                      {c.flag} {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <button
                 type="button"
                 className="btn-text"
@@ -157,80 +159,87 @@ export default function FillTheCountryPage() {
             </div>
 
             {targetCountry && (
-              <div className="area-fill-progress">
-                <div className="area-fill-progress__row">
-                  <span className="area-fill-progress__label">
-                    Filled: {Math.round(percent)}% of {targetCountry.name}
-                  </span>
-                  <span className="area-fill-progress__value">
-                    {formatAreaCompact(totalPouredArea)} / {formatArea(targetCountry.area_km2)}
-                  </span>
+              <div className="area-fill-panel__section">
+                <div className="area-fill-progress">
+                  <div className="area-fill-progress__row">
+                    <span className="area-fill-progress__label">
+                      Filled: {Math.round(percent)}% of {targetCountry.name}
+                    </span>
+                    <span className="area-fill-progress__value">
+                      {formatAreaCompact(totalPouredArea)} / {formatArea(targetCountry.area_km2)}
+                    </span>
+                  </div>
+                  <div className="area-fill-progress__bar">
+                    <div
+                      className={"area-fill-progress__fill" + (isComplete ? " is-complete" : "")}
+                      style={{ width: `${Math.min(percent, 100)}%` }}
+                    />
+                  </div>
+                  {isComplete && (
+                    <p className="area-fill-progress__note">
+                      🎉 That&apos;s the whole surface of {targetCountry.name} — full to the brim!
+                      Keep pouring or try another country.
+                    </p>
+                  )}
                 </div>
-                <div className="area-fill-progress__bar">
-                  <div
-                    className={"area-fill-progress__fill" + (isComplete ? " is-complete" : "")}
-                    style={{ width: `${Math.min(percent, 100)}%` }}
-                  />
+              </div>
+            )}
+
+            <div className="area-fill-panel__section area-fill-panel__section--map">
+              {mapError && (
+                <div className="status status--error">
+                  <span>Couldn&apos;t load the outline: {mapError}</span>
                 </div>
-                {isComplete && (
-                  <p className="area-fill-progress__note">
-                    🎉 That&apos;s the whole surface of {targetCountry.name} — full to the brim! Keep
-                    pouring or try another country.
-                  </p>
-                )}
-              </div>
-            )}
+              )}
 
-            {mapError && (
-              <div className="status status--error">
-                <span>Couldn&apos;t load the outline: {mapError}</span>
-              </div>
-            )}
+              {mapLoading && !mapError && (
+                <div className="status">
+                  <span className="status__spinner" aria-hidden="true" />
+                  <span>Loading outline…</span>
+                </div>
+              )}
 
-            {mapLoading && !mapError && (
-              <div className="status">
-                <span className="status__spinner" aria-hidden="true" />
-                <span>Loading outline…</span>
-              </div>
-            )}
+              {!mapLoading && !mapError && targetCountry && (
+                <AreaFillCanvas
+                  targetCountry={targetCountry}
+                  targetFeature={targetFeature}
+                  filledFraction={fraction}
+                />
+              )}
+            </div>
 
-            {!mapLoading && !mapError && targetCountry && (
-              <AreaFillCanvas
-                targetCountry={targetCountry}
-                targetFeature={targetFeature}
-                filledFraction={fraction}
-              />
-            )}
-
-            <div className="area-fill-used">
-              <h2 className="area-fill-used__title">Poured in ({pouredItems.length})</h2>
-              <div className="compare-zone__chips">
-                {pouredItems.length === 0 ? (
-                  <span className="compare-zone__placeholder">
-                    Nothing poured in yet — tap a country from the list.
-                  </span>
-                ) : (
-                  pouredItems.map((item) => {
-                    const c = countriesByIso3.get(item.iso3);
-                    if (!c) return null;
-                    return (
-                      <div key={item.id} className="compare-chip">
-                        <span>
-                          {c.flag} {c.name} · {formatAreaCompact(c.area_km2)}
-                        </span>
-                        <button
-                          type="button"
-                          className="compare-chip__remove"
-                          aria-label={`Remove ${c.name}`}
-                          onClick={() => removePoured(item.id)}
-                        >
-                          ×
-                        </button>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
+            <div className="area-fill-panel__section area-fill-panel__section--inside">
+              <h2 className="area-fill-inside-title">Poured in ({pouredItems.length})</h2>
+              {pouredItems.length === 0 ? (
+                <span className="area-fill-inside__empty">
+                  Nothing poured in yet — tap a country from the list.
+                </span>
+              ) : (
+                pouredItems.map((item) => {
+                  const c = countriesByIso3.get(item.iso3);
+                  if (!c) return null;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      className="area-fill-inside-chip"
+                      aria-label={`Remove ${c.name} from the container`}
+                      onClick={() => removePoured(item.id)}
+                    >
+                      <span className="area-fill-inside-chip__flag" aria-hidden="true">
+                        {c.flag}
+                      </span>
+                      <span className="area-fill-inside-chip__name">{c.name}</span>
+                      <span className="area-fill-inside-chip__area">
+                        {formatAreaCompact(c.area_km2)}
+                      </span>
+                      <span className="area-fill-inside-chip__remove" aria-hidden="true">
+                        ✕
+                      </span>
+                    </button>
+                  );
+                })
+              )}
             </div>
           </div>
 
