@@ -76,6 +76,32 @@ function nearestBy(countries, pool, key, iso3, exclude) {
   });
 }
 
+// Builds this country's profile (official name, currency, languages) by
+// preferring whatever's in its Supabase row (official_name, currency_name,
+// currency_code, currency_symbol, languages — see
+// docs/data/add_country_profile_columns.sql) and falling back, field by
+// field, to the hand-typed entry in lib/countryProfiles.js. That fallback
+// is what makes this safe to ship before the Supabase columns are
+// populated for every country, and lets a country keep a hand-checked
+// fact even if the bulk-imported data is missing just that one field.
+function buildProfile(country, iso3) {
+  const fallback = profileForIso3(iso3) || {};
+  const officialName = country.official_name || fallback.officialName || null;
+  const currency =
+    country.currency_name && country.currency_code
+      ? { name: country.currency_name, code: country.currency_code, symbol: country.currency_symbol || "" }
+      : fallback.currency || null;
+  const languages = country.languages
+    ? country.languages
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : fallback.languages || [];
+
+  if (!officialName && !currency && languages.length === 0) return null;
+  return { officialName, currency, languages };
+}
+
 export async function getCountryPageData(iso3) {
   const countries = await getAllCountries();
   const country = countries.find((c) => c.iso3 === iso3);
@@ -123,7 +149,7 @@ export async function getCountryPageData(iso3) {
 
   return {
     country,
-    profile: profileForIso3(iso3),
+    profile: buildProfile(country, iso3),
     subregion,
     rankings,
     neighbors,
@@ -141,6 +167,42 @@ export async function getIndexedCountries() {
   return INDEXED_COUNTRY_ISO3.map((iso3) => countries.find((c) => c.iso3 === iso3))
     .filter(Boolean)
     .map((c) => ({ ...c, slug: slugForIso3(c.iso3) }));
+}
+
+// Continent display order for the /country hub's "all countries" directory
+// below the indexed spotlight — alphabetical reads arbitrarily, so we pin
+// a geography-book order instead. Anything without continent metadata in
+// countryTopoIds.json (metaForAlpha3 falls back to "Other") is grouped
+// last rather than dropped, so the hub's country count still matches
+// Supabase's row count.
+const CONTINENT_ORDER = ["Africa", "Americas", "Asia", "Europe", "Oceania", "Other"];
+
+// Every country in Supabase — indexed or not — grouped by continent, for
+// the /country hub's full directory. A country with its own page links
+// there; every other one links to the Compare tool pre-filled with just
+// that country, so nothing on the hub is a dead end while pages are
+// rolled out one at a time (see lib/countryIndex.js).
+export async function getCountriesByContinent() {
+  const countries = await getAllCountries();
+  const sorted = [...countries].sort((a, b) => a.name.localeCompare(b.name));
+
+  const groups = new Map(CONTINENT_ORDER.map((name) => [name, []]));
+  for (const c of sorted) {
+    const continent = groups.has(c.region) ? c.region : "Other";
+    groups.get(continent).push({
+      iso3: c.iso3,
+      name: c.name,
+      flag: c.flag,
+      population: c.population,
+      area_km2: c.area_km2,
+      indexed: isCountryIndexed(c.iso3),
+      slug: isCountryIndexed(c.iso3) ? slugForIso3(c.iso3) : null,
+    });
+  }
+
+  return CONTINENT_ORDER.map((name) => ({ name, countries: groups.get(name) })).filter(
+    (g) => g.countries.length > 0
+  );
 }
 
 export { isCountryIndexed, slugForIso3, iso3ForSlug, flagForCountryName };

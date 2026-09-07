@@ -25,6 +25,7 @@ export default function SiteFooter() {
           <Link href="/country">Countries</Link>
           <Link href="/random-facts">Random Facts</Link>
           <Link href="/crosswords">Crosswords</Link>
+          <Link href="/data-sources">Data Sources</Link>
         </nav>
 
         <div className="site-footer__contact">
@@ -36,7 +37,10 @@ export default function SiteFooter() {
 
       <div className="site-footer__bottom">
         <span>© {new Date().getFullYear()} Globeing.</span>
-        <span>Population, area, and economic data from public sources (World Bank).</span>
+        <span>
+          Population, area, and economic data from public sources (World Bank) ·{" "}
+          <Link href="/data-sources">See all data sources</Link>
+        </span>
       </div>
     </footer>
   );

@@ -10,7 +10,7 @@
 // once a country's page is ready to publish.
 import topoIds from "./countryTopoIds.json";
 
-export const INDEXED_COUNTRY_ISO3 = ["JPN"];
+export const INDEXED_COUNTRY_ISO3 = ["JPN", "BDI"];
 
 // A few countries need a friendlier URL than a straight slugify() of
 // their ISO/World Bank name would give (e.g. "Russian Federation" ->

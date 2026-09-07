@@ -1,4 +1,5 @@
 import { Calistoga } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import SiteHeader from "../components/SiteHeader";
 import SiteFooter from "../components/SiteFooter";
@@ -58,6 +59,18 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`h-full ${calistoga.variable}`}>
       <body className="min-h-full flex flex-col">
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-8S0DXNK24W"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-8S0DXNK24W');
+          `}
+        </Script>
         <SiteHeader />
         <main className="flex-1">{children}</main>
         <SiteFooter />

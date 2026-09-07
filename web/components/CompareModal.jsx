@@ -2,11 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import CountryPictogram from "./CountryPictogram";
-import GdpPerCapitaPictogram from "./GdpPerCapitaPictogram";
+import GdpPerCapitaPictogram, { PERSON_HEIGHT as GDP_PER_CAPITA_PERSON_HEIGHT, bagStackHeight } from "./GdpPerCapitaPictogram";
 import TrueScalePanel from "./TrueScalePanel";
 import { INDICATORS } from "../lib/indicators";
 import { loadWorld, featuresByAlpha3 } from "../lib/worldAtlas";
-import { niceIconValue, pictogramViewPad } from "../lib/pictogram";
+import { niceIconValue, pictogramViewPad, iconCountForValue } from "../lib/pictogram";
 import { buildStatComparisons } from "../lib/compareInsights";
 import { formatNumber, formatIndicatorValue } from "../lib/format";
 
@@ -25,6 +25,12 @@ const BOX_SIZE = 260; // px — size of the largest country in the compared set
 // padding the LARGEST country (the one that sets the scale) needs so its
 // 3D edge and shadow don't get clipped or overlap the badge/title.
 const CANVAS_HEIGHT = BOX_SIZE + pictogramViewPad(BOX_SIZE) * 2;
+
+// .pictogram-canvas's own all-around padding (app/globals.css) — reused
+// here so the GDP-per-capita canvas below is sized to actually fit its
+// (much smaller) content instead of borrowing the silhouette canvas's
+// height and leaving a big gap above the figures.
+const PICTOGRAM_CANVAS_PADDING = 20;
 
 // Indicators bundled into the "Density" view below, so they aren't also
 // offered as their own (imageless) entries in the selector.
@@ -159,6 +165,21 @@ export default function CompareModal({ open, countries, onClose }) {
     [maxGdpPerCapita]
   );
 
+  // Sized to this view's actual content (a person + however many bags the
+  // richest country in the group needs), not to CountryPictogram's much
+  // taller silhouette canvas — see PERSON_HEIGHT/bagStackHeight in
+  // GdpPerCapitaPictogram for why reusing CANVAS_HEIGHT left a big empty
+  // gap above the figures.
+  const gdpPerCapitaCanvasHeight = useMemo(() => {
+    const maxBagCount = Math.max(
+      ...countries.map((c) => iconCountForValue(Number(c.gdp_per_capita_usd) || 0, gdpPerCapitaIconValue)),
+      0
+    );
+    return (
+      Math.max(GDP_PER_CAPITA_PERSON_HEIGHT, bagStackHeight(maxBagCount)) + PICTOGRAM_CANVAS_PADDING * 2
+    );
+  }, [countries, gdpPerCapitaIconValue]);
+
   const comparisonGroups = useMemo(() => {
     return activeView.statKeys
       .map((stat) => ({ ...stat, items: buildStatComparisons(countries, stat.key, stat.label) }))
@@ -280,7 +301,7 @@ export default function CompareModal({ open, countries, onClose }) {
                         key={country.iso3}
                         country={country}
                         iconValue={gdpPerCapitaIconValue}
-                        canvasHeight={CANVAS_HEIGHT}
+                        canvasHeight={gdpPerCapitaCanvasHeight}
                       />
                     ))}
                   </div>

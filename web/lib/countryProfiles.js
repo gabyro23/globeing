@@ -14,6 +14,11 @@ export const COUNTRY_PROFILES = {
     currency: { name: "Japanese yen", code: "JPY", symbol: "¥" },
     languages: ["Japanese"],
   },
+  BDI: {
+    officialName: "Republic of Burundi (Republika y'Uburundi)",
+    currency: { name: "Burundian franc", code: "BIF", symbol: "FBu" },
+    languages: ["Kirundi", "French", "English"],
+  },
 };
 
 export function profileForIso3(iso3) {
