@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import CountryHeroPictogram from "../../../components/CountryHeroPictogram";
+import CountryPageIndex from "../../../components/CountryPageIndex";
 import {
   formatArea,
   formatPopulation,
@@ -62,11 +63,29 @@ export default async function CountryPage({ params }) {
   const data = iso3 ? await getCountryPageData(iso3) : null;
   if (!data) notFound();
 
-  const { country, profile, rankings, neighbors, comparisons, facts, inGuessRoster } = data;
+  const { country, profile, rankings, neighbors, comparisons, facts, outline, inGuessRoster } = data;
   const year = new Date().getFullYear();
   const updatedLabel = new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" });
 
   const faqItems = buildFaqItems({ country, profile, comparisons });
+  const hasArea = Number(country.area_km2) > 0;
+
+  // The page index only links to sections that actually render for this
+  // country — a thin country profile (no rankings, no facts yet) skips
+  // straight from Quick facts to the FAQ instead of linking to an empty
+  // section. It sits below the hero, as a sticky left rail beside the
+  // rest of the content (lib/globals.css .country-layout), highlighting
+  // whichever one is in view (components/CountryPageIndex.jsx).
+  const tocItems = [
+    { id: "quick-facts-heading", label: "Quick facts" },
+    { id: "pictogram-heading", label: "At human scale" },
+    rankings.length > 0 && { id: "rankings-heading", label: "Rank in the world" },
+    comparisons.length > 0 && { id: "comparisons-heading", label: "Compare" },
+    facts.length > 0 && { id: "facts-heading", label: "Facts" },
+    neighbors.length > 0 && { id: "neighbors-heading", label: "Neighbors" },
+    hasArea && { id: "fill-the-country-heading", label: "Fill the country" },
+    { id: "faq-heading", label: "FAQ" },
+  ].filter(Boolean);
 
   const breadcrumbJsonLd = {
     "@context": "https://schema.org",
@@ -102,211 +121,273 @@ export default async function CountryPage({ params }) {
         <span aria-current="page">{country.name}</span>
       </nav>
 
-      <div className="app-hero country-hero">
-        <div className="country-hero__flag" aria-hidden="true">
-          {country.flag}
-        </div>
-        <div>
-          <h1 className="app-hero__title">{country.name}</h1>
-          {profile?.officialName && (
-            <p className="country-hero__official">{profile.officialName}</p>
-          )}
-          <p className="app-hero__subtitle">
-            Population, GDP, and key facts about {country.name} — updated for {year}.
-          </p>
-          <p className="country-hero__meta">
-            Capital: {country.capital || "—"} · Continent: {country.region || "—"}
-          </p>
+      {/* Outline watermark spans the hero AND everything below it (the
+          whole .country-layout), not just the header — see
+          .country-intro-wrap / .country-outline-bg in globals.css. */}
+      <div className="country-intro-wrap">
+        {outline && (
+          <div className="country-outline-sticky" aria-hidden="true">
+            <svg
+              className="country-outline-bg"
+              viewBox={outline.viewBox}
+              preserveAspectRatio="xMaxYMid meet"
+              focusable="false"
+            >
+              <path d={outline.pathD} />
+            </svg>
+          </div>
+        )}
+
+        <div className="country-intro-wrap__content">
+          <div className="country-layout">
+            <div className="app-hero country-hero">
+              <div className="country-hero__flag" aria-hidden="true">
+                {country.flag}
+              </div>
+              <div>
+                <h1 className="app-hero__title">{country.name}</h1>
+                {profile?.officialName && (
+                  <p className="country-hero__official">{profile.officialName}</p>
+                )}
+                <p className="app-hero__subtitle">
+                  Population, GDP, and key facts about {country.name} — updated for {year}.
+                </p>
+                <div className="country-hero__chips">
+                  <span className="country-hero__chip">
+                    Capital · {(country.capital || "—").toUpperCase()}
+                  </span>
+                  <span className="country-hero__chip">
+                    Continent · {(country.region || "—").toUpperCase()}
+                  </span>
+                  <span className="country-hero__chip">ISO · {country.iso3}</span>
+                </div>
+              </div>
+            </div>
+
+            <CountryPageIndex items={tocItems} ariaLabel={`${country.name} page sections`} />
+
+            <div className="country-layout__main">
+              <section className="country-section" aria-labelledby="quick-facts-heading">
+                <h2 id="quick-facts-heading" className="country-section__title">
+                  {country.name} quick facts
+                </h2>
+                <dl className="country-quickfacts">
+                  <div>
+                    <dt>Population</dt>
+                    <dd>{formatPopulation(country.population)}</dd>
+                  </div>
+                  <div>
+                    <dt>Area</dt>
+                    <dd>{formatArea(country.area_km2)}</dd>
+                  </div>
+                  <div>
+                    <dt>Population density</dt>
+                    <dd>{formatIndicatorValue(country.population_density, "people/km²")}</dd>
+                  </div>
+                  <div>
+                    <dt>GDP</dt>
+                    <dd>{formatCompareValue(country.gdp_usd, "US$")}</dd>
+                  </div>
+                  <div>
+                    <dt>GDP per capita</dt>
+                    <dd>{formatIndicatorValue(country.gdp_per_capita_usd, "US$")}</dd>
+                  </div>
+                  <div>
+                    <dt>Capital</dt>
+                    <dd>{country.capital || "—"}</dd>
+                  </div>
+                  {profile?.currency && (
+                    <div>
+                      <dt>Currency</dt>
+                      <dd>
+                        {profile.currency.name} ({profile.currency.symbol}, {profile.currency.code})
+                      </dd>
+                    </div>
+                  )}
+                  {profile?.languages?.length > 0 && (
+                    <div>
+                      <dt>{profile.languages.length > 1 ? "Languages" : "Language"}</dt>
+                      <dd>{profile.languages.join(", ")}</dd>
+                    </div>
+                  )}
+                </dl>
+              </section>
+
+              <section
+                className="country-section country-section--pictogram country-section--plain"
+                aria-labelledby="pictogram-heading"
+              >
+                <h2 id="pictogram-heading" className="country-section__title">
+                  {country.name} at human scale
+                </h2>
+                <CountryHeroPictogram country={country} />
+              </section>
+
+              {rankings.length > 0 && (
+                <section className="country-section country-section--plain" aria-labelledby="rankings-heading">
+                  <h2 id="rankings-heading" className="country-section__title">
+                    Where does {country.name} rank in the world?
+                  </h2>
+                  <ul className="country-rank-list">
+                    {rankings.map((r) => {
+                      // How close to #1 this ranking is, as a fill percentage
+                      // (100% = best in the world, 0% = last place).
+                      const pct =
+                        r.total > 1 ? Math.round((1 - (r.position - 1) / (r.total - 1)) * 100) : 100;
+                      return (
+                        <li key={r.key}>
+                          <Link href={`/rankings?indicator=${r.key}`} className="country-rank-row">
+                            <span className="country-rank-row__label">{r.label}</span>
+                            <span className="country-rank-row__track" aria-hidden="true">
+                              <span className="country-rank-row__fill" style={{ width: `${pct}%` }} />
+                            </span>
+                            <span className="country-rank-row__value">#{r.position}</span>
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </section>
+              )}
+
+              {comparisons.length > 0 && (
+                <section className="country-section country-section--plain" aria-labelledby="comparisons-heading">
+                  <h2 id="comparisons-heading" className="country-section__title">
+                    Compare {country.name} with other countries
+                  </h2>
+                  <div className="country-comparisons">
+                    {comparisons.map((other) => {
+                      const popMult = formatMultiplier(
+                        Math.max(Number(country.population), Number(other.population)) /
+                          Math.max(Math.min(Number(country.population), Number(other.population)), 1)
+                      );
+                      return (
+                        <Link
+                          key={other.iso3}
+                          href={`/compare?countries=${country.iso3},${other.iso3}`}
+                          className="country-comparison-card"
+                        >
+                          <span className="country-comparison-card__flags">
+                            {country.flag} vs {other.flag}
+                          </span>
+                          <span className="country-comparison-card__title">
+                            Compare {country.name} vs {other.name}
+                          </span>
+                          {popMult && (
+                            <span className="country-comparison-card__stat">
+                              {popMult} difference in population
+                            </span>
+                          )}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                  <Link href={`/compare?countries=${country.iso3}`} className="country-compare-cta">
+                    Compare {country.name} with any country →
+                  </Link>
+                </section>
+              )}
+
+              {facts.length > 0 && (
+                <section className="country-section country-section--plain" aria-labelledby="facts-heading">
+                  <h2 id="facts-heading" className="country-section__title">
+                    Everything we know about {country.name}
+                  </h2>
+                  <div className="fact-archive__grid">
+                    {facts.map((f) => (
+                      <article className="fact-card" key={f.day}>
+                        <div className="fact-card__header">
+                          <span className="fact-card__category">{f.category}</span>
+                        </div>
+                        <p className="fact-card__text">{f.fact}</p>
+                        <div className="fact-card__footer">
+                          <span className="fact-card__country">
+                            {flagForCountryName(f.country)} {f.country}
+                          </span>
+                          <a className="fact-card__source" href={f.source.url} target="_blank" rel="noreferrer">
+                            {f.source.name}
+                          </a>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {neighbors.length > 0 && (
+                <section className="country-section country-section--plain" aria-labelledby="neighbors-heading">
+                  <h2 id="neighbors-heading" className="country-section__title">
+                    Countries near {country.name}
+                  </h2>
+                  <div className="country-neighbors-grid">
+                    {neighbors.map((n) => {
+                      const href = isCountryIndexed(n.iso3)
+                        ? `/country/${slugForIso3(n.iso3)}`
+                        : `/compare?countries=${country.iso3},${n.iso3}`;
+                      return (
+                        <Link key={n.iso3} href={href} className="country-neighbor-card">
+                          <span aria-hidden="true">{n.flag}</span>
+                          <span>{n.name}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </section>
+              )}
+
+              {hasArea && (
+                <section className="country-cta" aria-labelledby="fill-the-country-heading">
+                  <h2 id="fill-the-country-heading" className="country-cta__title">
+                    How many countries do you think {country.name} could fit?
+                  </h2>
+                  <p className="country-cta__subtitle">
+                    Pour other countries into {country.name}&apos;s own outline, by real area, and
+                    see how many it takes to fill it up.
+                  </p>
+                  <Link
+                    href={`/compare/fill-the-country?target=${country.iso3}`}
+                    className="country-cta__button"
+                  >
+                    Fill the Country →
+                  </Link>
+                </section>
+              )}
+
+              <section className="country-section country-section--plain" aria-labelledby="faq-heading">
+                <h2 id="faq-heading" className="country-section__title">
+                  Frequently asked questions about {country.name}
+                </h2>
+                <div className="country-faq">
+                  {faqItems.map((item) => (
+                    <div className="country-faq-item" key={item.question}>
+                      <h3 className="country-faq-item__question">{item.question}</h3>
+                      <p className="country-faq-item__answer">{item.answer}</p>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              {inGuessRoster && (
+                <section className="country-cta" aria-labelledby="cta-heading">
+                  <h2 id="cta-heading" className="country-cta__title">
+                    Think you can guess {country.name} from its silhouette?
+                  </h2>
+                  <p className="country-cta__subtitle">
+                    {country.name} is one of the countries in our daily silhouette-guessing game.
+                  </p>
+                  <Link href="/guess-the-country" className="country-cta__button">
+                    Play Guess the Country →
+                  </Link>
+                </section>
+              )}
+
+              <p className="country-source-note">
+                Data from the World Bank, updated {updatedLabel}.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
-
-      <section className="country-section" aria-labelledby="quick-facts-heading">
-        <h2 id="quick-facts-heading" className="country-section__title">
-          {country.name} quick facts
-        </h2>
-        <dl className="country-quickfacts">
-          <div>
-            <dt>Population</dt>
-            <dd>{formatPopulation(country.population)}</dd>
-          </div>
-          <div>
-            <dt>Area</dt>
-            <dd>{formatArea(country.area_km2)}</dd>
-          </div>
-          <div>
-            <dt>Population density</dt>
-            <dd>{formatIndicatorValue(country.population_density, "people/km²")}</dd>
-          </div>
-          <div>
-            <dt>GDP</dt>
-            <dd>{formatCompareValue(country.gdp_usd, "US$")}</dd>
-          </div>
-          <div>
-            <dt>GDP per capita</dt>
-            <dd>{formatIndicatorValue(country.gdp_per_capita_usd, "US$")}</dd>
-          </div>
-          <div>
-            <dt>Capital</dt>
-            <dd>{country.capital || "—"}</dd>
-          </div>
-          {profile?.currency && (
-            <div>
-              <dt>Currency</dt>
-              <dd>
-                {profile.currency.name} ({profile.currency.symbol}, {profile.currency.code})
-              </dd>
-            </div>
-          )}
-          {profile?.languages?.length > 0 && (
-            <div>
-              <dt>{profile.languages.length > 1 ? "Languages" : "Language"}</dt>
-              <dd>{profile.languages.join(", ")}</dd>
-            </div>
-          )}
-        </dl>
-      </section>
-
-      <section className="country-section country-section--pictogram" aria-labelledby="pictogram-heading">
-        <h2 id="pictogram-heading" className="country-section__title">
-          {country.name} at human scale
-        </h2>
-        <CountryHeroPictogram country={country} />
-      </section>
-
-      {rankings.length > 0 && (
-        <section className="country-section" aria-labelledby="rankings-heading">
-          <h2 id="rankings-heading" className="country-section__title">
-            Where does {country.name} rank in the world?
-          </h2>
-          <ul className="country-rank-list">
-            {rankings.map((r) => (
-              <li key={r.key} className="country-rank-item">
-                <span className="country-rank-item__label">{r.label}</span>
-                <span className="country-rank-item__value">
-                  #{r.position} of {r.total}
-                </span>
-                <Link href={`/rankings?indicator=${r.key}`} className="country-rank-item__link">
-                  See full ranking →
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {comparisons.length > 0 && (
-        <section className="country-section" aria-labelledby="comparisons-heading">
-          <h2 id="comparisons-heading" className="country-section__title">
-            Compare {country.name} with other countries
-          </h2>
-          <div className="country-comparisons">
-            {comparisons.map((other) => {
-              const popMult = formatMultiplier(
-                Math.max(Number(country.population), Number(other.population)) /
-                  Math.max(Math.min(Number(country.population), Number(other.population)), 1)
-              );
-              return (
-                <Link
-                  key={other.iso3}
-                  href={`/compare?countries=${country.iso3},${other.iso3}`}
-                  className="country-comparison-card"
-                >
-                  <span className="country-comparison-card__flags">
-                    {country.flag} vs {other.flag}
-                  </span>
-                  <span className="country-comparison-card__title">
-                    Compare {country.name} vs {other.name}
-                  </span>
-                  {popMult && (
-                    <span className="country-comparison-card__stat">
-                      {popMult} difference in population
-                    </span>
-                  )}
-                </Link>
-              );
-            })}
-          </div>
-        </section>
-      )}
-
-      {facts.length > 0 && (
-        <section className="country-section" aria-labelledby="facts-heading">
-          <h2 id="facts-heading" className="country-section__title">
-            Everything we know about {country.name}
-          </h2>
-          <div className="fact-archive__grid">
-            {facts.map((f) => (
-              <article className="fact-card" key={f.day}>
-                <div className="fact-card__header">
-                  <span className="fact-card__category">{f.category}</span>
-                </div>
-                <p className="fact-card__text">{f.fact}</p>
-                <div className="fact-card__footer">
-                  <span className="fact-card__country">
-                    {flagForCountryName(f.country)} {f.country}
-                  </span>
-                  <a className="fact-card__source" href={f.source.url} target="_blank" rel="noreferrer">
-                    {f.source.name}
-                  </a>
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {neighbors.length > 0 && (
-        <section className="country-section" aria-labelledby="neighbors-heading">
-          <h2 id="neighbors-heading" className="country-section__title">
-            Countries near {country.name}
-          </h2>
-          <div className="country-neighbors-grid">
-            {neighbors.map((n) => {
-              const href = isCountryIndexed(n.iso3)
-                ? `/country/${slugForIso3(n.iso3)}`
-                : `/compare?countries=${country.iso3},${n.iso3}`;
-              return (
-                <Link key={n.iso3} href={href} className="country-neighbor-card">
-                  <span aria-hidden="true">{n.flag}</span>
-                  <span>{n.name}</span>
-                </Link>
-              );
-            })}
-          </div>
-        </section>
-      )}
-
-      <section className="country-section" aria-labelledby="faq-heading">
-        <h2 id="faq-heading" className="country-section__title">
-          Frequently asked questions about {country.name}
-        </h2>
-        <div className="country-faq">
-          {faqItems.map((item) => (
-            <div className="country-faq-item" key={item.question}>
-              <h3 className="country-faq-item__question">{item.question}</h3>
-              <p className="country-faq-item__answer">{item.answer}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {inGuessRoster && (
-        <section className="country-cta" aria-labelledby="cta-heading">
-          <h2 id="cta-heading" className="country-cta__title">
-            Think you can guess {country.name} from its silhouette?
-          </h2>
-          <p className="country-cta__subtitle">
-            {country.name} is one of the countries in our daily silhouette-guessing game.
-          </p>
-          <Link href="/guess-the-country" className="country-cta__button">
-            Play Guess the Country →
-          </Link>
-        </section>
-      )}
-
-      <p className="country-source-note">
-        Data from the World Bank, updated {updatedLabel}.
-      </p>
     </>
   );
 }

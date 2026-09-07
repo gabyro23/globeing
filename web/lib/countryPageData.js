@@ -12,6 +12,7 @@ import { INDEXED_COUNTRY_ISO3, isCountryIndexed, slugForIso3, iso3ForSlug } from
 import { getAccumulatedFacts } from "./dailyFact";
 import { flagForCountryName } from "./randomFactFlags";
 import { GUESS_COUNTRIES } from "./guessCountryData";
+import { getCountryOutline } from "./countryOutline";
 import topoIds from "./countryTopoIds.json";
 
 const topoByAlpha3 = new Map(topoIds.map((c) => [c.alpha3, c]));
@@ -111,6 +112,15 @@ export async function getCountryPageData(iso3) {
     (f) => f.country.toLowerCase() === country.name.toLowerCase()
   );
 
+  // Best-effort — a hiccup fetching the world atlas shouldn't break the
+  // whole page (or the static build); the outline is purely decorative.
+  let outline = null;
+  try {
+    outline = await getCountryOutline(iso3);
+  } catch {
+    outline = null;
+  }
+
   return {
     country,
     profile: profileForIso3(iso3),
@@ -119,6 +129,7 @@ export async function getCountryPageData(iso3) {
     neighbors,
     comparisons,
     facts,
+    outline,
     inGuessRoster: GUESS_COUNTRY_NAMES.has(country.name.toUpperCase()),
     slug: slugForIso3(iso3),
   };

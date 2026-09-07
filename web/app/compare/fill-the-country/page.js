@@ -10,8 +10,16 @@ import { formatArea, formatAreaCompact } from "../../../lib/format";
 
 // Russia is the poster child for this page (it's the example everyone
 // reaches for — "how many Spains fit in Russia?"), so it's the default
-// container on load if it's in the dataset.
+// container on load if it's in the dataset — unless a country page
+// deep-links here with its own ?target=ISO3 (e.g. /country/japan's "how
+// many countries fit in Japan?" teaser).
 const DEFAULT_TARGET_ISO3 = "RUS";
+
+function initialTargetIso3FromUrl() {
+  if (typeof window === "undefined") return DEFAULT_TARGET_ISO3;
+  const requested = new URLSearchParams(window.location.search).get("target");
+  return requested ? requested.trim().toUpperCase() : DEFAULT_TARGET_ISO3;
+}
 
 let itemIdSeed = 0;
 function nextItemId() {
@@ -30,7 +38,7 @@ export default function FillTheCountryPage() {
   const [error, setError] = useState(null);
   const [featureMap, setFeatureMap] = useState(null);
   const [mapError, setMapError] = useState(null);
-  const [targetIso3, setTargetIso3] = useState(DEFAULT_TARGET_ISO3);
+  const [targetIso3, setTargetIso3] = useState(initialTargetIso3FromUrl);
   const [pouredItems, setPouredItems] = useState([]);
 
   useEffect(() => {
