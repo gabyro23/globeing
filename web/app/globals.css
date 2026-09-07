@@ -4355,6 +4355,13 @@ path.country.is-dimmed {
   font-weight: 700;
   margin: 0;
 }
+.country-quickfacts__note {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--muted);
+  margin-top: 2px;
+}
 
 .country-section--pictogram {
   display: flex;
@@ -4544,42 +4551,11 @@ path.country.is-dimmed {
   border-radius: var(--radius);
 }
 
-/* /country hub */
-.country-index-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: var(--space-2);
-  margin: var(--space-4) clamp(16px, 4vw, 40px) var(--space-6);
-}
-.country-index-card {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: var(--space-2);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  text-decoration: none;
-  color: inherit;
-  transition: border-color 0.15s ease;
-}
-.country-index-card:hover {
-  border-color: var(--accent);
-}
-.country-index-card__flag {
-  font-size: 32px;
-}
-.country-index-card__name {
-  font-weight: 700;
-  font-size: 16px;
-}
-.country-index-card__stats {
-  font-size: 13px;
-  color: var(--muted);
-}
-
-/* /country hub — full "all countries" directory, grouped by continent */
+/* /country hub — full "all countries" directory, grouped by continent
+   (there used to be a separate small "spotlight" grid above this using
+   .country-index-grid/.country-index-card, back when only Japan and
+   Burundi were indexed — removed once indexing most countries made it a
+   near-duplicate of the directory below) */
 .country-directory {
   margin: var(--space-6) clamp(16px, 4vw, 40px);
 }
@@ -4587,6 +4563,19 @@ path.country.is-dimmed {
   font-size: 22px;
   font-weight: 700;
   margin: 0 0 var(--space-4);
+}
+.country-directory__search {
+  margin-bottom: var(--space-4);
+}
+.country-directory__search-count {
+  margin: 6px 2px 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.country-directory__empty {
+  color: var(--muted);
+  font-size: 14px;
+  padding: var(--space-3) 0;
 }
 .country-directory__continent {
   margin-bottom: var(--space-5);

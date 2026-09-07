@@ -28,6 +28,14 @@ const GDP_PER_CAPITA_TARGET_MAX_ICONS = 20;
 // bags (GDP per capita) — both reusing the exact components CompareModal
 // uses, just for a single country instead of a compared group.
 export default function CountryHeroPictogram({ country }) {
+  // `loading` and `feature` are deliberately separate rather than using
+  // "feature is still null" to mean "still loading" — now that /country
+  // covers 209 countries (not just the 2 this component was first built
+  // for), a handful of them have no shape in the world atlas at all (see
+  // lib/countryIndex.js's excluded-territory list), and those need to
+  // fall through to the "no shape available" message below instead of
+  // being stuck on the loading skeleton forever.
+  const [loading, setLoading] = useState(true);
   const [feature, setFeature] = useState(null);
   const [error, setError] = useState(null);
 
@@ -38,9 +46,12 @@ export default function CountryHeroPictogram({ country }) {
         if (cancelled) return;
         const byAlpha3 = featuresByAlpha3(world);
         setFeature(byAlpha3.get(country.iso3) || null);
+        setLoading(false);
       })
       .catch((err) => {
-        if (!cancelled) setError(err.message);
+        if (cancelled) return;
+        setError(err.message);
+        setLoading(false);
       });
     return () => {
       cancelled = true;
@@ -57,7 +68,7 @@ export default function CountryHeroPictogram({ country }) {
     return <p className="pictogram-missing">Couldn&apos;t load the map: {error}</p>;
   }
 
-  if (!feature) {
+  if (loading) {
     return (
       <div className="skeleton country-hero-pictogram__loading" aria-busy="true" style={{ height: BOX_SIZE }} />
     );
@@ -65,13 +76,19 @@ export default function CountryHeroPictogram({ country }) {
 
   return (
     <div className="pictogram-countries">
-      <CountryPictogram
-        country={country}
-        feature={feature}
-        boxSize={BOX_SIZE}
-        canvasHeight={CANVAS_HEIGHT}
-        iconValue={iconValue}
-      />
+      {feature ? (
+        <CountryPictogram
+          country={country}
+          feature={feature}
+          boxSize={BOX_SIZE}
+          canvasHeight={CANVAS_HEIGHT}
+          iconValue={iconValue}
+        />
+      ) : (
+        <p className="pictogram-missing" style={{ minHeight: CANVAS_HEIGHT }}>
+          We don&apos;t have a detailed map shape for {country.name} yet.
+        </p>
+      )}
       <GdpPerCapitaPictogram
         country={country}
         iconValue={gdpPerCapitaIconValue}

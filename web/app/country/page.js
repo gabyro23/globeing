@@ -1,7 +1,6 @@
-import Link from "next/link";
-import { getIndexedCountries, getCountriesByContinent } from "../../lib/countryPageData";
-import { formatPopulationCompact, formatArea } from "../../lib/format";
+import { getCountriesByContinent } from "../../lib/countryPageData";
 import { pageMetadata } from "../../lib/seo";
+import CountryDirectorySearch from "../../components/CountryDirectorySearch";
 
 export const revalidate = 86400;
 
@@ -12,78 +11,46 @@ export const metadata = pageMetadata({
   path: "/country",
 });
 
-// Hub page for the /country/[slug] template. The top spotlights whichever
-// countries currently have their own page (small today — see
-// lib/countryIndex.js's INDEXED_COUNTRY_ISO3, rolled out one at a time).
-// Below that, every country in the world is listed, grouped by continent,
-// so the page is a real directory instead of stopping at the handful
-// that are indexed so far. A country without its own page yet links to
-// the Compare tool pre-filled with just that country instead of a dead
-// end or a 404.
+// Hub page for the /country/[slug] template: every country in the world,
+// grouped by continent, so this is a real directory rather than stopping
+// at whichever ones happen to have their own page. An indexed country
+// (see lib/countryIndex.js's INDEXED_COUNTRY_ISO3 — most of them, as of
+// this page's last big update) links straight to its own page; anything
+// not indexed yet links to the Compare tool pre-filled with just that
+// country instead of a dead end or a 404.
+//
+// This used to also show a separate "spotlight" grid up top for whichever
+// few countries were indexed, back when that was just Japan and Burundi.
+// Once nearly everything is indexed, that grid became a near-duplicate of
+// the directory below it, so it's gone — the directory (with indexed
+// countries as real links) already tells that story on its own.
 export default async function CountryHubPage() {
-  const [spotlight, continents] = await Promise.all([getIndexedCountries(), getCountriesByContinent()]);
+  const continents = await getCountriesByContinent();
   const totalCount = continents.reduce((sum, g) => sum + g.countries.length, 0);
+  const indexedCount = continents.reduce(
+    (sum, g) => sum + g.countries.filter((c) => c.indexed).length,
+    0
+  );
 
   return (
     <>
       <div className="app-hero">
         <h1 className="app-hero__title">Countries</h1>
         <p className="app-hero__subtitle">
-          Population, GDP, capital, currency, and facts for every country we&apos;ve indexed — plus a
-          full directory of all {totalCount} countries, grouped by continent.
+          Population, GDP, capital, currency, and facts for every country — organized by continent
+          below.
         </p>
         <span className="app-hero__stat">
-          {spotlight.length} {spotlight.length === 1 ? "country" : "countries"} indexed so far · more
-          added regularly
+          {indexedCount} of {totalCount} countries have their own page so far · the rest link to
+          Compare
         </span>
-      </div>
-
-      <div className="country-index-grid">
-        {spotlight.map((c) => (
-          <Link key={c.iso3} href={`/country/${c.slug}`} className="country-index-card">
-            <span className="country-index-card__flag" aria-hidden="true">
-              {c.flag}
-            </span>
-            <span className="country-index-card__name">{c.name}</span>
-            <span className="country-index-card__stats">
-              {formatPopulationCompact(c.population)} people · {formatArea(c.area_km2)}
-            </span>
-          </Link>
-        ))}
       </div>
 
       <section className="country-directory" aria-labelledby="all-countries-heading">
         <h2 id="all-countries-heading" className="country-directory__heading">
           All countries
         </h2>
-        {continents.map((group) => (
-          <div key={group.name} className="country-directory__continent">
-            <h3 className="country-directory__continent-title">
-              {group.name}
-              <span className="country-directory__continent-count">{group.countries.length}</span>
-            </h3>
-            <div className="country-directory__grid">
-              {group.countries.map((c) =>
-                c.indexed ? (
-                  <Link key={c.iso3} href={`/country/${c.slug}`} className="country-directory__item">
-                    <span aria-hidden="true">{c.flag}</span>
-                    <span>{c.name}</span>
-                  </Link>
-                ) : (
-                  <Link
-                    key={c.iso3}
-                    href={`/compare?countries=${c.iso3}`}
-                    className="country-directory__item country-directory__item--pending"
-                    title={`${c.name} doesn't have its own page yet — compare it with any other country`}
-                  >
-                    <span aria-hidden="true">{c.flag}</span>
-                    <span>{c.name}</span>
-                  </Link>
-                )
-              )}
-            </div>
-          </div>
-        ))}
+        <CountryDirectorySearch continents={continents} />
       </section>
     </>
   );

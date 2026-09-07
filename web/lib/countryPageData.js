@@ -98,8 +98,21 @@ function buildProfile(country, iso3) {
         .filter(Boolean)
     : fallback.languages || [];
 
+  // Every currency the country officially uses (countries.currencies —
+  // see docs/data/add_country_currencies_column.sql), as "Name (CODE)"
+  // strings straight from the database. Most countries only have one, so
+  // this just repeats `currency` above for them; it's here so a country
+  // with more than one (Panama, the Bahamas, Bhutan, ...) can show the
+  // rest as "also legal tender" instead of only its picked primary one.
+  const currencies = country.currencies
+    ? country.currencies
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : [];
+
   if (!officialName && !currency && languages.length === 0) return null;
-  return { officialName, currency, languages };
+  return { officialName, currency, languages, currencies };
 }
 
 export async function getCountryPageData(iso3) {

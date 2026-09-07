@@ -201,6 +201,24 @@ export default async function CountryPage({ params }) {
                       <dt>Currency</dt>
                       <dd>
                         {profile.currency.name} ({profile.currency.symbol}, {profile.currency.code})
+                        {(() => {
+                          // A handful of countries legally use more than one
+                          // currency (Panama, the Bahamas, Bhutan, ...) —
+                          // profile.currencies is the full list, so show
+                          // whichever entries aren't the one already named
+                          // above instead of hiding that they exist.
+                          const others = (profile.currencies || []).filter(
+                            (c) => !c.includes(`(${profile.currency.code})`)
+                          );
+                          return (
+                            others.length > 0 && (
+                              <span className="country-quickfacts__note">
+                                {" "}
+                                · also legal tender: {others.join(", ")}
+                              </span>
+                            )
+                          );
+                        })()}
                       </dd>
                     </div>
                   )}
