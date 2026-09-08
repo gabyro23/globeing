@@ -1,6 +1,8 @@
-import { getAccumulatedFacts } from "../../lib/dailyFact";
-import { flagForCountryName } from "../../lib/randomFactFlags";
+import { getAccumulatedFacts, factDateLabel } from "../../lib/dailyFact";
+import { factCountryMeta } from "../../lib/randomFactMeta";
 import { pageMetadata } from "../../lib/seo";
+import FactArchive from "../../components/FactArchive";
+import RandomFactHero from "../../components/RandomFactHero";
 
 // Regenerate at most hourly so the archive picks up each new day's fact
 // without needing the whole page to be dynamically rendered on every request.
@@ -13,75 +15,67 @@ export const metadata = pageMetadata({
   path: "/random-facts",
 });
 
-function factDateLabel(day) {
-  const date = new Date(new Date().getFullYear(), 0, day);
-  return date.toLocaleDateString("en-US", { month: "long", day: "numeric" });
-}
-
 // A new fact is added every day (see lib/randomFacts.js + lib/dailyFact.js)
-// and past ones accumulate here, newest first.
+// and past ones accumulate here, newest first. The interactive pieces
+// (browsing the hero card, searching/filtering the archive) live in their
+// own client components — see components/RandomFactHero.jsx and
+// components/FactArchive.jsx — everything else here stays server-rendered.
+//
+// The title + hero card + stats box all sit on their own full-bleed dark
+// band (.random-facts-band) instead of the shared .app-hero — this is
+// hero variant C from "Estructura de páginas" (a page building its own
+// container because it needs something other pages don't), so the usual
+// .app-hero title/subtitle classes aren't reused here.
 export default function RandomFactsPage() {
   const facts = getAccumulatedFacts();
-  const [today, ...archive] = facts;
+  const [, ...archive] = facts;
+
+  const countryCount = new Set(facts.map((f) => f.country)).size;
+  const continentCount = new Set(facts.map((f) => factCountryMeta(f.country).region).filter(Boolean)).size;
+  const categoryCount = new Set(facts.map((f) => f.category)).size;
 
   return (
     <>
-      <div className="app-hero">
-        <h1 className="app-hero__title">Random Facts</h1>
-        <p className="app-hero__subtitle">
-          A new fact about the world appears every day and builds into this archive.
-        </p>
-        <span className="app-hero__stat">
-          {facts.length} fact{facts.length === 1 ? "" : "s"} so far this year
-        </span>
-      </div>
-
-      <section className="daily-fact daily-fact--page">
-        <div className="daily-fact__card">
-          <span className="daily-fact__eyebrow">Today · {factDateLabel(today.day)}</span>
-          <p className="daily-fact__text">
-            {today.fact}{" "}
-            <span className="daily-fact__country">
-              — {flagForCountryName(today.country)} {today.country}
-            </span>
+      <div className="random-facts-band">
+        <div className="random-facts-band__inner">
+          <div className="random-facts-band__title-row">
+            <h1 className="random-facts-band__title">Random Facts</h1>
+            <span className="random-facts-band__eyebrow">Today · {factDateLabel(facts[0].day)}</span>
+          </div>
+          <p className="random-facts-band__subtitle">
+            A new fact about the world appears every day and builds into this archive. Flip through the
+            deck to browse them, and open the one that catches your eye to see the country.
           </p>
-          <div className="daily-fact__footer">
-            <a
-              className="daily-fact__source"
-              href={today.source.url}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Source: {today.source.name}
-            </a>
+
+          <div className="random-facts-top">
+            <RandomFactHero facts={facts} />
+
+            <aside className="random-facts-stats">
+              <div className="random-facts-stats__label">This year</div>
+              <div className="random-facts-stats__headline">
+                <span className="random-facts-stats__number">{facts.length}</span>
+                <span className="random-facts-stats__unit">fact{facts.length === 1 ? "" : "s"} published</span>
+              </div>
+              <div className="random-facts-stats__row">
+                <div className="random-facts-stats__item">
+                  <div className="random-facts-stats__count">{countryCount}</div>
+                  <div className="random-facts-stats__sub">countries</div>
+                </div>
+                <div className="random-facts-stats__item">
+                  <div className="random-facts-stats__count">{continentCount}</div>
+                  <div className="random-facts-stats__sub">continents</div>
+                </div>
+                <div className="random-facts-stats__item">
+                  <div className="random-facts-stats__count">{categoryCount}</div>
+                  <div className="random-facts-stats__sub">categories</div>
+                </div>
+              </div>
+            </aside>
           </div>
         </div>
-      </section>
+      </div>
 
-      {archive.length > 0 && (
-        <section className="fact-archive">
-          <h2 className="fact-archive__title">Archive</h2>
-          <div className="fact-archive__grid">
-            {archive.map((f) => (
-              <article className="fact-card" key={f.day}>
-                <div className="fact-card__header">
-                  <span className="fact-card__date">{factDateLabel(f.day)}</span>
-                  <span className="fact-card__category">{f.category}</span>
-                </div>
-                <p className="fact-card__text">{f.fact}</p>
-                <div className="fact-card__footer">
-                  <span className="fact-card__country">
-                    {flagForCountryName(f.country)} {f.country}
-                  </span>
-                  <a className="fact-card__source" href={f.source.url} target="_blank" rel="noreferrer">
-                    {f.source.name}
-                  </a>
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
-      )}
+      {archive.length > 0 && <FactArchive archive={archive} />}
     </>
   );
 }

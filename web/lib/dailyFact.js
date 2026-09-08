@@ -24,3 +24,12 @@ export function getAccumulatedFacts(date = new Date()) {
   const day = getDayOfYear(date);
   return RANDOM_FACTS.slice(0, day).reverse();
 }
+
+// Human-readable label for a fact's day-of-year number, e.g. "September 8".
+// Uses the current year purely for month/day arithmetic (day-of-year has no
+// year of its own), so it's safe to call regardless of when a fact was
+// actually published.
+export function factDateLabel(day) {
+  const date = new Date(new Date().getFullYear(), 0, day);
+  return date.toLocaleDateString("en-US", { month: "long", day: "numeric" });
+}

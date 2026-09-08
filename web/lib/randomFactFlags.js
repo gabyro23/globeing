@@ -211,3 +211,10 @@ export function flagForCountryName(name) {
   const alpha2 = COUNTRY_NAME_TO_ALPHA2[name];
   return alpha2 ? alpha2ToFlagEmoji(alpha2) : "";
 }
+
+// The raw alpha-2 lookup itself, for callers that need to cross-reference
+// a fact's country name against other datasets keyed by alpha-2/alpha-3
+// (see lib/randomFactMeta.js) rather than just rendering a flag.
+export function alpha2ForCountryName(name) {
+  return COUNTRY_NAME_TO_ALPHA2[name] || null;
+}
