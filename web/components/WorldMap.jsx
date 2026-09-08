@@ -5,16 +5,42 @@ import * as d3 from "d3";
 import * as topojson from "topojson-client";
 import topoIds from "../lib/countryTopoIds.json";
 import { readDraggedAlpha3 } from "../lib/dnd";
+import { formatPopulationCompact, formatNumber } from "../lib/format";
 
 const WORLD_ATLAS_URL =
   "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
 
+// "48.8M · 97 people/km²" line shown under the country name in the hover
+// tooltip, so people get a first data point before they even click.
+function formatTooltipStats(stats) {
+  const parts = [];
+  if (stats.population) parts.push(formatPopulationCompact(stats.population));
+  if (stats.population_density) parts.push(`${formatNumber(stats.population_density)} people/km²`);
+  return parts.join(" · ");
+}
+
 // Port of js/components/mapView.js
-export default function WorldMap({ selectedAlpha3, filteredAlpha3, onToggleCountry, onDropAlpha3 }) {
+export default function WorldMap({
+  selectedAlpha3,
+  filteredAlpha3,
+  onToggleCountry,
+  onDropAlpha3,
+  statsByAlpha3,
+}) {
   const containerRef = useRef(null);
   const mapApiRef = useRef(null);
   const [world, setWorld] = useState(null);
   const [error, setError] = useState(null);
+
+  // The map-building effect below only runs once per `world` load (it
+  // would be wasteful to tear down and redraw the whole SVG every time the
+  // stats change), so the hover tooltip reads the *current* stats through
+  // this ref instead of closing over whatever /api/countries had (or
+  // hadn't yet) returned when that effect last ran.
+  const statsByAlpha3Ref = useRef(statsByAlpha3);
+  useEffect(() => {
+    statsByAlpha3Ref.current = statsByAlpha3;
+  }, [statsByAlpha3]);
 
   useEffect(() => {
     fetch(WORLD_ATLAS_URL)
@@ -96,11 +122,15 @@ export default function WorldMap({ selectedAlpha3, filteredAlpha3, onToggleCount
         const c = countryOf(d);
         if (!c) return;
         const [x, y] = d3.pointer(event, container);
+        const stats = statsByAlpha3Ref.current?.get(c.alpha3);
+        const statLine = stats
+          ? `<span class="map-tooltip__stat">${formatTooltipStats(stats)}</span>`
+          : "";
         tooltip
           .attr("hidden", null)
           .style("left", `${x + 14}px`)
           .style("top", `${y + 10}px`)
-          .html(`<strong>${c.name}</strong>`);
+          .html(`<strong>${c.name}</strong>${statLine}`);
       })
       .on("mouseleave", () => tooltip.attr("hidden", true));
 

@@ -3,11 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import CountryPictogram from "./CountryPictogram";
 import GdpPerCapitaPictogram, { PERSON_HEIGHT as GDP_PER_CAPITA_PERSON_HEIGHT, bagStackHeight } from "./GdpPerCapitaPictogram";
+import GenericIndicatorPictogram, { ICON_HEIGHT as GENERIC_ICON_HEIGHT, iconGridHeight } from "./GenericIndicatorPictogram";
 import TrueScalePanel from "./TrueScalePanel";
-import { INDICATORS } from "../lib/indicators";
+import CompareStatsGrid from "./CompareCharts";
+import { INDICATORS, CATEGORIES } from "../lib/indicators";
 import { loadWorld, featuresByAlpha3 } from "../lib/worldAtlas";
 import { niceIconValue, pictogramViewPad, iconCountForValue } from "../lib/pictogram";
-import { buildStatComparisons } from "../lib/compareInsights";
 import { formatNumber, formatIndicatorValue } from "../lib/format";
 
 // How many bags the biggest GDP in the group should show, roughly — kept
@@ -20,6 +21,11 @@ const GDP_TARGET_MAX_ICONS = 90;
 // no need for as many icons to read clearly.
 const GDP_PER_CAPITA_TARGET_MAX_ICONS = 20;
 
+// Placeholder-visual indicators (see GenericIndicatorPictogram) can show
+// more icons than the money-bag views since a lone personita is a much
+// simpler shape.
+const GENERIC_TARGET_MAX_ICONS = 30;
+
 const BOX_SIZE = 260; // px — size of the largest country in the compared set
 // Height reserved for each country's canvas: the reference size plus the
 // padding the LARGEST country (the one that sets the scale) needs so its
@@ -27,13 +33,13 @@ const BOX_SIZE = 260; // px — size of the largest country in the compared set
 const CANVAS_HEIGHT = BOX_SIZE + pictogramViewPad(BOX_SIZE) * 2;
 
 // .pictogram-canvas's own all-around padding (app/globals.css) — reused
-// here so the GDP-per-capita canvas below is sized to actually fit its
-// (much smaller) content instead of borrowing the silhouette canvas's
-// height and leaving a big gap above the figures.
+// here so the GDP-per-capita/generic canvases below are sized to actually
+// fit their (much smaller) content instead of borrowing the silhouette
+// canvas's height and leaving a big gap above the figures.
 const PICTOGRAM_CANVAS_PADDING = 20;
 
 // Indicators bundled into the "Density" view below, so they aren't also
-// offered as their own (imageless) entries in the selector.
+// offered as their own entries in the selector.
 const DENSITY_BUNDLE_KEYS = new Set(["population", "area_km2", "population_density"]);
 
 // Keys with their own explicit entry below (a bundle or a custom image),
@@ -42,53 +48,44 @@ const DENSITY_BUNDLE_KEYS = new Set(["population", "area_km2", "population_densi
 const CUSTOM_VIEW_KEYS = new Set([...DENSITY_BUNDLE_KEYS, "gdp_usd", "gdp_per_capita_usd"]);
 
 // One selectable entry per indicator the comparison screen can show. Only
-// one is active at a time — picking one swaps both the image (when it has
-// one) and the "Key differences" below it. "Density" bundles the three
-// baseline stats (area, population, population density) because that's
-// what the real-silhouette pictogram already visualizes together: the
-// personitas scattered inside each country's true-scale shape read as a
-// literal density map. "GDP" and "GDP per capita" have their own
-// money-bag pictograms. Every other indicator is stats-only for now (no
-// image yet) — flip `hasImage` and add a rendering branch below once its
-// visual is designed. `needsMap` gates the "Loading silhouettes…" wait on
-// only the views that actually draw a country silhouette from the world
-// atlas — GDP per capita's personita + bags doesn't need it.
+// one is active at a time — picking one swaps the image. "Density" bundles
+// the three baseline stats (area, population, population density) because
+// that's what the real-silhouette pictogram already visualizes together.
+// "GDP" and "GDP per capita" have their own money-bag pictograms. Every
+// other indicator uses `isGeneric: true` — a placeholder visual (repeated
+// personitas, see GenericIndicatorPictogram) until each gets its own
+// custom image. `needsMap` gates the "Loading silhouettes…" wait on only
+// the views that actually draw a country silhouette from the world atlas.
 const COMPARISON_INDICATORS = [
   {
     key: "density",
     label: "Density",
-    hasImage: true,
+    category: "Geography",
     needsMap: true,
     description: "Real silhouettes at relative scale based on area — the largest country sets the scale.",
-    statKeys: [
-      { key: "area_km2", label: "Area" },
-      { key: "population", label: "Population" },
-      { key: "population_density", label: "Density" },
-    ],
   },
   {
     key: "gdp_usd",
     label: "GDP",
-    hasImage: true,
+    category: "Economy",
     needsMap: true,
     description: "A stack of money bags per country — each bag represents a fixed share of GDP.",
-    statKeys: [{ key: "gdp_usd", label: "GDP" }],
   },
   {
     key: "gdp_per_capita_usd",
     label: "GDP per capita",
-    hasImage: true,
+    category: "Economy",
     needsMap: false,
     description: "One personita per country, next to a stack of money bags sized to its GDP per capita.",
-    statKeys: [{ key: "gdp_per_capita_usd", label: "GDP per capita" }],
   },
   ...INDICATORS.filter((ind) => !CUSTOM_VIEW_KEYS.has(ind.key)).map((ind) => ({
     key: ind.key,
     label: ind.label,
-    hasImage: false,
+    category: ind.category,
     needsMap: false,
-    description: `${ind.label} comparison — a dedicated visual is coming soon. For now, here's how the group compares.`,
-    statKeys: [{ key: ind.key, label: ind.label }],
+    isGeneric: true,
+    unit: ind.unit,
+    description: `${ind.label} — a dedicated visual is coming soon. For now, each icon stands for a fixed share of the value.`,
   })),
 ];
 
@@ -101,40 +98,35 @@ const TRUE_SCALE_MIN = 56;
 const TRUE_SCALE_MAX = 220;
 const TRUE_SCALE_STEP = 24;
 
-// Dedicated comparison screen: pick one indicator at a time from the chips
-// below — it drives both the image (a real-silhouette population map for
-// "Density", money bags for "GDP", nothing yet for the rest) and the "Key
-// differences" sentences underneath. Opens as a full-screen overlay
-// (doesn't change the URL).
-export default function CompareModal({ open, countries, onClose }) {
+// The Compare results screen: a category filter (shared by the "Compare
+// by" tabs and the stats grid below), the visual comparison for whichever
+// indicator is active, and the individual-stats card grid. Lives inline in
+// the results screen of app/compare/page.js (that page owns the "← Change
+// countries" / Share / Download CSV header above this).
+export default function CompareResults({ countries }) {
   const [featureMap, setFeatureMap] = useState(null);
   const [mapError, setMapError] = useState(null);
+  const [category, setCategory] = useState("All");
   const [activeIndicator, setActiveIndicator] = useState(DEFAULT_INDICATOR_KEY);
   const [trueScaleSize, setTrueScaleSize] = useState(TRUE_SCALE_DEFAULT);
 
+  const visibleIndicators = useMemo(
+    () => COMPARISON_INDICATORS.filter((ind) => category === "All" || ind.category === category),
+    [category]
+  );
+
+  // If switching category hides the active tab, fall back to the first
+  // tab still visible instead of showing an indicator that's no longer in
+  // the chip list above it.
   const activeView =
-    COMPARISON_INDICATORS.find((ind) => ind.key === activeIndicator) ?? COMPARISON_INDICATORS[0];
+    visibleIndicators.find((ind) => ind.key === activeIndicator) ?? visibleIndicators[0];
 
   useEffect(() => {
-    if (!open) return undefined;
-
-    document.body.style.overflow = "hidden";
-    const onKeyDown = (e) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open, onClose]);
-
-  useEffect(() => {
-    if (!open || featureMap) return;
+    if (featureMap) return;
     loadWorld()
       .then((world) => setFeatureMap(featuresByAlpha3(world)))
       .catch((err) => setMapError(err.message));
-  }, [open, featureMap]);
+  }, [featureMap]);
 
   const maxArea = useMemo(
     () => Math.max(...countries.map((c) => Number(c.area_km2) || 0), 1),
@@ -180,45 +172,65 @@ export default function CompareModal({ open, countries, onClose }) {
     );
   }, [countries, gdpPerCapitaIconValue]);
 
-  const comparisonGroups = useMemo(() => {
-    return activeView.statKeys
-      .map((stat) => ({ ...stat, items: buildStatComparisons(countries, stat.key, stat.label) }))
-      .filter((group) => group.items.length > 0);
+  // Same idea, but for whichever placeholder ("isGeneric") indicator is
+  // currently active — each has its own value range, so the icon count
+  // (and therefore the canvas height) is computed per-indicator on demand
+  // rather than for all six up front.
+  const genericIconValue = useMemo(() => {
+    if (!activeView?.isGeneric) return 0;
+    const max = Math.max(...countries.map((c) => Number(c[activeView.key]) || 0), 1);
+    return niceIconValue(max, GENERIC_TARGET_MAX_ICONS);
   }, [countries, activeView]);
 
-  if (!open) return null;
+  const genericCanvasHeight = useMemo(() => {
+    if (!activeView?.isGeneric) return CANVAS_HEIGHT;
+    const maxCount = Math.max(
+      ...countries.map((c) => iconCountForValue(Number(c[activeView.key]) || 0, genericIconValue)),
+      0
+    );
+    return Math.max(GENERIC_ICON_HEIGHT, iconGridHeight(maxCount)) + PICTOGRAM_CANVAS_PADDING * 2;
+  }, [countries, activeView, genericIconValue]);
+
+  if (!activeView) return null;
 
   const needsMap = activeView.needsMap;
   const mapReady = !needsMap || (featureMap && !mapError);
 
   return (
-    <div className="compare-modal-backdrop" role="presentation" onClick={onClose}>
-      <div
-        className="compare-modal"
-        role="dialog"
-        aria-modal="true"
-        aria-label="Visual comparison of countries"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <>
+      <div className="compare-category-filter">
+        <span className="compare-category-filter__label">Category</span>
+        <div className="compare-category-filter__list">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat}
+              type="button"
+              className={"category-chip" + (category === cat ? " is-active" : "")}
+              onClick={() => setCategory(cat)}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="compare-modal">
         <header className="compare-modal__header">
           <div>
             <h2>Visual comparison</h2>
             <p>{activeView.description}</p>
           </div>
-          <button type="button" className="compare-modal__close" aria-label="Close comparison" onClick={onClose}>
-            ×
-          </button>
         </header>
 
         <div className="compare-modal__indicators">
           <span className="compare-modal__indicators-label">Compare by:</span>
           <div className="compare-modal__indicators-list">
-            {COMPARISON_INDICATORS.map((ind) => (
+            {visibleIndicators.map((ind) => (
               <label className="indicator-chip" key={ind.key}>
                 <input
                   type="radio"
                   name="comparison-indicator"
-                  checked={activeIndicator === ind.key}
+                  checked={activeView.key === ind.key}
                   onChange={() => setActiveIndicator(ind.key)}
                 />
                 <span>{ind.label}</span>
@@ -311,22 +323,25 @@ export default function CompareModal({ open, countries, onClose }) {
                 </div>
               )}
 
-              {comparisonGroups.length > 0 && (
-                <section className="compare-insights">
-                  <h3>Key differences</h3>
-                  <div className="compare-insights__groups">
-                    {comparisonGroups.map((group) => (
-                      <div className="compare-insights__group" key={group.key}>
-                        <h4>{group.label}</h4>
-                        <ul>
-                          {group.items.map((item) => (
-                            <li key={item.key}>{item.text}</li>
-                          ))}
-                        </ul>
-                      </div>
+              {activeView.isGeneric && (
+                <div className="pictogram-gdp-row">
+                  <div className="pictogram-countries">
+                    {countries.map((country) => (
+                      <GenericIndicatorPictogram
+                        key={country.iso3}
+                        country={country}
+                        label={activeView.label}
+                        value={country[activeView.key]}
+                        unit={activeView.unit}
+                        iconValue={genericIconValue}
+                        canvasHeight={genericCanvasHeight}
+                      />
                     ))}
                   </div>
-                </section>
+                  <p className="pictogram-row__legend">
+                    🧍 Each icon represents {formatIndicatorValue(genericIconValue, activeView.unit)}.
+                  </p>
+                </div>
               )}
             </>
           )}
@@ -344,6 +359,8 @@ export default function CompareModal({ open, countries, onClose }) {
           </footer>
         )}
       </div>
-    </div>
+
+      <CompareStatsGrid countries={countries} category={category} />
+    </>
   );
 }

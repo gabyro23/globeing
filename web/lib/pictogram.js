@@ -9,7 +9,7 @@ const MAX_SAMPLE_ATTEMPTS = 7;
 const SPACING_DECAY = 0.72;
 
 // --- Pictogram layout constants (shared between CountryPictogram, which
-// draws each silhouette, and CompareModal, which needs to reserve enough
+// draws each silhouette, and CompareResults, which needs to reserve enough
 // container height for the largest one) --------------------------------
 
 // Matches the "personita" figure's natural proportions (viewBox 60x120,

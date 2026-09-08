@@ -10,7 +10,7 @@ const BOX_SIZE = 300;
 const CANVAS_HEIGHT = BOX_SIZE + pictogramViewPad(BOX_SIZE) * 2;
 
 // How many money bags the GDP-per-capita view should show at most for a
-// single country — same target CompareModal uses for that view (one
+// single country — same target CompareResults uses for that view (one
 // personita next to a modest stack of bags reads better than a huge one).
 const GDP_PER_CAPITA_TARGET_MAX_ICONS = 20;
 
@@ -25,7 +25,7 @@ const GDP_PER_CAPITA_TARGET_MAX_ICONS = 20;
 // Shows two pictograms side by side, same as the /compare tool's
 // multi-metric layout: the country's real silhouette filled with
 // personitas (population) next to one personita and its stack of money
-// bags (GDP per capita) — both reusing the exact components CompareModal
+// bags (GDP per capita) — both reusing the exact components CompareResults
 // uses, just for a single country instead of a compared group.
 export default function CountryHeroPictogram({ country }) {
   // `loading` and `feature` are deliberately separate rather than using

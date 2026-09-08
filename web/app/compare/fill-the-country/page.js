@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import CompareSubNav from "../../../components/CompareSubNav";
 import AreaFillCanvas from "../../../components/AreaFillCanvas";
 import AreaFillPalette from "../../../components/AreaFillPalette";
 import { metaForAlpha3 } from "../../../lib/countryMeta";
@@ -132,8 +131,6 @@ export default function FillTheCountryPage() {
           Russia with Spain, the UK, Panama, and a few more, until it&apos;s full.
         </p>
       </div>
-
-      <CompareSubNav />
 
       {error && (
         <div className="status status--error area-fill-status">

@@ -1,7 +1,7 @@
 // Server-side computation of a country's plain geographic silhouette (no
 // icons, no gradient — just a path) for use as a low-opacity background
 // watermark on /country/[slug]. Reuses the same world-atlas + azimuthal
-// projection approach as CountryPictogram.jsx / CompareModal.jsx, but
+// projection approach as CountryPictogram.jsx / CompareResults.jsx, but
 // runs during the server render (this file has no "use client") so the
 // shape is present in the static HTML immediately instead of popping in
 // after a client fetch.

@@ -1,6 +1,6 @@
 // Loads the same world-atlas (110m) that WorldMap.jsx uses, but exposed as
 // a reusable utility to extract the GeoJSON feature for a single country
-// (needed by CompareModal/CountryPictogram to draw the real silhouette of
+// (needed by CompareResults/CountryPictogram to draw the real silhouette of
 // each selected country).
 import * as topojson from "topojson-client";
 import topoIds from "./countryTopoIds.json";

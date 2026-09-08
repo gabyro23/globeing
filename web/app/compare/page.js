@@ -1,12 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import CompareSubNav from "../../components/CompareSubNav";
 import WorldMap from "../../components/WorldMap";
 import SearchBar from "../../components/SearchBar";
 import SelectedCountries from "../../components/SelectedCountries";
-import CompareCharts from "../../components/CompareCharts";
-import CompareModal from "../../components/CompareModal";
+import CompareSlots from "../../components/CompareSlots";
+import CompareQuickPicks from "../../components/CompareQuickPicks";
+import CompareResults from "../../components/CompareResults";
+import { paletteColor } from "../../lib/palette";
 import { metaForAlpha3 } from "../../lib/countryMeta";
 import { MAX_COMPARE } from "../../lib/constants";
 
@@ -35,12 +36,20 @@ function initialCompareAlpha3FromUrl() {
   return codes.slice(0, MAX_COMPARE);
 }
 
+function focusSearchInput() {
+  document.getElementById("global-search")?.focus();
+}
+
 export default function ComparePage() {
   const [countries, setCountries] = useState([]);
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState({ search: "" });
   const [compareAlpha3, setCompareAlpha3] = useState(initialCompareAlpha3FromUrl);
-  const [compareModalOpen, setCompareModalOpen] = useState(false);
+  // 'select': pick countries (search/quick picks/slots/map). 'results':
+  // the visual comparison + individual stats, replacing the old modal
+  // overlay so it reads as its own screen with a "← Change countries"
+  // way back instead of a dialog on top of the picker.
+  const [screen, setScreen] = useState("select");
 
   useEffect(() => {
     fetch("/api/countries")
@@ -98,17 +107,69 @@ export default function ComparePage() {
     [byAlpha3, toggleCompare]
   );
 
+  const pickQuickSet = useCallback((codes) => {
+    setCompareAlpha3(codes.slice(0, MAX_COMPARE));
+  }, []);
+
+  const canCompare = selectedCountries.length >= 2;
+  const goToResults = useCallback(() => {
+    if (!canCompare) return;
+    setScreen("results");
+    window.scrollTo(0, 0);
+  }, [canCompare]);
+  const goToSelect = useCallback(() => {
+    setScreen("select");
+    window.scrollTo(0, 0);
+  }, []);
+
+  if (screen === "results" && canCompare) {
+    return (
+      <div className="compare-results-screen">
+        <div className="compare-results-screen__toolbar">
+          <button type="button" className="compare-results-screen__back" onClick={goToSelect}>
+            ← Change countries
+          </button>
+          <div className="compare-results-screen__actions">
+            <button type="button" className="btn-secondary" disabled title="Coming soon">
+              Share
+            </button>
+            <button type="button" className="btn-secondary" disabled title="Coming soon">
+              Download CSV
+            </button>
+          </div>
+        </div>
+
+        <header className="compare-results-screen__header">
+          <h1>{selectedCountries.map((c) => c.name).join(" vs ")}</h1>
+          <div className="compare-results-screen__chips">
+            {selectedCountries.map((c, i) => (
+              <div className="compare-results-chip" key={c.iso3}>
+                <span className="compare-chip__dot" style={{ background: paletteColor(i) }} aria-hidden="true" />
+                {c.name}
+              </div>
+            ))}
+          </div>
+        </header>
+
+        <div className="compare-results-screen__body">
+          <CompareResults countries={selectedCountries} />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <>
+    <div className="compare-select-screen">
       <div className="app-hero">
-        <h1 className="app-hero__title">Compare</h1>
-        <p className="app-hero__subtitle">Search for countries, pick up to {MAX_COMPARE}, and compare their data.</p>
+        <h1 className="app-hero__title">Compare up to {MAX_COMPARE} countries</h1>
+        <p className="app-hero__subtitle">
+          Select a country or search for the name. Pick two or three countries to see visual
+          comparisons and graphics.
+        </p>
         {countries.length > 0 && (
           <span className="app-hero__stat">{countries.length} countries · public data</span>
         )}
       </div>
-
-      <CompareSubNav />
 
       {countries.length === 0 && !error && (
         <div aria-busy="true" aria-label="Loading countries and map">
@@ -118,15 +179,15 @@ export default function ComparePage() {
             </div>
           </div>
 
-          <section className="app-layout__compare">
-            <div className="compare-zone">
-              <div className="skeleton compare-skeleton__zone-line" />
-            </div>
-          </section>
-
           <section className="map-section">
             <div className="app-layout__map">
               <div className="skeleton compare-skeleton__map" />
+            </div>
+          </section>
+
+          <section className="app-layout__compare">
+            <div className="compare-zone">
+              <div className="skeleton compare-skeleton__zone-line" />
             </div>
           </section>
         </div>
@@ -148,16 +209,13 @@ export default function ComparePage() {
               search={filters.search}
               onSearchChange={(value) => setFilters((f) => ({ ...f, search: value }))}
             />
+            <CompareQuickPicks onPick={pickQuickSet} />
           </div>
 
-          <section className="app-layout__compare">
-            <SelectedCountries
-              selectedCountries={selectedCountries}
-              onRemove={removeCompare}
-              onReorder={reorderCompare}
-              onOpenCompare={() => setCompareModalOpen(true)}
-            />
-          </section>
+          <div className="compare-section-heading">
+            <h2>Choose from the map</h2>
+            <p>Click the country and add it to the comparison graphics.</p>
+          </div>
 
           <section className="map-section">
             <div className="app-layout__map">
@@ -166,21 +224,40 @@ export default function ComparePage() {
                 filteredAlpha3={filteredAlpha3Set}
                 onToggleCountry={toggleCompare}
                 onDropAlpha3={handleDropAlpha3}
+                statsByAlpha3={byAlpha3}
               />
             </div>
           </section>
 
           <section className="app-layout__compare">
-            <CompareCharts selectedCountries={selectedCountries} />
+            <CompareSlots
+              selectedCountries={selectedCountries}
+              onRemove={removeCompare}
+              onFocusSearch={focusSearchInput}
+            />
+
+            <div className="compare-select-screen__cta">
+              <button
+                type="button"
+                className="btn-primary"
+                disabled={!canCompare}
+                title={canCompare ? "Compare these countries" : "Pick at least 2 countries to compare"}
+                onClick={goToResults}
+              >
+                Compare →
+              </button>
+            </div>
           </section>
 
-          <CompareModal
-            open={compareModalOpen}
-            countries={selectedCountries}
-            onClose={() => setCompareModalOpen(false)}
+          <SelectedCountries
+            selectedCountries={selectedCountries}
+            onRemove={removeCompare}
+            onReorder={reorderCompare}
+            onOpenCompare={goToResults}
           />
+          <div className="compare-sticky-bar__spacer" aria-hidden="true" />
         </>
       )}
-    </>
+    </div>
   );
 }

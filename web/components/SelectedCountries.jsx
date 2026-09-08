@@ -2,24 +2,33 @@
 
 import { useState } from "react";
 import { handleDragStart, readDraggedAlpha3 } from "../lib/dnd";
+import { paletteColor } from "../lib/palette";
+import { MAX_COMPARE } from "../lib/constants";
 
-// The selected-countries chip row, plus the button that opens the visual
-// comparison modal. Sits between the search bar and the map. See
-// CompareCharts for the indicator bar-chart breakdown, which lives further
-// down the page.
+// The sticky bottom bar: chosen-country chips (color-coded to match their
+// slot card, draggable to reorder) plus the CTA that moves to the results
+// screen. Fixed to the bottom of the viewport so it's reachable from
+// anywhere on the selection screen (search, slots, or map) without
+// scrolling back up. See CompareSlots for the bigger per-country preview
+// cards above it in the page.
 export default function SelectedCountries({ selectedCountries, onRemove, onReorder, onOpenCompare }) {
   const [dropTarget, setDropTarget] = useState(null); // { iso3, before }
 
   const canOpenCompare = selectedCountries.length >= 2;
+  const label =
+    selectedCountries.length === 0
+      ? "Pick at least two countries"
+      : selectedCountries.length === 1
+        ? "One more to go"
+        : `Comparing ${selectedCountries.length} of ${MAX_COMPARE}`;
 
   return (
-    <div className="compare-zone">
-      <div className="compare-zone__header">
-        <div className="compare-zone__chips">
-          {selectedCountries.length === 0 ? (
-            <span className="compare-zone__placeholder">No countries selected yet.</span>
-          ) : (
-            selectedCountries.map((country, index) => (
+    <div className="compare-sticky-bar">
+      <div className="compare-sticky-bar__inner">
+        <div className="compare-sticky-bar__chips-group">
+          <span className="compare-sticky-bar__label">{label}</span>
+          <div className="compare-zone__chips">
+            {selectedCountries.map((country, index) => (
               <div
                 key={country.iso3}
                 className={
@@ -45,9 +54,8 @@ export default function SelectedCountries({ selectedCountries, onRemove, onReord
                   onReorder(draggedAlpha3, index, before);
                 }}
               >
-                <span>
-                  {country.flag} {country.name}
-                </span>
+                <span className="compare-chip__dot" style={{ background: paletteColor(index) }} aria-hidden="true" />
+                <span>{country.name}</span>
                 <button
                   type="button"
                   className="compare-chip__remove"
@@ -57,17 +65,17 @@ export default function SelectedCountries({ selectedCountries, onRemove, onReord
                   ×
                 </button>
               </div>
-            ))
-          )}
+            ))}
+          </div>
         </div>
         <button
           type="button"
           className="btn-primary"
           disabled={!canOpenCompare}
-          title={canOpenCompare ? "Open visual comparison" : "Pick at least 2 countries to compare"}
+          title={canOpenCompare ? "Compare these countries" : "Pick at least 2 countries to compare"}
           onClick={onOpenCompare}
         >
-          View comparison →
+          Compare →
         </button>
       </div>
     </div>
