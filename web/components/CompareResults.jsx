@@ -4,6 +4,11 @@ import { useEffect, useMemo, useState } from "react";
 import CountryPictogram from "./CountryPictogram";
 import GdpPerCapitaPictogram, { PERSON_HEIGHT as GDP_PER_CAPITA_PERSON_HEIGHT, bagStackHeight } from "./GdpPerCapitaPictogram";
 import GenericIndicatorPictogram, { ICON_HEIGHT as GENERIC_ICON_HEIGHT, iconGridHeight } from "./GenericIndicatorPictogram";
+import UnemploymentPictogram, {
+  CANVAS_CONTENT_HEIGHT as UNEMPLOYMENT_CANVAS_CONTENT_HEIGHT,
+  UNIT_PCT as UNEMPLOYMENT_UNIT_PCT,
+} from "./UnemploymentPictogram";
+import { EMPLOYED_POSES, IDLE_POSES, renderPrimitives as renderEmploymentPrimitives } from "../lib/employmentIcons";
 import TrueScalePanel from "./TrueScalePanel";
 import CompareStatsGrid from "./CompareCharts";
 import { INDICATORS, CATEGORIES } from "../lib/indicators";
@@ -38,6 +43,10 @@ const CANVAS_HEIGHT = BOX_SIZE + pictogramViewPad(BOX_SIZE) * 2;
 // canvas's height and leaving a big gap above the figures.
 const PICTOGRAM_CANVAS_PADDING = 20;
 
+// Unemployment's grid is a fixed 25 icons (5x5), so its canvas height
+// doesn't depend on the comparison group like GDP-per-capita/generic do.
+const UNEMPLOYMENT_CANVAS_HEIGHT = UNEMPLOYMENT_CANVAS_CONTENT_HEIGHT + PICTOGRAM_CANVAS_PADDING * 2;
+
 // Indicators bundled into the "Density" view below, so they aren't also
 // offered as their own entries in the selector.
 const DENSITY_BUNDLE_KEYS = new Set(["population", "area_km2", "population_density"]);
@@ -45,7 +54,7 @@ const DENSITY_BUNDLE_KEYS = new Set(["population", "area_km2", "population_densi
 // Keys with their own explicit entry below (a bundle or a custom image),
 // so they're skipped when the generic "everything else" entries are
 // derived from INDICATORS further down.
-const CUSTOM_VIEW_KEYS = new Set([...DENSITY_BUNDLE_KEYS, "gdp_usd", "gdp_per_capita_usd"]);
+const CUSTOM_VIEW_KEYS = new Set([...DENSITY_BUNDLE_KEYS, "gdp_usd", "gdp_per_capita_usd", "unemployment_pct"]);
 
 // One selectable entry per indicator the comparison screen can show. Only
 // one is active at a time — picking one swaps the image. "Density" bundles
@@ -77,6 +86,13 @@ const COMPARISON_INDICATORS = [
     category: "Economy",
     needsMap: false,
     description: "One personita per country, next to a stack of money bags sized to its GDP per capita.",
+  },
+  {
+    key: "unemployment_pct",
+    label: "Unemployment",
+    category: "Economy",
+    needsMap: false,
+    description: "25 figures per country — grey ones are unemployed, one per 4% of the labor force.",
   },
   ...INDICATORS.filter((ind) => !CUSTOM_VIEW_KEYS.has(ind.key)).map((ind) => ({
     key: ind.key,
@@ -323,6 +339,20 @@ export default function CompareResults({ countries }) {
                 </div>
               )}
 
+              {activeView.key === "unemployment_pct" && (
+                <div className="pictogram-gdp-row">
+                  <div className="pictogram-countries">
+                    {countries.map((country) => (
+                      <UnemploymentPictogram
+                        key={country.iso3}
+                        country={country}
+                        canvasHeight={UNEMPLOYMENT_CANVAS_HEIGHT}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {activeView.isGeneric && (
                 <div className="pictogram-gdp-row">
                   <div className="pictogram-countries">
@@ -356,6 +386,24 @@ export default function CompareResults({ countries }) {
               Each icon represents {formatNumber(iconValue)} people. Size scale based on the real area
               of {largestCountry?.name} (the largest in the group).
             </span>
+          </footer>
+        )}
+
+        {activeView.key === "unemployment_pct" && (
+          <footer className="compare-modal__legend compare-modal__legend--split">
+            <span className="compare-modal__legend-swatch">
+              <svg width="14" height="28" viewBox="0 0 60 120" aria-hidden="true">
+                {renderEmploymentPrimitives(EMPLOYED_POSES.front)}
+              </svg>
+              Employed
+            </span>
+            <span className="compare-modal__legend-swatch">
+              <svg width="14" height="28" viewBox="0 0 60 120" aria-hidden="true">
+                {renderEmploymentPrimitives(IDLE_POSES.walk)}
+              </svg>
+              Unemployed
+            </span>
+            <span>Each figure represents {UNEMPLOYMENT_UNIT_PCT}% of the labor force.</span>
           </footer>
         )}
       </div>

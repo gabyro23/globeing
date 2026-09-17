@@ -1408,6 +1408,27 @@ path.country.is-dimmed {
   flex-shrink: 0;
 }
 
+/* --- Unemployment view: fixed 5x5 grid of two-color figures, plus a
+   legend row with an employed/unemployed swatch pair --- */
+.unemployment-grid {
+  display: grid;
+  justify-content: center;
+}
+
+.compare-modal__legend--split {
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 18px;
+}
+
+.compare-modal__legend-swatch {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ink);
+  font-weight: 600;
+}
+
 @media (max-width: 720px) {
   .compare-modal__header {
     flex-direction: column;
