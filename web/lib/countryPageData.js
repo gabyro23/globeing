@@ -44,6 +44,30 @@ function getAllCountries() {
   return allCountriesPromise;
 }
 
+let allWarsPromise = null;
+
+// Every (country, conflict) row from country_wars — see
+// docs/data/wars_README.md for exactly what's in here (only conflicts
+// that reached UCDP's "war" intensity threshold, 1946 onward; an absent
+// country is NOT the same as "never had a war," just "never crossed that
+// threshold" per this specific dataset). Small table (~160 rows), so
+// fetching it whole and filtering per-country in JS is simpler than a
+// query per page and still cheap. Cached for the life of the server
+// process/build, same as getAllCountries.
+function getAllWars() {
+  if (!allWarsPromise) {
+    allWarsPromise = supabase
+      .from("country_wars")
+      .select("*")
+      .order("start_year", { ascending: false })
+      .then(({ data, error }) => {
+        if (error) throw new Error(error.message);
+        return data;
+      });
+  }
+  return allWarsPromise;
+}
+
 function rankFor(countries, key, iso3) {
   const indicator = INDICATORS.find((i) => i.key === key);
   const dir = indicator?.betterWhen === "low" ? 1 : -1;
@@ -160,6 +184,17 @@ export async function getCountryPageData(iso3) {
     outline = null;
   }
 
+  // Same best-effort treatment: a country page shouldn't 500 just because
+  // the wars table had a hiccup — the section simply won't render (see
+  // the `wars.length > 0` check in app/country/[slug]/page.js).
+  let wars = [];
+  try {
+    const allWars = await getAllWars();
+    wars = allWars.filter((w) => w.iso3 === iso3);
+  } catch {
+    wars = [];
+  }
+
   return {
     country,
     profile: buildProfile(country, iso3),
@@ -169,6 +204,7 @@ export async function getCountryPageData(iso3) {
     comparisons,
     facts,
     outline,
+    wars,
     inGuessRoster: GUESS_COUNTRY_NAMES.has(country.name.toUpperCase()),
     slug: slugForIso3(iso3),
   };

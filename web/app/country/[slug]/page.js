@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import CountryHeroPictogram from "../../../components/CountryHeroPictogram";
+import CountryWarTimeline from "../../../components/CountryWarTimeline";
 import CountryPageIndex from "../../../components/CountryPageIndex";
 import {
   formatArea,
@@ -8,6 +9,7 @@ import {
   formatPopulationCompact,
   formatCompareValue,
   formatIndicatorValue,
+  formatLocalCurrency,
 } from "../../../lib/format";
 import { formatMultiplier } from "../../../lib/compareInsights";
 import { pageMetadata, SITE_URL } from "../../../lib/seo";
@@ -63,7 +65,7 @@ export default async function CountryPage({ params }) {
   const data = iso3 ? await getCountryPageData(iso3) : null;
   if (!data) notFound();
 
-  const { country, profile, rankings, neighbors, comparisons, facts, outline, inGuessRoster } = data;
+  const { country, profile, rankings, neighbors, comparisons, facts, outline, wars, inGuessRoster } = data;
   const year = new Date().getFullYear();
   const updatedLabel = new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" });
 
@@ -222,6 +224,65 @@ export default async function CountryPage({ params }) {
                       </dd>
                     </div>
                   )}
+                  {(() => {
+                    const localAmount = formatLocalCurrency(
+                      country.minimum_wage_monthly_local,
+                      profile?.currency?.symbol || profile?.currency?.code
+                    );
+                    const yearNote = country.minimum_wage_year ? ` (${country.minimum_wage_year})` : "";
+
+                    // Preferred: a USD figure (converted from the local
+                    // amount using that year's official exchange rate — see
+                    // docs/data/minimum_wage_README.md) so figures are
+                    // comparable at a glance, with the real local-currency
+                    // amount kept underneath as a note since that's what's
+                    // legally set. Falls back to showing the local amount as
+                    // the headline if minimum_wage_monthly_usd hasn't been
+                    // loaded into Supabase yet, so the page never breaks or
+                    // goes blank while that column is being backfilled.
+                    if (country.minimum_wage_monthly_usd != null) {
+                      return (
+                        <div>
+                          <dt>Minimum wage</dt>
+                          <dd>
+                            {formatIndicatorValue(country.minimum_wage_monthly_usd, "US$")}/month
+                            {localAmount && (
+                              <span className="country-quickfacts__note">
+                                {" "}
+                                · {localAmount}/month{yearNote}
+                              </span>
+                            )}
+                          </dd>
+                        </div>
+                      );
+                    }
+
+                    if (localAmount) {
+                      return (
+                        <div>
+                          <dt>Minimum wage</dt>
+                          <dd>
+                            {localAmount}/month
+                            {country.minimum_wage_year && (
+                              <span className="country-quickfacts__note">
+                                {" "}
+                                · {country.minimum_wage_year} figure
+                              </span>
+                            )}
+                          </dd>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div>
+                        <dt>Minimum wage</dt>
+                        <dd className="country-quickfacts__no-data">
+                          No statutory minimum wage on record
+                        </dd>
+                      </div>
+                    );
+                  })()}
                   {profile?.languages?.length > 0 && (
                     <div>
                       <dt>{profile.languages.length > 1 ? "Languages" : "Language"}</dt>
@@ -303,6 +364,23 @@ export default async function CountryPage({ params }) {
                   <Link href={`/compare?countries=${country.iso3}`} className="country-compare-cta">
                     Compare {country.name} with any country →
                   </Link>
+                </section>
+              )}
+
+              {wars.length > 0 && (
+                <section className="country-section country-section--plain" aria-labelledby="wars-heading">
+                  <h2 id="wars-heading" className="country-section__title">
+                    {country.name}&apos;s war history
+                  </h2>
+                  <CountryWarTimeline wars={wars} />
+                  <p className="country-source-note">
+                    Wars that reached at least 1,000 battle-related deaths in a year, since 1946 — not
+                    a full record of every armed conflict {country.name} has had. Source:{" "}
+                    <a href="https://ucdp.uu.se/downloads/" target="_blank" rel="noreferrer">
+                      UCDP/PRIO Armed Conflict Dataset
+                    </a>
+                    .
+                  </p>
                 </section>
               )}
 
@@ -430,6 +508,30 @@ function buildFaqItems({ country, profile, comparisons }) {
     items.push({
       question: `What is the currency of ${country.name}?`,
       answer: `The currency of ${country.name} is the ${profile.currency.name} (${profile.currency.code}).`,
+    });
+  }
+
+  if (country.minimum_wage_monthly_usd != null) {
+    const usdWage = formatIndicatorValue(country.minimum_wage_monthly_usd, "US$");
+    const localWage = formatLocalCurrency(
+      country.minimum_wage_monthly_local,
+      profile?.currency?.symbol || profile?.currency?.code
+    );
+    const yearNote = country.minimum_wage_year ? ` (as of ${country.minimum_wage_year})` : "";
+    const localNote = localWage ? ` — ${localWage} per month in local currency` : "";
+    items.push({
+      question: `What is the minimum wage in ${country.name}?`,
+      answer: `${country.name}'s statutory minimum wage is about ${usdWage} per month${yearNote}${localNote}.`,
+    });
+  } else if (country.minimum_wage_monthly_local != null) {
+    const wage = formatLocalCurrency(
+      country.minimum_wage_monthly_local,
+      profile?.currency?.symbol || profile?.currency?.code
+    );
+    const yearNote = country.minimum_wage_year ? ` (as of ${country.minimum_wage_year})` : "";
+    items.push({
+      question: `What is the minimum wage in ${country.name}?`,
+      answer: `${country.name}'s statutory minimum wage is ${wage} per month${yearNote}.`,
     });
   }
 

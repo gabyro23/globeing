@@ -32,6 +32,14 @@
   --highlight: #077187;
   --highlight-ink: #ffffff;
   --danger: #b91c1c;
+  /* War history timeline (components/CountryWarTimeline.jsx) — interstate
+     and intrastate reuse the site's own accent/sage so they don't feel
+     like a bolted-on palette; internationalized-intrastate and extrastate
+     are their own tokens since there's no existing color for either. */
+  --war-interstate: var(--accent);
+  --war-intrastate: var(--sage);
+  --war-intl-intrastate: #c1834f;
+  --war-extrastate: #5b7c99;
   /* Logo wordmark colors — fixed brand pair per the "Logo Globeing" spec,
      not tied to --ink/--accent so the logo can't drift when the general UI
      accent hue changes (as it does in dark mode). */
@@ -97,6 +105,8 @@
     --accent-ink: #0c1f22;
     --highlight: #3fb6c2;
     --highlight-ink: #0c1f22;
+    --war-intl-intrastate: #d9a06a;
+    --war-extrastate: #8fb3cc;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.6);
     --background: var(--bg);
     --foreground: var(--ink);
@@ -4672,6 +4682,14 @@ path.country.is-dimmed {
   height: 100vh;
   opacity: 0.09;
 }
+/* /country hub only (app/country/page.js) — the whole-world version of
+   the watermark reads better bigger than a single country's silhouette
+   does, so it gets its own size instead of sharing .country-outline-bg's
+   default. Applied as a second class alongside .country-outline-bg, so
+   per-country pages (app/country/[slug]/page.js) are untouched. */
+.country-outline-bg--world {
+  width: min(92%, 980px);
+}
 .country-outline-bg path {
   fill: var(--accent-deep);
 }
@@ -4835,6 +4853,11 @@ path.country.is-dimmed {
   color: var(--muted);
   margin-top: 2px;
 }
+.country-quickfacts__no-data {
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--muted);
+}
 
 .country-section--pictogram {
   display: flex;
@@ -4886,6 +4909,123 @@ path.country.is-dimmed {
   font-size: 16px;
   font-weight: 700;
   color: var(--accent-deep);
+}
+
+.country-war-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.country-war-timeline__axis {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  font-family: ui-monospace, "SF Mono", monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.country-war-timeline__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.country-war-timeline__row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 9px 0 11px;
+  border-bottom: 1px solid var(--divider);
+}
+.country-war-timeline__list li:last-child {
+  border-bottom: none;
+}
+.country-war-timeline__row-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.country-war-timeline__side {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.country-war-timeline__vs {
+  font-family: ui-monospace, "SF Mono", monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin: 0 2px;
+}
+.country-war-timeline__chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 18px;
+  border-radius: 3px;
+  line-height: 1;
+  overflow: hidden;
+  background: var(--divider);
+  border: 1px solid var(--border);
+  font-size: 13px;
+  flex: none;
+}
+.country-war-timeline__chip--noflag {
+  background: transparent;
+  border: 1px dashed var(--border-strong);
+  font-size: 10px;
+  color: var(--muted);
+}
+.country-war-timeline__label {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin-right: 6px;
+}
+.country-war-timeline__meta {
+  margin-left: auto;
+  font-family: ui-monospace, "SF Mono", monospace;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.country-war-timeline__track {
+  position: relative;
+  height: 12px;
+  border-radius: 6px;
+  background: var(--divider);
+}
+.country-war-timeline__fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 6px;
+}
+.country-war-timeline__legend {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  padding-top: var(--space-1);
+}
+.country-war-timeline__legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.country-war-timeline__legend-swatch {
+  width: 22px;
+  height: 8px;
+  border-radius: 4px;
 }
 
 .country-comparisons {
@@ -5511,4 +5651,492 @@ path.country.is-dimmed {
   color: var(--muted);
   font-size: 15px;
   line-height: 1.5;
+}
+
+/* ============================================================
+   Breaking News by country (/noticias)
+   Design ported from Gaby's "Breaking News.dc.html" mockup —
+   dark hero + live ticker, country rail, featured story + grid.
+   ============================================================ */
+
+/* --- Dark hero band (own container — "Variant C" per Estructura de
+   Páginas: full-bleed colored section, not the plain .app-hero) --- */
+.news-hero {
+  background: var(--accent-deep);
+  color: var(--bg);
+  position: relative;
+  overflow: hidden;
+}
+
+.news-hero__glow {
+  position: absolute;
+  right: -120px;
+  top: -160px;
+  width: 520px;
+  height: 520px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, rgba(158, 206, 154, 0.45), rgba(7, 113, 135, 0) 65%);
+  pointer-events: none;
+}
+
+.news-hero__inner {
+  position: relative;
+  padding: 44px clamp(16px, 4vw, 40px) 32px;
+}
+
+.news-hero__live {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--sage-light);
+  margin-bottom: 16px;
+}
+
+.news-hero__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--sand);
+  display: inline-block;
+  animation: news-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes news-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+
+.news-hero__row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.news-hero__title {
+  font-size: clamp(34px, 5vw, 56px);
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin: 0 0 14px;
+  max-width: 620px;
+}
+
+.news-hero__subtitle {
+  font-size: 17px;
+  line-height: 1.55;
+  color: rgba(251, 245, 239, 0.82);
+  margin: 0;
+  max-width: 560px;
+}
+
+.news-hero__stats {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.news-hero__stat-value {
+  font-size: 38px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.news-hero__stat-label {
+  font-size: 12px;
+  color: var(--sage-light);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-top: 6px;
+}
+
+.news-hero__back {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--sage-light);
+  margin-bottom: 18px;
+}
+
+.news-hero__back:hover {
+  color: var(--bg);
+}
+
+/* --- Ticker strip (hub only) --- */
+.news-ticker {
+  border-top: 1px solid rgba(158, 206, 154, 0.28);
+  background: #063f46;
+  overflow: hidden;
+  position: relative;
+}
+
+.news-ticker__row {
+  display: flex;
+  align-items: center;
+}
+
+.news-ticker__label {
+  flex: 0 0 auto;
+  background: var(--sand);
+  color: var(--accent-deep);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 12px 18px;
+  z-index: 2;
+}
+
+.news-ticker__viewport {
+  overflow: hidden;
+  flex: 1;
+}
+
+.news-ticker__track {
+  display: flex;
+  width: max-content;
+  animation: news-marquee 40s linear infinite;
+}
+
+@keyframes news-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.news-ticker__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 26px;
+  font-size: 14px;
+  color: rgba(251, 245, 239, 0.9);
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.news-ticker__item:hover {
+  color: var(--bg);
+}
+
+.news-ticker__country {
+  color: var(--sage-light);
+  font-weight: 700;
+}
+
+/* --- Search + region filter + country rail (NewsCountryRail) --- */
+.news-toolbar {
+  padding: 28px clamp(16px, 4vw, 40px) 0;
+}
+
+.news-toolbar__row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.news-search-input {
+  flex: 1 1 320px;
+  max-width: 420px;
+  box-sizing: border-box;
+  padding: 13px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 15px;
+  font-family: inherit;
+  color: var(--ink);
+  outline: none;
+}
+
+.news-search-input:focus {
+  border-color: var(--accent);
+}
+
+.news-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.news-chip {
+  padding: 9px 15px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+}
+
+.news-chip--active {
+  border-color: var(--accent-deep);
+  background: var(--accent-deep);
+  color: var(--bg);
+}
+
+.news-rail {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 2px 24px;
+  scrollbar-width: thin;
+}
+
+.news-rail::-webkit-scrollbar {
+  height: 6px;
+}
+
+.news-rail::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 3px;
+}
+
+.news-rail__pill {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  text-decoration: none;
+  border: 1px solid var(--divider);
+  background: transparent;
+  color: var(--muted);
+}
+
+.news-rail__pill--active {
+  border-color: var(--sage-light);
+  background: var(--sage-bg-strong);
+  color: var(--accent-deep);
+}
+
+.news-rail__empty {
+  font-size: 13px;
+  color: var(--muted);
+  padding: 8px 4px;
+}
+
+/* --- Country page body --- */
+.news-country-body {
+  padding: 20px clamp(16px, 4vw, 40px) 100px;
+}
+
+.news-country-body__topline {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin: 4px 0 18px;
+}
+
+.news-country-body__heading {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.news-toggle-images {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+/* --- Featured story (top headline) --- */
+.news-featured {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(30, 42, 44, 0.06);
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+
+.news-featured__media {
+  position: relative;
+  flex: 1 1 380px;
+  min-height: 280px;
+  background: var(--sage-bg-strong);
+}
+
+.news-featured__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.news-featured__body {
+  flex: 1 1 420px;
+  padding: 28px 28px 26px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.news-featured__meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  color: var(--muted);
+}
+
+.news-featured__avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent-deep);
+  color: var(--bg);
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.news-featured__source {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.news-featured__dot {
+  color: var(--border-strong);
+}
+
+.news-featured__title {
+  font-size: clamp(24px, 3vw, 30px);
+  line-height: 1.16;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0 0 14px;
+}
+
+.news-featured__summary {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 0 0 20px;
+  max-width: 56ch;
+}
+
+.news-featured__cta {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent);
+  color: var(--bg);
+  font-size: 15px;
+  font-weight: 700;
+  padding: 12px 20px;
+  border-radius: 999px;
+}
+
+.news-featured__cta:hover {
+  background: var(--accent-deep);
+  color: var(--bg);
+}
+
+/* --- Remaining stories grid --- */
+.news-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 22px 20px;
+}
+
+.news-grid__item {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.news-grid__media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--sage-bg-strong);
+  border: 1px solid var(--border);
+}
+
+.news-grid__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.news-grid__title {
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.28;
+  letter-spacing: -0.01em;
+}
+
+.news-grid__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--muted);
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+
+.news-grid__avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--sage-bg-strong);
+  border: 1px solid var(--divider);
+  color: var(--accent-deep);
+  font-size: 10px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.news-grid__source {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.news-country-body__footnote {
+  margin-top: 26px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.news-country-body__empty {
+  padding: 8px 0;
 }

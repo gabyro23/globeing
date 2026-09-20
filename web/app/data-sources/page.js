@@ -62,6 +62,36 @@ const SOURCES = [
     ),
   },
   {
+    title: "Minimum wage",
+    where: "Used on each country page's quick facts and FAQ.",
+    body: (
+      <>
+        <p>
+          Statutory minimum wage figures (in each country&apos;s own currency) come from{" "}
+          <a href="https://ilostat.ilo.org/" target="_blank" rel="noreferrer">
+            ILOSTAT
+          </a>
+          , the International Labour Organization&apos;s statistics database. Coverage years vary by
+          country, so we always show the year a figure was last reported alongside it. A blank figure
+          usually means the country has no statutory minimum wage — pay is set some other way, like
+          collective bargaining (this is the case for Sweden, Denmark, Norway, Finland, Iceland,
+          Switzerland, and Austria, among others) — not that the data is missing, though for a handful
+          of small territories ILOSTAT genuinely has no figure on file either way.
+        </p>
+        <p>
+          The USD figure shown alongside it is a plain currency conversion — the local-currency amount
+          converted using the{" "}
+          <a href="https://data.worldbank.org/indicator/PA.NUS.FCRF" target="_blank" rel="noreferrer">
+            World Bank&apos;s official market exchange rate
+          </a>{" "}
+          for that same reporting year. It is not adjusted for purchasing power or cost of living, so
+          it&apos;s meant for a quick, literal dollar comparison only — not a claim that two countries&apos;
+          minimum wages buy the same amount of goods.
+        </p>
+      </>
+    ),
+  },
+  {
     title: "Country shapes & outlines",
     where: "Used for the world map, the silhouette pictograms, Guess the Country, and Fill the Country.",
     body: (
@@ -78,6 +108,36 @@ const SOURCES = [
         rather than surveyed precision — good for a recognizable silhouette, not for cartographic or
         legal boundary claims.
       </p>
+    ),
+  },
+  {
+    title: "War history",
+    where: "Used on each indexed country page's war history section.",
+    body: (
+      <>
+        <p>
+          Which countries have been at war, against/with whom, and in what years comes from the{" "}
+          <a href="https://ucdp.uu.se/downloads/" target="_blank" rel="noreferrer">
+            UCDP/PRIO Armed Conflict Dataset
+          </a>
+          , produced by the Uppsala Conflict Data Program (Uppsala University) with PRIO Oslo — the
+          standard academic and UN-referenced source for this. It&apos;s free and{" "}
+          <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noreferrer">
+            CC BY 4.0
+          </a>{" "}
+          licensed: Gleditsch, Wallensteen, Eriksson, Sollenberg &amp; Strand (2002) &quot;Armed
+          Conflict 1946-2001: A New Dataset&quot;, <em>Journal of Peace Research</em> 39(5), plus UCDP&apos;s
+          annual &quot;Organized violence&quot; article (see the dataset&apos;s own codebook for that year&apos;s
+          exact citation).
+        </p>
+        <p>
+          This is a narrow, deliberate slice of the dataset: only conflicts that reached at least 1,000
+          battle-related deaths in a calendar year (UCDP&apos;s own &quot;war&quot; threshold) are included, and
+          only from 1946 onward — UCDP&apos;s own coverage starts at the end of WWII. A country not showing
+          any wars doesn&apos;t mean it&apos;s never had an armed conflict, only that none crossed this specific
+          threshold. Interstate wars are shown on both countries&apos; pages.
+        </p>
+      </>
     ),
   },
   {

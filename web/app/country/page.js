@@ -51,7 +51,7 @@ export default async function CountryHubPage() {
       {outline && (
         <div className="country-outline-sticky" aria-hidden="true">
           <svg
-            className="country-outline-bg"
+            className="country-outline-bg country-outline-bg--world"
             viewBox={outline.viewBox}
             preserveAspectRatio="xMaxYMid meet"
             focusable="false"

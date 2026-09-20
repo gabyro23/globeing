@@ -79,3 +79,38 @@ export function formatCompareValue(value, unit) {
   if (unit) return `${scaledWithWord(num)} ${unit}`;
   return scaledWithWord(num);
 }
+
+// Formats a value that's already in a specific country's own currency (e.g.
+// minimum wage figures, which aren't comparable across countries without an
+// FX conversion the site doesn't do) — unlike formatCompareValue/
+// formatIndicatorValue, this never assumes US$. `symbol` is whatever should
+// be shown before the number (a currency symbol like "€", or a currency
+// code like "USD" if no symbol is available).
+export function formatLocalCurrency(value, symbol) {
+  if (value === null || value === undefined || value === "") return null;
+  const num = Number(value);
+  if (Number.isNaN(num)) return null;
+  return symbol ? `${symbol} ${formatNumber(num)}` : formatNumber(num);
+}
+
+// Relative time for news headlines ("2h ago", "3d ago") — /noticias only.
+// Falls back to a short date once it's more than a week old, since
+// "9d ago" reads worse than the actual date at that point.
+export function formatRelativeTime(isoString) {
+  if (!isoString) return "";
+  const date = new Date(isoString);
+  if (Number.isNaN(date.getTime())) return "";
+
+  const diffMs = Date.now() - date.getTime();
+  const diffMinutes = Math.round(diffMs / 60000);
+  if (diffMinutes < 1) return "just now";
+  if (diffMinutes < 60) return `${diffMinutes}m ago`;
+
+  const diffHours = Math.round(diffMinutes / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+
+  const diffDays = Math.round(diffHours / 24);
+  if (diffDays < 7) return `${diffDays}d ago`;
+
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}

@@ -1,0 +1,8 @@
+gwno,side,conflict_id,side_a,side_b,year,reason
+751,a,226,Government of Hyderabad,Government of India,1948,código de Gleditsch-Ward desconocido (no está en nuestra tabla GW_TO_ISO3 — revisar si falta agregarlo)
+817,a,249,Government of South Vietnam,FNL,1955,"República de Vietnam / Vietnam del Sur (se disolvió en 1975, absorbido por Vietnam/816)"
+817,a,293,Government of South Vietnam,Government of Vietnam (North Vietnam),1965,"República de Vietnam / Vietnam del Sur (se disolvió en 1975, absorbido por Vietnam/816)"
+680,a,359,Government of South Yemen,YSP - AFI,1986,"Yemen del Sur / República Popular de Yemen (se disolvió en 1990, absorbido por Yemen/678)"
+345,a,385,Government of Serbia (Yugoslavia),"Croatian irregulars, Republic of Croatia",1991,"Yugoslavia 1918–2006 (se disolvió; los sucesores tienen su propio código — Serbia/340, Croacia/344, etc.)"
+345,a,412,Government of Serbia (Yugoslavia),UCK,1998,"Yugoslavia 1918–2006 (se disolvió; los sucesores tienen su propio código — Serbia/340, Croacia/344, etc.)"
+751,a,11884,Government of Hyderabad,CPI,1947,código de Gleditsch-Ward desconocido (no está en nuestra tabla GW_TO_ISO3 — revisar si falta agregarlo)

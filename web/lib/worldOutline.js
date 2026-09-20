@@ -19,9 +19,16 @@ const PROJECTION_BOX_HEIGHT = 480;
 
 const normalizeId = (id) => String(Number(id));
 // Same filter WorldMap.jsx applies: only landmasses we actually track in
-// countryTopoIds.json — leaves out Antarctica and any other shape the
-// world atlas has that isn't one of our countries.
-const knownTopoIds = new Set(topoIds.map((c) => normalizeId(c.id)));
+// countryTopoIds.json — leaves out any shape the world atlas has that
+// isn't one of our countries. Antarctica IS in countryTopoIds.json (id
+// 10, alpha3 ATA, region "Other"), so it has to be excluded explicitly
+// on top of that filter, not just by "not in our list" — left in, its
+// huge, mostly-empty landmass dominates the whole watermark and makes it
+// look wrong (reported by the user, "saca antartica").
+const ANTARCTICA_ALPHA3 = "ATA";
+const knownTopoIds = new Set(
+  topoIds.filter((c) => c.alpha3 !== ANTARCTICA_ALPHA3).map((c) => normalizeId(c.id))
+);
 
 let outlinePromise = null;
 

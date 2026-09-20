@@ -1,0 +1,162 @@
+iso3,conflict_name,side_a,side_b,type_of_conflict,start_year,end_year,ucdp_conflict_id
+AFG,"Government of Afghanistan – NRF, Taleban",Government of Afghanistan,"NRF, Taleban",internationalized intrastate,1978,2021,333
+AFG,"Government of Afghanistan – Government of United Kingdom, Government of United States of America",Government of Afghanistan,"Government of United Kingdom, Government of United States of America",interstate,2001,2001,13692
+AFG,Government of Afghanistan – IS,Government of Afghanistan,IS,internationalized intrastate,2016,2019,13637
+AGO,Government of Angola – UNITA,Government of Angola,UNITA,internationalized intrastate,1975,2001,327
+AUS,"Government of Australia, Government of United Kingdom, Government of United States of America – Government of Iraq","Government of Australia, Government of United Kingdom, Government of United States of America",Government of Iraq,interstate,2003,2003,420
+AZE,Government of Azerbaijan – Republic of Artsakh,Government of Azerbaijan,Republic of Artsakh,internationalized intrastate,1992,2020,388
+BDI,"Government of Burundi – CNDD-FDD , Palipehutu-FNL",Government of Burundi,"CNDD-FDD , Palipehutu-FNL",intrastate,1997,2002,287
+BFA,Government of Burkina Faso – JNIM,Government of Burkina Faso,JNIM,internationalized intrastate,2022,,360
+BIH,"Government of Bosnia-Herzegovina – Serbian irregulars, Serbian Republic of Bosnia-Herzegovina",Government of Bosnia-Herzegovina,"Serbian irregulars, Serbian Republic of Bosnia-Herzegovina",intrastate,1992,1995,389
+BIH,"Government of Bosnia-Herzegovina – Croatian irregulars, Croatian Republic of Bosnia-Herzegovina",Government of Bosnia-Herzegovina,"Croatian irregulars, Croatian Republic of Bosnia-Herzegovina",internationalized intrastate,1993,1993,398
+BIH,Government of Bosnia-Herzegovina – Autonomous Province of Western Bosnia,Government of Bosnia-Herzegovina,Autonomous Province of Western Bosnia,intrastate,1994,1994,397
+BOL,Government of Bolivia – Popular Revolutionary Movement,Government of Bolivia,Popular Revolutionary Movement,intrastate,1946,1946,200
+CHN,Government of China – PLA,Government of China,PLA,intrastate,1946,1949,202
+CHN,Government of China – Taiwanese insurgents,Government of China,Taiwanese insurgents,intrastate,1947,1947,217
+CHN,Government of China – Government of Taiwan,Government of China,Government of Taiwan,interstate,1949,1958,232
+CHN,Government of China – Tibet,Government of China,Tibet,intrastate,1956,1959,236
+CHN,Government of China – Government of India,Government of China,Government of India,interstate,1962,1962,274
+CHN,Government of China – Government of Vietnam (North Vietnam),Government of China,Government of Vietnam (North Vietnam),interstate,1979,1979,334
+CMR,Government of Cameroon – UPC,Government of Cameroon,UPC,internationalized intrastate,1960,1960,353
+COD,"Government of DR Congo (Zaire) – AFC, CRP",Government of DR Congo (Zaire),"AFC, CRP",internationalized intrastate,1964,,283
+COG,"Government of Congo – Cocoyes, Ninjas, Ntsiloulous",Government of Congo,"Cocoyes, Ninjas, Ntsiloulous",internationalized intrastate,1997,1998,408
+COL,"Government of Colombia – ELN, FARC",Government of Colombia,"ELN, FARC",intrastate,1985,2005,289
+CRI,Government of Costa Rica – National Liberation Army,Government of Costa Rica,National Liberation Army,intrastate,1948,1948,225
+CUB,Government of Cuba – M-26-7,Government of Cuba,M-26-7,intrastate,1958,1958,242
+CYP,Government of Cyprus – Government of Turkey,Government of Cyprus,Government of Turkey,interstate,1974,1974,323
+DZA,"Government of Algeria – AQIM, GIA",Government of Algeria,"AQIM, GIA",intrastate,1994,1999,386
+EGY,"Government of Egypt, Government of Iraq, Government of Jordan, Government of Lebanon, Government of Syria – Government of Israel","Government of Egypt, Government of Iraq, Government of Jordan, Government of Lebanon, Government of Syria",Government of Israel,interstate,1948,1948,228
+EGY,"Government of Egypt – Government of France, Government of Israel, Government of United Kingdom",Government of Egypt,"Government of France, Government of Israel, Government of United Kingdom",interstate,1956,1956,252
+EGY,Government of Egypt – Government of Israel,Government of Egypt,Government of Israel,interstate,1967,1973,11343
+ERI,Government of Eritrea – Government of Ethiopia,Government of Eritrea,Government of Ethiopia,interstate,1998,2000,409
+ETH,Government of Ethiopia – EPLF,Government of Ethiopia,EPLF,intrastate,1975,1991,275
+ETH,"Government of Ethiopia – GLF, TPLF",Government of Ethiopia,"GLF, TPLF",internationalized intrastate,1976,2022,267
+ETH,Government of Ethiopia – Government of Somalia,Government of Ethiopia,Government of Somalia,interstate,1977,1978,268
+ETH,Government of Ethiopia – WSLF,Government of Ethiopia,WSLF,internationalized intrastate,1977,1978,329
+ETH,Government of Ethiopia – OLF,Government of Ethiopia,OLF,intrastate,1981,1981,413
+ETH,Government of Ethiopia – SLM,Government of Ethiopia,SLM,intrastate,1981,1981,437
+ETH,Government of Eritrea – Government of Ethiopia,Government of Eritrea,Government of Ethiopia,interstate,1998,2000,409
+ETH,Government of Ethiopia – Fano,Government of Ethiopia,Fano,intrastate,2023,,16069
+FRA,Government of France – Viet minh,Government of France,Viet minh,extrastate,1946,1954,216
+FRA,Government of France – MDRM,Government of France,MDRM,extrastate,1947,1947,219
+FRA,Government of France – FLN ,Government of France,FLN ,extrastate,1955,1961,246
+FRA,"Government of Egypt – Government of France, Government of Israel, Government of United Kingdom",Government of Egypt,"Government of France, Government of Israel, Government of United Kingdom",interstate,1956,1956,252
+FRA,Government of France – OAS,Government of France,OAS,intrastate,1961,1962,270
+FRA,Government of France – Government of Tunisia,Government of France,Government of Tunisia,interstate,1961,1961,272
+GBR,Government of United Kingdom – CPM,Government of United Kingdom,CPM,extrastate,1950,1953,229
+GBR,Government of United Kingdom – Mau Mau,Government of United Kingdom,Mau Mau,extrastate,1953,1956,241
+GBR,"Government of Egypt – Government of France, Government of Israel, Government of United Kingdom",Government of Egypt,"Government of France, Government of Israel, Government of United Kingdom",interstate,1956,1956,252
+GBR,"Government of Afghanistan – Government of United Kingdom, Government of United States of America",Government of Afghanistan,"Government of United Kingdom, Government of United States of America",interstate,2001,2001,13692
+GBR,"Government of Australia, Government of United Kingdom, Government of United States of America – Government of Iraq","Government of Australia, Government of United Kingdom, Government of United States of America",Government of Iraq,interstate,2003,2003,420
+GEO,Government of Georgia – Republic of Abkhazia,Government of Georgia,Republic of Abkhazia,intrastate,1993,1993,392
+GRC,Government of Greece – DSE,Government of Greece,DSE,intrastate,1946,1949,203
+HND,Government of El Salvador – Government of Honduras,Government of El Salvador,Government of Honduras,interstate,1969,1969,306
+HRV,Government of Croatia – Serbian Republic of Krajina,Government of Croatia,Serbian Republic of Krajina,intrastate,1992,1995,390
+HTI,Government of Haiti – Viv Ansanm,Government of Haiti,Viv Ansanm,internationalized intrastate,2025,,381
+HUN,Government of Hungary – Government of Russia (Soviet Union),Government of Hungary,Government of Russia (Soviet Union),interstate,1956,1956,250
+IDN,Government of Indonesia – Republic of South Moluccas,Government of Indonesia,Republic of South Moluccas,intrastate,1950,1950,237
+IDN,"Government of Indonesia – Darul Islam, Permesta Movement, PRRI",Government of Indonesia,"Darul Islam, Permesta Movement, PRRI",intrastate,1953,1961,243
+IDN,Government of Indonesia – CNRT,Government of Indonesia,CNRT,intrastate,1975,1978,330
+IDN,Government of Indonesia – OPM,Government of Indonesia,OPM,intrastate,1976,1981,291
+IND,Government of India – Government of Pakistan,Government of India,Government of Pakistan,interstate,1948,1971,218
+IND,Government of Hyderabad – Government of India,Government of Hyderabad,Government of India,interstate,1948,1948,226
+IND,Government of India – CPI,Government of India,CPI,intrastate,1948,1951,227
+IND,Government of China – Government of India,Government of China,Government of India,interstate,1962,1962,274
+IND,Government of India – Sikh insurgents,Government of India,Sikh insurgents,intrastate,1988,1992,351
+IND,Government of India – Kashmir insurgents,Government of India,Kashmir insurgents,intrastate,2000,2005,364
+IRN,Government of Iran – KDPI,Government of Iran,KDPI,intrastate,1979,1982,205
+IRN,Government of Iran – Government of Iraq,Government of Iran,Government of Iraq,interstate,1980,1988,324
+IRN,Government of Iran – MEK,Government of Iran,MEK,intrastate,1981,1982,338
+IRN,Government of Iran – Government of Israel,Government of Iran,Government of Israel,interstate,2025,,14609
+IRQ,"Government of Egypt, Government of Iraq, Government of Jordan, Government of Lebanon, Government of Syria – Government of Israel","Government of Egypt, Government of Iraq, Government of Jordan, Government of Lebanon, Government of Syria",Government of Israel,interstate,1948,1948,228
+IRQ,"Government of Iraq – KDP, PUK",Government of Iraq,"KDP, PUK",intrastate,1961,1991,271
+IRQ,Government of Iraq – IS,Government of Iraq,IS,internationalized intrastate,1963,2017,259
+IRQ,Government of Iran – Government of Iraq,Government of Iran,Government of Iraq,interstate,1980,1988,324
+IRQ,Government of Iraq – Government of Kuwait,Government of Iraq,Government of Kuwait,interstate,1990,1991,371
+IRQ,"Government of Australia, Government of United Kingdom, Government of United States of America – Government of Iraq","Government of Australia, Government of United Kingdom, Government of United States of America",Government of Iraq,interstate,2003,2003,420
+ISR,"Government of Egypt, Government of Iraq, Government of Jordan, Government of Lebanon, Government of Syria – Government of Israel","Government of Egypt, Government of Iraq, Government of Jordan, Government of Lebanon, Government of Syria",Government of Israel,interstate,1948,1948,228
+ISR,"Government of Egypt – Government of France, Government of Israel, Government of United Kingdom",Government of Egypt,"Government of France, Government of Israel, Government of United Kingdom",interstate,1956,1956,252
+ISR,Government of Israel – Government of Jordan,Government of Israel,Government of Jordan,interstate,1967,1967,301
+ISR,Government of Israel – Government of Syria,Government of Israel,Government of Syria,interstate,1967,1973,302
+ISR,Government of Egypt – Government of Israel,Government of Egypt,Government of Israel,interstate,1967,1973,11343
+ISR,"Government of Israel – Hamas, Palestinian Mujahideen Movement, PIJ, PRC",Government of Israel,"Hamas, Palestinian Mujahideen Movement, PIJ, PRC",intrastate,1982,,234
+ISR,Government of Israel – Hezbollah,Government of Israel,Hezbollah,intrastate,2006,2024,426
+ISR,Government of Iran – Government of Israel,Government of Iran,Government of Israel,interstate,2025,,14609
+JOR,"Government of Egypt, Government of Iraq, Government of Jordan, Government of Lebanon, Government of Syria – Government of Israel","Government of Egypt, Government of Iraq, Government of Jordan, Government of Lebanon, Government of Syria",Government of Israel,interstate,1948,1948,228
+JOR,Government of Israel – Government of Jordan,Government of Israel,Government of Jordan,interstate,1967,1967,301
+KHM,Government of Cambodia (Kampuchea) – KNUFNS,Government of Cambodia (Kampuchea),KNUFNS,internationalized intrastate,1967,1978,300
+KOR,Government of North Korea – Government of South Korea,Government of North Korea,Government of South Korea,interstate,1950,1953,235
+KWT,Government of Iraq – Government of Kuwait,Government of Iraq,Government of Kuwait,interstate,1990,1991,371
+LAO,Government of Laos – Pathet Lao,Government of Laos,Pathet Lao,internationalized intrastate,1959,1973,262
+LBN,"Government of Egypt, Government of Iraq, Government of Jordan, Government of Lebanon, Government of Syria – Government of Israel","Government of Egypt, Government of Iraq, Government of Jordan, Government of Lebanon, Government of Syria",Government of Israel,interstate,1948,1948,228
+LBN,"Government of Lebanon – Amal, NSF",Government of Lebanon,"Amal, NSF",internationalized intrastate,1958,1984,260
+LBR,"Government of Liberia – LURD, MODEL",Government of Liberia,"LURD, MODEL",intrastate,2003,2003,341
+LBY,Government of Chad – Government of Libya,Government of Chad,Government of Libya,interstate,1987,1987,361
+LBY,Government of Libya – Forces of the House of Representatives,Government of Libya,Forces of the House of Representatives,internationalized intrastate,2011,2019,11346
+LBY,Government of Libya – IS,Government of Libya,IS,internationalized intrastate,2016,2016,13694
+LKA,Government of Sri Lanka – JVP,Government of Sri Lanka,JVP,intrastate,1971,1971,313
+LKA,Government of Sri Lanka – LTTE,Government of Sri Lanka,LTTE,intrastate,1987,2009,352
+MAR,Government of Morocco – POLISARIO,Government of Morocco,POLISARIO,intrastate,1979,1980,331
+MLI,Government of Mali – JNIM,Government of Mali,JNIM,internationalized intrastate,2022,,11347
+MMR,"Government of Myanmar (Burma) – NUG, PSLF",Government of Myanmar (Burma),"NUG, PSLF",intrastate,1948,,222
+MMR,Government of Myanmar (Burma) – KNU,Government of Myanmar (Burma),KNU,intrastate,1949,1992,221
+MMR,Government of Myanmar (Burma) – KIO,Government of Myanmar (Burma),KIO,intrastate,1961,1984,231
+MMR,"Government of Myanmar (Burma) – SSA, SSNLO, SURA",Government of Myanmar (Burma),"SSA, SSNLO, SURA",intrastate,1964,1970,264
+MOZ,Government of Mozambique – Renamo,Government of Mozambique,Renamo,intrastate,1981,1991,332
+NGA,Government of Nigeria – Republic of Biafra,Government of Nigeria,Republic of Biafra,intrastate,1967,1970,303
+NGA,Government of Nigeria – JAS,Government of Nigeria,JAS,internationalized intrastate,2013,2017,297
+NGA,Government of Nigeria – IS,Government of Nigeria,IS,internationalized intrastate,2015,,13641
+NIC,Government of Nicaragua – Contras,Government of Nicaragua,Contras,intrastate,1978,1988,336
+NPL,Government of Nepal – CPN-M,Government of Nepal,CPN-M,intrastate,2002,2005,269
+PAK,Government of India – Government of Pakistan,Government of India,Government of Pakistan,interstate,1948,1971,218
+PAK,Government of Pakistan – Mukti Bahini,Government of Pakistan,Mukti Bahini,intrastate,1971,1971,312
+PAK,Government of Pakistan – BLF,Government of Pakistan,BLF,intrastate,1974,1974,325
+PAK,"Government of Pakistan – HGB, IMP, TTP",Government of Pakistan,"HGB, IMP, TTP",intrastate,2008,,404
+PER,"Government of Peru – MRTA, Sendero Luminoso",Government of Peru,"MRTA, Sendero Luminoso",intrastate,1983,1992,292
+PHL,Government of Philippines – CPP,Government of Philippines,CPP,intrastate,1946,1991,209
+PHL,"Government of Philippines – ASG, MILF",Government of Philippines,"ASG, MILF",intrastate,1978,2000,308
+PHL,Government of Philippines – IS,Government of Philippines,IS,intrastate,2017,2017,14275
+PRK,Government of North Korea – Government of South Korea,Government of North Korea,Government of South Korea,interstate,1950,1953,235
+PRT,Government of Portugal – FNLA,Government of Portugal,FNLA,extrastate,1961,1962,263
+PRT,Government of Portugal – Frelimo,Government of Portugal,Frelimo,extrastate,1972,1973,285
+PRY,"Government of Paraguay – Opposition coalition (Febreristas, Liberals and Communists)",Government of Paraguay,"Opposition coalition (Febreristas, Liberals and Communists)",intrastate,1947,1947,220
+RUS,Government of Russia (Soviet Union) – BDPS,Government of Russia (Soviet Union),BDPS,intrastate,1946,1947,212
+RUS,Government of Russia (Soviet Union) – UPA,Government of Russia (Soviet Union),UPA,intrastate,1946,1948,213
+RUS,Government of Hungary – Government of Russia (Soviet Union),Government of Hungary,Government of Russia (Soviet Union),interstate,1956,1956,250
+RUS,Government of Russia (Soviet Union) – Chechen Republic of Ichkeria,Government of Russia (Soviet Union),Chechen Republic of Ichkeria,intrastate,1995,2004,401
+RUS,Government of Russia (Soviet Union) – Government of Ukraine,Government of Russia (Soviet Union),Government of Ukraine,interstate,2022,,13243
+RWA,Government of Rwanda – FDLR-FOCA,Government of Rwanda,FDLR-FOCA,internationalized intrastate,1990,2009,374
+SDN,Government of Sudan – SSLM,Government of Sudan,SSLM,intrastate,1963,1972,282
+SDN,"Government of Sudan – RSF, SFA, SPLM/A-North",Government of Sudan,"RSF, SFA, SPLM/A-North",intrastate,1983,,309
+SLE,"Government of Sierra Leone – AFRC, RUF",Government of Sierra Leone,"AFRC, RUF",internationalized intrastate,1995,1999,382
+SLV,Government of El Salvador – Government of Honduras,Government of El Salvador,Government of Honduras,interstate,1969,1969,306
+SLV,Government of El Salvador – FMLN,Government of El Salvador,FMLN,intrastate,1981,1989,316
+SOM,Government of Ethiopia – Government of Somalia,Government of Ethiopia,Government of Somalia,interstate,1977,1978,268
+SOM,Government of Somalia – Al-Shabaab,Government of Somalia,Al-Shabaab,internationalized intrastate,1988,,337
+SSD,Government of South Sudan – SPLM/A - IO,Government of South Sudan,SPLM/A - IO,internationalized intrastate,2014,2014,11345
+SYR,"Government of Egypt, Government of Iraq, Government of Jordan, Government of Lebanon, Government of Syria – Government of Israel","Government of Egypt, Government of Iraq, Government of Jordan, Government of Lebanon, Government of Syria",Government of Israel,interstate,1948,1948,228
+SYR,Government of Israel – Government of Syria,Government of Israel,Government of Syria,interstate,1967,1973,302
+SYR,Government of Syria – Syrian insurgents,Government of Syria,Syrian insurgents,internationalized intrastate,1982,2024,299
+SYR,Government of Syria – IS,Government of Syria,IS,internationalized intrastate,2013,2020,13604
+TCD,"Government of Chad – FUCD, RAFD, UFDD",Government of Chad,"FUCD, RAFD, UFDD",intrastate,1978,2006,288
+TCD,Government of Chad – Government of Libya,Government of Chad,Government of Libya,interstate,1987,1987,361
+TJK,Government of Tajikistan – UTO,Government of Tajikistan,UTO,internationalized intrastate,1992,1996,395
+TUN,Government of France – Government of Tunisia,Government of France,Government of Tunisia,interstate,1961,1961,272
+TUR,Government of Cyprus – Government of Turkey,Government of Cyprus,Government of Turkey,interstate,1974,1974,323
+TUR,Government of Turkey – PKK,Government of Turkey,PKK,intrastate,1992,2016,354
+TUR,Government of Turkey – IS,Government of Turkey,IS,intrastate,2016,2016,13902
+TWN,Government of China – Government of Taiwan,Government of China,Government of Taiwan,interstate,1949,1958,232
+UGA,Government of Uganda – LRA,Government of Uganda,LRA,intrastate,1981,2004,314
+UKR,Government of Ukraine – DPR,Government of Ukraine,DPR,internationalized intrastate,2014,2014,13246
+UKR,Government of Ukraine – LPR,Government of Ukraine,LPR,internationalized intrastate,2014,2014,13247
+UKR,"Government of Ukraine – DPR, LPR, United Armed Forces of Novorossiya",Government of Ukraine,"DPR, LPR, United Armed Forces of Novorossiya",internationalized intrastate,2014,2015,13306
+UKR,Government of Russia (Soviet Union) – Government of Ukraine,Government of Russia (Soviet Union),Government of Ukraine,interstate,2022,,13243
+USA,Government of United States of America – al-Qaida ,Government of United States of America,al-Qaida ,internationalized intrastate,2001,2001,418
+USA,"Government of Afghanistan – Government of United Kingdom, Government of United States of America",Government of Afghanistan,"Government of United Kingdom, Government of United States of America",interstate,2001,2001,13692
+USA,"Government of Australia, Government of United Kingdom, Government of United States of America – Government of Iraq","Government of Australia, Government of United Kingdom, Government of United States of America",Government of Iraq,interstate,2003,2003,420
+VNM,Government of South Vietnam – Government of Vietnam (North Vietnam),Government of South Vietnam,Government of Vietnam (North Vietnam),interstate,1965,1975,293
+VNM,Government of China – Government of Vietnam (North Vietnam),Government of China,Government of Vietnam (North Vietnam),interstate,1979,1979,334
+YEM,Government of Yemen (North Yemen) – Forces of the Presidential Leadership Council,Government of Yemen (North Yemen),Forces of the Presidential Leadership Council,internationalized intrastate,1948,2022,230
+YEM,Government of Yemen (North Yemen) – Democratic Republic of Yemen,Government of Yemen (North Yemen),Democratic Republic of Yemen,intrastate,1994,1994,402
+ZAF,Government of South Africa – SWAPO,Government of South Africa,SWAPO,intrastate,1978,1988,298
+ZWE,Government of Zimbabwe (Rhodesia) – PF,Government of Zimbabwe (Rhodesia),PF,intrastate,1976,1979,318

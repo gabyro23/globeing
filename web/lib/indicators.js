@@ -15,6 +15,7 @@ export const INDICATORS = [
   { key: "gdp_growth_pct", label: "GDP growth", unit: "%", betterWhen: "high", category: "Economy" },
   { key: "inflation_pct", label: "Inflation", unit: "%", betterWhen: "low", category: "Economy" },
   { key: "unemployment_pct", label: "Unemployment", unit: "%", betterWhen: "low", category: "Economy" },
+  { key: "minimum_wage_monthly_usd", label: "Minimum wage", unit: "US$", betterWhen: "high", category: "Economy" },
   { key: "life_expectancy_years", label: "Life expectancy", unit: "years", betterWhen: "high", category: "Society" },
   { key: "internet_users_pct", label: "Internet usage", unit: "%", betterWhen: "high", category: "Society" },
 ];

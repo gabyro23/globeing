@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import CountryPictogram from "./CountryPictogram";
 import GdpPerCapitaPictogram, { PERSON_HEIGHT as GDP_PER_CAPITA_PERSON_HEIGHT, bagStackHeight } from "./GdpPerCapitaPictogram";
-import GenericIndicatorPictogram, { ICON_HEIGHT as GENERIC_ICON_HEIGHT, iconGridHeight } from "./GenericIndicatorPictogram";
 import UnemploymentPictogram, {
   CANVAS_CONTENT_HEIGHT as UNEMPLOYMENT_CANVAS_CONTENT_HEIGHT,
   UNIT_PCT as UNEMPLOYMENT_UNIT_PCT,
@@ -11,7 +10,7 @@ import UnemploymentPictogram, {
 import { EMPLOYED_POSES, IDLE_POSES, renderPrimitives as renderEmploymentPrimitives } from "../lib/employmentIcons";
 import TrueScalePanel from "./TrueScalePanel";
 import CompareStatsGrid from "./CompareCharts";
-import { INDICATORS, CATEGORIES } from "../lib/indicators";
+import { CATEGORIES } from "../lib/indicators";
 import { loadWorld, featuresByAlpha3 } from "../lib/worldAtlas";
 import { niceIconValue, pictogramViewPad, iconCountForValue } from "../lib/pictogram";
 import { formatNumber, formatIndicatorValue } from "../lib/format";
@@ -26,11 +25,6 @@ const GDP_TARGET_MAX_ICONS = 90;
 // no need for as many icons to read clearly.
 const GDP_PER_CAPITA_TARGET_MAX_ICONS = 20;
 
-// Placeholder-visual indicators (see GenericIndicatorPictogram) can show
-// more icons than the money-bag views since a lone personita is a much
-// simpler shape.
-const GENERIC_TARGET_MAX_ICONS = 30;
-
 const BOX_SIZE = 260; // px — size of the largest country in the compared set
 // Height reserved for each country's canvas: the reference size plus the
 // padding the LARGEST country (the one that sets the scale) needs so its
@@ -38,33 +32,23 @@ const BOX_SIZE = 260; // px — size of the largest country in the compared set
 const CANVAS_HEIGHT = BOX_SIZE + pictogramViewPad(BOX_SIZE) * 2;
 
 // .pictogram-canvas's own all-around padding (app/globals.css) — reused
-// here so the GDP-per-capita/generic canvases below are sized to actually
-// fit their (much smaller) content instead of borrowing the silhouette
-// canvas's height and leaving a big gap above the figures.
+// here so the GDP-per-capita/Unemployment canvases below are sized to
+// actually fit their (much smaller) content instead of borrowing the
+// silhouette canvas's height and leaving a big gap above the figures.
 const PICTOGRAM_CANVAS_PADDING = 20;
 
 // Unemployment's grid is a fixed 25 icons (5x5), so its canvas height
 // doesn't depend on the comparison group like GDP-per-capita/generic do.
 const UNEMPLOYMENT_CANVAS_HEIGHT = UNEMPLOYMENT_CANVAS_CONTENT_HEIGHT + PICTOGRAM_CANVAS_PADDING * 2;
 
-// Indicators bundled into the "Density" view below, so they aren't also
-// offered as their own entries in the selector.
-const DENSITY_BUNDLE_KEYS = new Set(["population", "area_km2", "population_density"]);
-
-// Keys with their own explicit entry below (a bundle or a custom image),
-// so they're skipped when the generic "everything else" entries are
-// derived from INDICATORS further down.
-const CUSTOM_VIEW_KEYS = new Set([...DENSITY_BUNDLE_KEYS, "gdp_usd", "gdp_per_capita_usd", "unemployment_pct"]);
-
-// One selectable entry per indicator the comparison screen can show. Only
-// one is active at a time — picking one swaps the image. "Density" bundles
-// the three baseline stats (area, population, population density) because
-// that's what the real-silhouette pictogram already visualizes together.
-// "GDP" and "GDP per capita" have their own money-bag pictograms. Every
-// other indicator uses `isGeneric: true` — a placeholder visual (repeated
-// personitas, see GenericIndicatorPictogram) until each gets its own
-// custom image. `needsMap` gates the "Loading silhouettes…" wait on only
-// the views that actually draw a country silhouette from the world atlas.
+// The only four indicators the "Visual comparison" screen offers a
+// dedicated pictogram for. (Individual stats below still lists every
+// indicator from lib/indicators.js — this list is just the "Compare by"
+// tabs.) "Density" bundles the three baseline stats (area, population,
+// population density) because that's what the real-silhouette pictogram
+// already visualizes together. `needsMap` gates the "Loading
+// silhouettes…" wait on only the views that actually draw a country
+// silhouette from the world atlas.
 const COMPARISON_INDICATORS = [
   {
     key: "density",
@@ -94,15 +78,6 @@ const COMPARISON_INDICATORS = [
     needsMap: false,
     description: "25 figures per country — grey ones are unemployed, one per 4% of the labor force.",
   },
-  ...INDICATORS.filter((ind) => !CUSTOM_VIEW_KEYS.has(ind.key)).map((ind) => ({
-    key: ind.key,
-    label: ind.label,
-    category: ind.category,
-    needsMap: false,
-    isGeneric: true,
-    unit: ind.unit,
-    description: `${ind.label} — a dedicated visual is coming soon. For now, each icon stands for a fixed share of the value.`,
-  })),
 ];
 
 const DEFAULT_INDICATOR_KEY = "density";
@@ -187,25 +162,6 @@ export default function CompareResults({ countries }) {
       Math.max(GDP_PER_CAPITA_PERSON_HEIGHT, bagStackHeight(maxBagCount)) + PICTOGRAM_CANVAS_PADDING * 2
     );
   }, [countries, gdpPerCapitaIconValue]);
-
-  // Same idea, but for whichever placeholder ("isGeneric") indicator is
-  // currently active — each has its own value range, so the icon count
-  // (and therefore the canvas height) is computed per-indicator on demand
-  // rather than for all six up front.
-  const genericIconValue = useMemo(() => {
-    if (!activeView?.isGeneric) return 0;
-    const max = Math.max(...countries.map((c) => Number(c[activeView.key]) || 0), 1);
-    return niceIconValue(max, GENERIC_TARGET_MAX_ICONS);
-  }, [countries, activeView]);
-
-  const genericCanvasHeight = useMemo(() => {
-    if (!activeView?.isGeneric) return CANVAS_HEIGHT;
-    const maxCount = Math.max(
-      ...countries.map((c) => iconCountForValue(Number(c[activeView.key]) || 0, genericIconValue)),
-      0
-    );
-    return Math.max(GENERIC_ICON_HEIGHT, iconGridHeight(maxCount)) + PICTOGRAM_CANVAS_PADDING * 2;
-  }, [countries, activeView, genericIconValue]);
 
   if (!activeView) return null;
 
@@ -353,26 +309,6 @@ export default function CompareResults({ countries }) {
                 </div>
               )}
 
-              {activeView.isGeneric && (
-                <div className="pictogram-gdp-row">
-                  <div className="pictogram-countries">
-                    {countries.map((country) => (
-                      <GenericIndicatorPictogram
-                        key={country.iso3}
-                        country={country}
-                        label={activeView.label}
-                        value={country[activeView.key]}
-                        unit={activeView.unit}
-                        iconValue={genericIconValue}
-                        canvasHeight={genericCanvasHeight}
-                      />
-                    ))}
-                  </div>
-                  <p className="pictogram-row__legend">
-                    🧍 Each icon represents {formatIndicatorValue(genericIconValue, activeView.unit)}.
-                  </p>
-                </div>
-              )}
             </>
           )}
         </div>

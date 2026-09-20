@@ -48,6 +48,7 @@ export default function SiteHeader() {
       </Link>
       <nav className="site-header__nav" aria-label="Main navigation">
         <Link href="/rankings">Rankings</Link>
+        <Link href="/noticias">News</Link>
         <Link href="/compare">Compare</Link>
         <Link href="/compare/fill-the-country">Fill a country</Link>
         <Link href="/country">Countries</Link>
