@@ -1,4 +1,6 @@
 import NewsCountryPicker from "../../components/NewsCountryPicker";
+import NewsTicker from "../../components/NewsTicker";
+import NewsGlobalFeed from "../../components/NewsGlobalFeed";
 import { pageMetadata } from "../../lib/seo";
 import { getNewsGroupedByCountry } from "../../lib/newsRepo";
 import { NEWS_COUNTRIES } from "../../lib/newsCountries";
@@ -18,11 +20,12 @@ export const metadata = pageMetadata({
   path: "/noticias",
 });
 
-// Hub page: dark hero + live ticker + search/region filter + country
-// rail — ports Gaby's "Breaking News.dc.html" mockup. Each rail pill
-// links to its own /noticias/[country] page (real navigation, not a
-// client-side switch) so every country keeps an indexable URL — see the
-// project spec's "Cambio de alcance" note.
+// Hub page: dark hero + rotating ticker + a cross-country feed of real
+// headlines + search/region filter + country rail — ports Gaby's updated
+// "Breaking News.dc.html" mockup. Each rail pill links to its own
+// /noticias/[country] page (real navigation, not a client-side switch) so
+// every country keeps an indexable URL — see the project spec's "Cambio
+// de alcance" note.
 export default async function NewsHubPage() {
   const newsByIso3 = await getNewsGroupedByCountry();
 
@@ -43,19 +46,34 @@ export default async function NewsHubPage() {
   }, null);
   const updatedAgo = mostRecent ? formatRelativeTime(mostRecent) : "not yet";
 
+  // Ticker: top (most recent) headline per country, newest first.
   const tickerItems = countries
     .filter((c) => c.articles.length > 0)
     .map((c) => ({
       key: c.iso3,
       flag: c.flag,
       name: c.name,
+      slug: c.slug,
       title: c.articles[0].title,
       link: c.articles[0].link,
-    }));
-  // Duplicated so the CSS marquee (translateX -50%) loops seamlessly —
-  // see .news-ticker__track in globals.css. Only rendered at all once
-  // there's at least one headline to show.
-  const tickerLoop = tickerItems.length > 0 ? tickerItems.concat(tickerItems) : [];
+      published_at: c.articles[0].published_at,
+    }))
+    .sort((a, b) => (b.published_at || "").localeCompare(a.published_at || ""));
+
+  // Global feed: interleave each country's articles by rank (1st of PAN,
+  // 1st of URY, 2nd of PAN, 2nd of URY, ...) so one country with more
+  // headlines doesn't crowd out the others, then tag each with its
+  // country for the "place" chip. Featured = the most recent overall.
+  const place = (c) => ({ flag: c.flag, name: c.name, slug: c.slug, iso3: c.iso3 });
+  const maxLen = Math.max(0, ...countries.map((c) => c.articles.length));
+  const interleaved = [];
+  for (let rank = 0; rank < maxLen; rank += 1) {
+    for (const c of countries) {
+      if (c.articles[rank]) interleaved.push({ ...c.articles[rank], place: place(c) });
+    }
+  }
+  interleaved.sort((a, b) => (b.published_at || "").localeCompare(a.published_at || ""));
+  const [globalFeatured, ...globalRest] = interleaved;
 
   return (
     <div className="news-hub">
@@ -91,27 +109,12 @@ export default async function NewsHubPage() {
           </div>
         </div>
 
-        {tickerLoop.length > 0 && (
-          <div className="news-ticker">
-            <div className="news-ticker__row">
-              <div className="news-ticker__label">Latest</div>
-              <div className="news-ticker__viewport">
-                <div className="news-ticker__track">
-                  {tickerLoop.map((t, i) => (
-                    <a key={`${t.key}-${i}`} className="news-ticker__item" href={t.link} target="_blank" rel="noopener noreferrer">
-                      <span aria-hidden="true">{t.flag}</span>
-                      <span className="news-ticker__country">{t.name.toUpperCase()}</span>
-                      {t.title}
-                    </a>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
+        <NewsTicker items={tickerItems} />
       </section>
 
       <NewsCountryPicker countries={countries} />
+
+      <NewsGlobalFeed featured={globalFeatured} rest={globalRest} />
     </div>
   );
 }

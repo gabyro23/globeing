@@ -5,6 +5,8 @@
 //
 // Only called server-side (app/api/news/refresh/route.js) — the API key
 // never reaches the browser.
+import { NEWS_CATEGORIES } from "./newsCountries";
+
 const NEWSDATA_LATEST_URL = "https://newsdata.io/api/1/latest";
 
 function hostnameFromUrl(url) {
@@ -30,6 +32,7 @@ export async function fetchLatestNewsForCountry(country, apiKey) {
     country: country.newsdataCountry,
     domain: country.domains.join(","),
     language: country.lang,
+    category: NEWS_CATEGORIES.join(","),
     size: "10",
   });
 

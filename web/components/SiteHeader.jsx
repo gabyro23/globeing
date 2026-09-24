@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 // Small line-icon for the "Crosswords" menu item: a plus-shaped grid of
 // rounded cells (evokes a crossword) with a pencil crossing the bottom-right
@@ -36,7 +39,31 @@ function GuessIcon() {
 // Site header: shows the Globeing wordmark (see the "Logo Globeing" spec in
 // the project) and the main navigation. "Let's play" is a hover/focus
 // dropdown (pure CSS, no JS needed) revealing the game modes.
+const NAV_HREFS = [
+  "/rankings",
+  "/noticias",
+  "/compare",
+  "/compare/fill-the-country",
+  "/country",
+  "/random-facts",
+  "/crosswords",
+  "/guess-the-country",
+  "/contact",
+];
+
+// Longest nav href that matches the current path, so /compare/fill-the-country
+// highlights "Fill a country" and not "Compare" too.
+function activeHref(pathname) {
+  return NAV_HREFS.filter((href) => pathname === href || pathname.startsWith(href + "/")).sort(
+    (a, b) => b.length - a.length
+  )[0];
+}
+
 export default function SiteHeader() {
+  const current = activeHref(usePathname() || "/");
+  const nav = (href) => (current === href ? { className: "is-active", "aria-current": "page" } : {});
+  const playActive = current === "/crosswords" || current === "/guess-the-country";
+
   return (
     <header className="site-header">
       <Link className="site-header__brand" href="/" aria-label="Globeing — home">
@@ -47,16 +74,16 @@ export default function SiteHeader() {
         </span>
       </Link>
       <nav className="site-header__nav" aria-label="Main navigation">
-        <Link href="/rankings">Rankings</Link>
-        <Link href="/noticias">News</Link>
-        <Link href="/compare">Compare</Link>
-        <Link href="/compare/fill-the-country">Fill a country</Link>
-        <Link href="/country">Countries</Link>
+        <Link href="/rankings" {...nav("/rankings")}>Rankings</Link>
+        <Link href="/noticias" {...nav("/noticias")}>News</Link>
+        <Link href="/compare" {...nav("/compare")}>Compare</Link>
+        <Link href="/compare/fill-the-country" {...nav("/compare/fill-the-country")}>Fill a country</Link>
+        <Link href="/country" {...nav("/country")}>Countries</Link>
         {/* "By Years" hidden for now — not built yet, re-enable when it is. */}
-        <Link href="/random-facts">Random Facts</Link>
+        <Link href="/random-facts" {...nav("/random-facts")}>Random Facts</Link>
 
         <div className="site-header__nav-item">
-          <button type="button" className="site-header__nav-trigger" aria-haspopup="menu">
+          <button type="button" className={`site-header__nav-trigger${playActive ? " is-active" : ""}`} aria-haspopup="menu">
             Let&apos;s play
             <svg className="site-header__nav-trigger-chevron" viewBox="0 0 12 8" width="10" height="7" aria-hidden="true">
               <path d="M1 1.5 L6 6.5 L11 1.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
@@ -64,13 +91,13 @@ export default function SiteHeader() {
           </button>
           <div className="site-header__dropdown">
             <div className="site-header__dropdown-panel" role="menu">
-              <Link href="/crosswords" className="site-header__dropdown-link" role="menuitem">
+              <Link href="/crosswords" className={`site-header__dropdown-link${current === "/crosswords" ? " is-active" : ""}`} aria-current={current === "/crosswords" ? "page" : undefined} role="menuitem">
                 <span className="playmenu-icon playmenu-icon--crossword">
                   <CrosswordIcon />
                 </span>
                 Crosswords
               </Link>
-              <Link href="/guess-the-country" className="site-header__dropdown-link" role="menuitem">
+              <Link href="/guess-the-country" className={`site-header__dropdown-link${current === "/guess-the-country" ? " is-active" : ""}`} aria-current={current === "/guess-the-country" ? "page" : undefined} role="menuitem">
                 <span className="playmenu-icon playmenu-icon--guess">
                   <GuessIcon />
                 </span>
@@ -81,7 +108,7 @@ export default function SiteHeader() {
         </div>
 
         {/* "About us" hidden for now — not built yet, re-enable when it is. */}
-        <Link href="/contact">Contact</Link>
+        <Link href="/contact" {...nav("/contact")}>Contact</Link>
       </nav>
     </header>
   );

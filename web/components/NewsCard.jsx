@@ -7,7 +7,10 @@ import { sourceInitial } from "../lib/newsCountries";
 // rendered separately in NewsArticleFeed (it's a different enough layout
 // — big image, summary, CTA button — that sharing this component would
 // mean a pile of variant props instead of two clear pieces of markup).
-export default function NewsCard({ article, showImage }) {
+// `place` (optional: { flag, name }) shows a country tag in the meta row —
+// used on the /noticias hub's cross-country feed, where the source alone
+// doesn't say which country a headline is from.
+export default function NewsCard({ article, showImage, place }) {
   return (
     <a className="news-grid__item" href={article.link} target="_blank" rel="noopener noreferrer">
       {showImage && (
@@ -17,6 +20,11 @@ export default function NewsCard({ article, showImage }) {
             <img src={article.image_url} alt="" loading="lazy" />
           ) : null}
         </div>
+      )}
+      {place && (
+        <span className="news-grid__place">
+          <span aria-hidden="true">{place.flag}</span> {place.name}
+        </span>
       )}
       <span className="news-grid__title">{article.title}</span>
       <span className="news-grid__meta">

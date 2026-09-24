@@ -1,8 +1,9 @@
 import Link from "next/link";
 
-// Site-wide footer, rendered once in the root layout so every page gets
-// it. Only links to pages that actually exist — "About us" and "By Years"
-// are left out here too, same as the header, until those are built.
+// Site-wide footer (design "2a"), rendered once in the root layout so every
+// page gets it. Brand + tagline, Explore links split in two columns (the
+// second one has no title of its own), and a Contact column. Only links to
+// pages that actually exist.
 export default function SiteFooter() {
   return (
     <footer className="site-footer">
@@ -18,17 +19,26 @@ export default function SiteFooter() {
           <p className="site-footer__tagline">Made to explore the world, one fact at a time.</p>
         </div>
 
-        <nav className="site-footer__nav" aria-label="Footer navigation">
+        <nav className="site-footer__explore" aria-label="Footer navigation">
           <span className="site-footer__nav-title">Explore</span>
-          <Link href="/compare">Compare</Link>
-          <Link href="/rankings">Rankings</Link>
-          <Link href="/country">Countries</Link>
-          <Link href="/random-facts">Random Facts</Link>
-          <Link href="/crosswords">Crosswords</Link>
-          <Link href="/data-sources">Data Sources</Link>
+          <div className="site-footer__explore-cols">
+            <div className="site-footer__col">
+              <Link href="/compare">Compare</Link>
+              <Link href="/compare/fill-the-country">Fill a country</Link>
+              <Link href="/rankings">Rankings</Link>
+              <Link href="/country">Countries</Link>
+              <Link href="/noticias">News</Link>
+            </div>
+            <div className="site-footer__col">
+              <Link href="/random-facts">Random Facts</Link>
+              <Link href="/crosswords">Crosswords</Link>
+              <Link href="/guess-the-country">Guess the country</Link>
+              <Link href="/data-sources">Data Sources</Link>
+            </div>
+          </div>
         </nav>
 
-        <div className="site-footer__contact">
+        <div className="site-footer__col">
           <span className="site-footer__nav-title">Contact</span>
           <a href="mailto:gabyro23@gmail.com">gabyro23@gmail.com</a>
           <Link href="/contact">Contact page →</Link>

@@ -39,6 +39,12 @@ export const NEWS_COUNTRIES = [
   },
 ];
 
+// Only politics and business/economy news — no entertainment, no sports.
+// Sent as NewsData.io's `category` filter (see lib/newsData.js), so the
+// exclusion happens server-side at fetch time, not by filtering rows
+// after the fact.
+export const NEWS_CATEGORIES = ["politics", "business"];
+
 // First letter shown in the little avatar circle next to a source name
 // (NewsCard's featured/grid layouts) — skips a leading article ("El",
 // "La", "Los"...) so "El País" reads as "P", not "E".
