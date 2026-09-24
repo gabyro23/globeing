@@ -46,7 +46,11 @@ export default function SiteFooter() {
       </div>
 
       <div className="site-footer__bottom">
-        <span>© {new Date().getFullYear()} Globeing.</span>
+        <span className="site-footer__legal">
+          <span>© {new Date().getFullYear()} Globeing.</span>
+          <Link href="/privacy">Privacy Policy</Link>
+          <Link href="/terms">Terms of Use</Link>
+        </span>
         <span>
           Population, area, and economic data from public sources (World Bank) ·{" "}
           <Link href="/data-sources">See all data sources</Link>

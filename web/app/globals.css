@@ -5323,6 +5323,67 @@ path.country.is-dimmed {
   text-align: center;
 }
 
+/* /privacy, /terms */
+.legal {
+  max-width: 760px;
+  margin: var(--space-4) clamp(16px, 4vw, 40px) var(--space-6);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  line-height: 1.6;
+}
+.legal h2 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 var(--space-2);
+}
+.legal p,
+.legal ul {
+  margin: 0 0 10px;
+}
+.legal p:last-child,
+.legal ul:last-child {
+  margin-bottom: 0;
+}
+.legal ul {
+  padding-left: 20px;
+}
+.legal li + li {
+  margin-top: 6px;
+}
+.legal a {
+  color: var(--accent);
+}
+.legal__cookie-button {
+  align-self: flex-start;
+  margin-top: var(--space-2);
+  padding: 10px 16px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.legal__cookie-button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.site-footer__legal {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+
 /* --- Compare page redesign: category filter, quick picks, slots, sticky bar, results screen --- */
 
 .compare-category-filter {

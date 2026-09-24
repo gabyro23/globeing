@@ -6,7 +6,7 @@
 // the site-wide defaults these override).
 
 export const SITE_NAME = "Globeing";
-export const SITE_URL = "https://globeing.co";
+export const SITE_URL = "https://www.globeing.co";
 
 export const DEFAULT_DESCRIPTION =
   "Compare any two countries by population, GDP, area, and more — every number drawn at real, human scale so it actually makes sense.";

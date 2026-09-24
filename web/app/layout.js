@@ -59,6 +59,33 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`h-full ${calistoga.variable}`}>
       <body className="min-h-full flex flex-col">
+        {/* Google Consent Mode v2 defaults: everything denied until the
+            visitor accepts in the CookieYes banner (CookieYes then sends the
+            "consent update"). Must run BEFORE CookieYes and GA. */}
+        <Script id="consent-default" strategy="beforeInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('consent', 'default', {
+              ad_storage: 'denied',
+              ad_user_data: 'denied',
+              ad_personalization: 'denied',
+              analytics_storage: 'denied',
+              functionality_storage: 'denied',
+              personalization_storage: 'denied',
+              security_storage: 'granted',
+              wait_for_update: 2000
+            });
+            gtag('set', 'ads_data_redaction', true);
+            gtag('set', 'url_passthrough', true);
+          `}
+        </Script>
+        {/* CookieYes CMP banner — loaded in <head> before anything else. */}
+        <Script
+          id="cookieyes"
+          src="https://cdn-cookieyes.com/client_data/0c40cd6c4e8942e90f7bf5950d6e4c22/script.js"
+          strategy="beforeInteractive"
+        />
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-8S0DXNK24W"
           strategy="afterInteractive"

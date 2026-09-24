@@ -14,6 +14,8 @@ const ROUTES = [
   { path: "/country", changeFrequency: "weekly", priority: 0.8 },
   { path: "/contact", changeFrequency: "yearly", priority: 0.3 },
   { path: "/data-sources", changeFrequency: "monthly", priority: 0.3 },
+  { path: "/privacy", changeFrequency: "yearly", priority: 0.1 },
+  { path: "/terms", changeFrequency: "yearly", priority: 0.1 },
 ];
 
 // One entry per published /country/[slug] page (see lib/countryIndex.js

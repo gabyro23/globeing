@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 
+const CONTACT_EMAIL = "gabyro23@gmail.com";
+
 const CONTACT_METHODS = [
   { icon: "✉", label: "Email", value: "gabyro23@gmail.com" },
-  { icon: "⌘", label: "Website", value: "globeing.com" },
+  { icon: "⌘", label: "Website", value: "globeing.co" },
   { icon: "◎", label: "Office", value: "Barcelona, Spain" },
 ];
 
@@ -12,7 +14,7 @@ const CONTACT_METHODS = [
 // form on the right. Ported from a standalone design prototype into the
 // site's own layout/tokens/language.
 export default function ContactPage() {
-  const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [form, setForm] = useState({ name: "", message: "" });
   const [status, setStatus] = useState("");
 
   function updateField(key) {
@@ -22,9 +24,18 @@ export default function ContactPage() {
     };
   }
 
+  // No backend: the form just opens the visitor's own email app with a
+  // message to CONTACT_EMAIL already filled in (mailto:).
   function handleSubmit(e) {
     e.preventDefault();
-    setStatus(form.email ? "Thanks — we'll get back to you within 48 hours." : "Please add your email.");
+    if (!form.message.trim()) {
+      setStatus("Please write a message first.");
+      return;
+    }
+    const subject = form.name.trim() ? `Globeing — message from ${form.name.trim()}` : "Globeing — message";
+    const href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(form.message)}`;
+    window.location.href = href;
+    setStatus(`Your email app should open now. If it doesn't, write to us at ${CONTACT_EMAIL}.`);
   }
 
   return (
@@ -65,18 +76,6 @@ export default function ContactPage() {
           placeholder="Your name"
         />
 
-        <label className="contact-form__label" htmlFor="contact-email">
-          Email
-        </label>
-        <input
-          id="contact-email"
-          type="email"
-          className="contact-form__input"
-          value={form.email}
-          onChange={updateField("email")}
-          placeholder="you@email.com"
-        />
-
         <label className="contact-form__label" htmlFor="contact-message">
           Message
         </label>
@@ -86,11 +85,12 @@ export default function ContactPage() {
           value={form.message}
           onChange={updateField("message")}
           placeholder="How can we help?"
+          required
         />
 
         <div className="contact-form__footer">
           <button type="submit" className="contact-form__submit">
-            Send message
+            Open in my email app
           </button>
           {status && <span className="contact-form__status">{status}</span>}
         </div>
