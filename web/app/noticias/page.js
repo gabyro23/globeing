@@ -3,7 +3,7 @@ import NewsTicker from "../../components/NewsTicker";
 import NewsGlobalFeed from "../../components/NewsGlobalFeed";
 import { pageMetadata } from "../../lib/seo";
 import { getNewsGroupedByCountry } from "../../lib/newsRepo";
-import { NEWS_COUNTRIES } from "../../lib/newsCountries";
+import { NEWS_COUNTRIES, NEWS_INDEXABLE } from "../../lib/newsCountries";
 import { metaForAlpha3 } from "../../lib/countryMeta";
 import { slugForIso3 } from "../../lib/countryIndex";
 import { formatRelativeTime } from "../../lib/format";
@@ -13,12 +13,16 @@ import { formatRelativeTime } from "../../lib/format";
 // visitors would notice, without rebuilding on every request.
 export const revalidate = 10800;
 
-export const metadata = pageMetadata({
-  title: "Breaking News by Country",
-  description:
-    "Top breaking news from official and trusted sources in Panama and Uruguay — pick a country from the list or search. More countries coming soon.",
-  path: "/noticias",
-});
+export const metadata = {
+  ...pageMetadata({
+    title: "Breaking News by Country",
+    description:
+      "Top breaking news from official and trusted sources in Panama and Uruguay — pick a country from the list or search. More countries coming soon.",
+    path: "/noticias",
+  }),
+  // Temporarily noindex — see NEWS_INDEXABLE in lib/newsCountries.js.
+  ...(NEWS_INDEXABLE ? {} : { robots: { index: false, follow: true } }),
+};
 
 // Hub page: dark hero + rotating ticker + a cross-country feed of real
 // headlines + search/region filter + country rail — ports Gaby's updated
@@ -64,15 +68,23 @@ export default async function NewsHubPage() {
   // 1st of URY, 2nd of PAN, 2nd of URY, ...) so one country with more
   // headlines doesn't crowd out the others, then tag each with its
   // country for the "place" chip. Featured = the most recent overall.
-  const place = (c) => ({ flag: c.flag, name: c.name, slug: c.slug, iso3: c.iso3 });
+  const place = (c) => ({
+    flag: c.flag,
+    name: c.name,
+    slug: c.slug,
+    iso3: c.iso3,
+  });
   const maxLen = Math.max(0, ...countries.map((c) => c.articles.length));
   const interleaved = [];
   for (let rank = 0; rank < maxLen; rank += 1) {
     for (const c of countries) {
-      if (c.articles[rank]) interleaved.push({ ...c.articles[rank], place: place(c) });
+      if (c.articles[rank])
+        interleaved.push({ ...c.articles[rank], place: place(c) });
     }
   }
-  interleaved.sort((a, b) => (b.published_at || "").localeCompare(a.published_at || ""));
+  interleaved.sort((a, b) =>
+    (b.published_at || "").localeCompare(a.published_at || ""),
+  );
   const [globalFeatured, ...globalRest] = interleaved;
 
   return (
@@ -88,8 +100,9 @@ export default async function NewsHubPage() {
             <div>
               <h1 className="news-hero__title">Breaking News by Country</h1>
               <p className="news-hero__subtitle">
-                Headlines from official press agencies and verified outlets. No rumors, no
-                reproduced articles — just the story and a link to the source.
+                Headlines from official press agencies and verified outlets. No
+                rumors, no reproduced articles — just the story and a link to
+                the source.
               </p>
             </div>
             <div className="news-hero__stats">

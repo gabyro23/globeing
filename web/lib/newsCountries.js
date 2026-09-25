@@ -63,3 +63,9 @@ export function newsCountryForIso3(iso3) {
 // How many days of articles to keep around — matches the refresh job's
 // pruning window (see app/api/news/refresh/route.js).
 export const NEWS_RETENTION_DAYS = 5;
+
+// Keep the whole /noticias section out of Google until AdSense approves
+// the site: it's third-party headlines linking out, which a manual
+// quality review can read as thin/aggregated content. Flip to true once
+// approved (and add /noticias + each /noticias/[country] to app/sitemap.js).
+export const NEWS_INDEXABLE = false;

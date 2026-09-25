@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import NewsArticleFeed from "../../../components/NewsArticleFeed";
 import { pageMetadata } from "../../../lib/seo";
 import { getNewsForCountry } from "../../../lib/newsRepo";
-import { NEWS_COUNTRIES, newsCountryForIso3 } from "../../../lib/newsCountries";
+import { NEWS_COUNTRIES, NEWS_INDEXABLE, newsCountryForIso3 } from "../../../lib/newsCountries";
 import { metaForAlpha3 } from "../../../lib/countryMeta";
 import { slugForIso3, iso3ForSlug } from "../../../lib/countryIndex";
 import { formatRelativeTime } from "../../../lib/format";
@@ -29,11 +29,19 @@ export async function generateMetadata({ params }) {
   const country = countryForSlug(slug);
   if (!country) return {};
 
-  return pageMetadata({
+  const meta = pageMetadata({
     title: `${country.name} Breaking News`,
     description: `Top breaking news headlines from ${country.name}, sourced only from its official press agency and trusted mainstream outlets — with a direct link to read each story at the source.`,
     path: `/noticias/${slug}`,
   });
+
+  // No headlines yet (cron hasn't run, or the source feed is down) → the
+  // page is just a hero with nothing under it. Keep it out of Google until
+  // there's real content; it flips back to indexable on the next ISR run.
+  // Also noindex the whole section for now — see NEWS_INDEXABLE.
+  const articles = NEWS_INDEXABLE ? await getNewsForCountry(country.iso3, 1) : [];
+  if (!NEWS_INDEXABLE || articles.length === 0) meta.robots = { index: false, follow: true };
+  return meta;
 }
 
 export default async function NewsCountryPage({ params }) {
