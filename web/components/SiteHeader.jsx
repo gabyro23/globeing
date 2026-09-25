@@ -41,7 +41,6 @@ function GuessIcon() {
 // dropdown (pure CSS, no JS needed) revealing the game modes.
 const NAV_HREFS = [
   "/rankings",
-  "/noticias",
   "/compare",
   "/compare/fill-the-country",
   "/country",
@@ -75,7 +74,6 @@ export default function SiteHeader() {
       </Link>
       <nav className="site-header__nav" aria-label="Main navigation">
         <Link href="/rankings" {...nav("/rankings")}>Rankings</Link>
-        <Link href="/noticias" {...nav("/noticias")}>News</Link>
         <Link href="/compare" {...nav("/compare")}>Compare</Link>
         <Link href="/compare/fill-the-country" {...nav("/compare/fill-the-country")}>Fill a country</Link>
         <Link href="/country" {...nav("/country")}>Countries</Link>

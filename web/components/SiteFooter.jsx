@@ -27,7 +27,6 @@ export default function SiteFooter() {
               <Link href="/compare/fill-the-country">Fill a country</Link>
               <Link href="/rankings">Rankings</Link>
               <Link href="/country">Countries</Link>
-              <Link href="/noticias">News</Link>
             </div>
             <div className="site-footer__col">
               <Link href="/random-facts">Random Facts</Link>
