@@ -37,7 +37,12 @@ export async function generateMetadata({ params }) {
 
   return pageMetadata({
     title: `${country.name} Facts, Population & GDP (${year})`,
-    description: `${country.name} has a population of ${formatPopulationCompact(country.population)} and a GDP of ${formatCompareValue(country.gdp_usd, "US$")}. Explore capital, currency, rankings, and facts about ${country.name}.`,
+    // Some countries have no GDP on file (e.g. Eritrea, North Korea) — leave
+    // it out rather than put "a GDP of —" in the search snippet.
+    description:
+      Number(country.gdp_usd) > 0
+        ? `${country.name} has a population of ${formatPopulationCompact(country.population)} and a GDP of ${formatCompareValue(country.gdp_usd, "US$")}. Explore capital, currency, rankings, and facts about ${country.name}.`
+        : `${country.name} has a population of ${formatPopulationCompact(country.population)}. Explore its capital, currency, rankings, and facts about ${country.name}.`,
     path: `/country/${slug}`,
     image: {
       url: `/country/${slug}/opengraph-image`,
