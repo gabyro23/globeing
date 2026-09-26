@@ -1,3 +1,1 @@
-# ads.txt for globeing.co
-# No authorized sellers yet. Add the AdSense line once the account is approved, e.g.:
-# google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0
+google.com, pub-3926829518790042, DIRECT, f08c47fec0942fa0

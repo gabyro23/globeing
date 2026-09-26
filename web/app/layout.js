@@ -7,6 +7,8 @@ import { SITE_NAME, SITE_URL, DEFAULT_DESCRIPTION, DEFAULT_OG_IMAGE } from "../l
 
 const calistoga = Calistoga({ subsets: ["latin"], weight: "400", variable: "--font-calistoga" });
 
+const ADSENSE_CLIENT = "ca-pub-3926829518790042";
+
 const HOME_TITLE = "Globeing — Compare Countries Side by Side";
 
 // Site-wide defaults. Every other route overrides title/description (and,
@@ -48,6 +50,10 @@ export const metadata = {
     description: DEFAULT_DESCRIPTION,
     images: [DEFAULT_OG_IMAGE.url],
   },
+  // AdSense site verification (Google also checks ads.txt + the script below).
+  other: {
+    "google-adsense-account": ADSENSE_CLIENT,
+  },
   robots: {
     index: true,
     follow: true,
@@ -58,6 +64,17 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`h-full ${calistoga.variable}`}>
+      <head>
+        {/* Google AdSense. Plain <script>, not next/script: AdSense rejects the
+            data-nscript attribute next/script adds. Ads only get personalised
+            once the visitor accepts in CookieYes (Consent Mode defaults below
+            start as "denied"). */}
+        <script
+          async
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
+          crossOrigin="anonymous"
+        />
+      </head>
       <body className="min-h-full flex flex-col">
         {/* Google Consent Mode v2 defaults: everything denied until the
             visitor accepts in the CookieYes banner (CookieYes then sends the
