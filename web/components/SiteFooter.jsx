@@ -30,6 +30,7 @@ export default function SiteFooter() {
             </div>
             <div className="site-footer__col">
               <Link href="/random-facts">Random Facts</Link>
+              <Link href="/war-timeline">War Timeline</Link>
               <Link href="/crosswords">Crosswords</Link>
               <Link href="/guess-the-country">Guess the country</Link>
               <Link href="/data-sources">Data Sources</Link>

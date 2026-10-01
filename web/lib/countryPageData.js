@@ -30,7 +30,7 @@ let allCountriesPromise = null;
 // pages get from /api/countries — fetched directly from Supabase here
 // (no HTTP round-trip) since this runs at build/request time on the
 // server. Cached for the life of the server process / build.
-function getAllCountries() {
+export function getAllCountries() {
   if (!allCountriesPromise) {
     allCountriesPromise = supabase
       .from("countries")
@@ -54,7 +54,7 @@ let allWarsPromise = null;
 // fetching it whole and filtering per-country in JS is simpler than a
 // query per page and still cheap. Cached for the life of the server
 // process/build, same as getAllCountries.
-function getAllWars() {
+export function getAllWars() {
   if (!allWarsPromise) {
     allWarsPromise = supabase
       .from("country_wars")

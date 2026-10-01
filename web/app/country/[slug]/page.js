@@ -386,6 +386,9 @@ export default async function CountryPage({ params }) {
                     </a>
                     .
                   </p>
+                  <Link className="country-compare-cta" href={`/war-timeline?country=${country.iso3}`}>
+                    See {country.name}&apos;s wars on the full War Timeline →
+                  </Link>
                 </section>
               )}
 
