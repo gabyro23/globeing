@@ -1,342 +1,375 @@
 "use client";
 
-// The interactive part of /war-timeline: every war in country_wars (one
-// entry per conflict — app/war-timeline/page.js already grouped the
-// per-country rows) on a shared 1946–present axis, with the same
-// continent chips as Rankings / Random Facts plus a country picker.
+// Interactive part of /war-timeline, built from the "War Timeline" design
+// in the project:
+//   1. filters — continent, type of war (these pills double as the color
+//      legend), a country/group search, sort order and "only ongoing".
+//      Every filter applies to the whole page: numbers, chart and list;
+//   2. an overview card — headline numbers and a stacked bar per year of
+//      how many wars were active;
+//   3. every war as a bar on a shared 1946–today axis, grouped by the
+//      continent where it was fought.
 //
-// A war matches a continent if ANY country involved in it is on that
-// continent, and matches a country if that country is one of the states
-// involved. Filters are mirrored into the URL (?continent=Asia&country=IND)
-// so a filtered view can be shared or linked from a country page.
-import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { warSideActors } from "../lib/warActors";
-import WarPoster from "./WarPoster";
+// `wars` comes pre-shaped from lib/warTimeline.js:
+//   { id, name, start, end (null = ongoing), type, continent, also[],
+//     actors[] }
+import { useId, useMemo, useState } from "react";
+import { WAR_CONTINENTS } from "../lib/warTimeline";
 
-const START_YEAR = 1946;
-const REGION_ORDER = ["Africa", "Americas", "Asia", "Europe", "Oceania", "Other"];
+const START = 1946;
 
-const WAR_TYPE_META = {
+// Stacking order of the yearly bars, bottom to top, and the legend order.
+const TYPE_ORDER = ["interstate", "internationalized intrastate", "intrastate", "extrastate"];
+const TYPES = {
   interstate: { label: "Interstate", color: "var(--war-interstate)" },
+  "internationalized intrastate": { label: "Internationalized intrastate", color: "var(--war-intl-intrastate)" },
   intrastate: { label: "Intrastate", color: "var(--war-intrastate)" },
-  "internationalized intrastate": {
-    label: "Internationalized intrastate",
-    color: "var(--war-intl-intrastate)",
-  },
-  extrastate: { label: "Extrastate", color: "var(--war-extrastate)" },
+  extrastate: { label: "Extrastate (colonial)", color: "var(--war-extrastate)" },
 };
+const typeOf = (t) => TYPES[t] || { label: t || "Conflict", color: "var(--muted)" };
 
-function typeMeta(type) {
-  return WAR_TYPE_META[type] || { label: type || "Conflict", color: "var(--muted)" };
-}
+// [year, label, label row] — row 1 drops the label a line so 1989/1991
+// don't collide.
+const EVENTS = [
+  [1962, "Cuban Missile Crisis", 0],
+  [1989, "Berlin Wall falls", 0],
+  [1991, "USSR dissolves", 1],
+  [2001, "September 11", 0],
+];
+const COLD_WAR_END = 1992; // first post–Cold War year
 
-function SideChips({ actors }) {
-  if (actors.length === 0) return null;
-  return (
-    <span className="country-war-timeline__side">
-      {actors.map((a, i) => (
-        <span
-          key={i}
-          className={
-            a.flag ? "country-war-timeline__chip" : "country-war-timeline__chip country-war-timeline__chip--noflag"
-          }
-          title={a.name}
-          aria-hidden="true"
-        >
-          {a.flag || "✳"}
+const SORTS = [
+  ["start", "Start year"],
+  ["duration", "Duration"],
+];
+
+export default function WarTimelineExplorer({ wars: rawWars, currentYear }) {
+  // Tolerate entries without `actors`/`also` (e.g. a cached server payload
+  // from before those fields existed) instead of crashing the page.
+  const wars = useMemo(
+    () => rawWars.map((w) => (w.actors && w.also ? w : { ...w, actors: w.actors || [], also: w.also || [] })),
+    [rawWars]
+  );
+  const [continent, setContinent] = useState("All");
+  const [sort, setSort] = useState("start");
+  const [ongoingOnly, setOngoingOnly] = useState(false);
+  const [hidden, setHidden] = useState({});
+  const [actor, setActor] = useState("");
+  const actorListId = useId();
+
+  // Every country or group that fought in at least one war, for the
+  // search box's suggestions. Typing anything else still works — the
+  // filter is a plain "contains" match on each side's names.
+  const actorOptions = useMemo(() => {
+    const counts = new Map();
+    for (const w of wars) for (const a of w.actors) counts.set(a, (counts.get(a) || 0) + 1);
+    return [...counts.entries()].sort((x, y) => x[0].localeCompare(y[0]));
+  }, [wars]);
+  const actorQuery = actor.trim().toLowerCase();
+
+  const now = Math.max(currentYear, ...wars.map((w) => w.end || w.start));
+  const span = now - START + 1;
+  const pct = (year) => `${(((year - START) / span) * 100).toFixed(3)}%`;
+
+  const visible = useMemo(
+    () =>
+      wars.filter(
+        (w) =>
+          !hidden[w.type] &&
+          (!ongoingOnly || !w.end) &&
+          (continent === "All" || w.continent === continent || w.also.includes(continent)) &&
+          (!actorQuery || w.actors.some((a) => a.toLowerCase().includes(actorQuery)))
+      ),
+    [wars, hidden, ongoingOnly, continent, actorQuery]
+  );
+
+  const groups = useMemo(() => {
+    const toRow = (w) => {
+      const end = w.end || now;
+      const ongoing = !w.end;
+      const startPct = ((w.start - START) / span) * 100;
+      const endPct = ((end + 1 - START) / span) * 100;
+      const years = end - w.start + 1;
+      const label = ongoing ? `${w.start}–now` : w.start === w.end ? String(w.start) : `${w.start}–${w.end}`;
+      // The year tag sits right after the bar, unless the bar ends too
+      // close to the right edge — then it goes just before it.
+      const after = endPct < 82;
+      return {
+        id: w.id,
+        name: w.name,
+        also: w.also.join(", "),
+        label,
+        ongoing,
+        years,
+        start: w.start,
+        color: typeOf(w.type).color,
+        barStyle: {
+          left: `${startPct.toFixed(3)}%`,
+          width: `${Math.max(0.55, endPct - startPct).toFixed(3)}%`,
+          background: typeOf(w.type).color,
+        },
+        tagStyle: after ? { left: `${endPct.toFixed(3)}%` } : { right: `${(100 - startPct).toFixed(3)}%` },
+        title: `${w.name}\n${label} · ${years} ${years === 1 ? "year" : "years"} · ${typeOf(w.type).label}`,
+      };
+    };
+    const order =
+      sort === "start"
+        ? (x, y) => x.start - y.start || y.years - x.years
+        : (x, y) => y.years - x.years || x.start - y.start;
+
+    const conts = continent === "All" ? WAR_CONTINENTS : [continent];
+    return conts
+      .map((c) => ({
+        title: c,
+        rows: visible
+          .filter((w) => (continent === "All" ? w.continent === c : true))
+          .map(toRow)
+          .sort(order),
+      }))
+      .filter((g) => g.rows.length > 0);
+  }, [visible, continent, sort, now, span]);
+
+  // How many of the visible wars were active in each year, by type.
+  const overview = useMemo(() => {
+    const years = [];
+    let peak = 0;
+    let peakYear = START;
+    for (let y = START; y <= now; y++) {
+      const counts = {};
+      let total = 0;
+      for (const w of visible) {
+        if (y >= w.start && y <= (w.end || now)) {
+          counts[w.type] = (counts[w.type] || 0) + 1;
+          total++;
+        }
+      }
+      if (total > peak) {
+        peak = total;
+        peakYear = y;
+      }
+      years.push({ year: y, counts, total });
+    }
+    return { years, peak, peakYear, scale: 100 / Math.max(peak, 10) };
+  }, [visible, now]);
+
+  const axis = [];
+  for (let y = START; y <= now; y += 10) axis.push(y);
+  if (axis[axis.length - 1] !== now) axis.push(now);
+
+  const ongoingCount = visible.filter((w) => !w.end).length;
+  const hasFilters =
+    continent !== "All" || ongoingOnly || Boolean(actorQuery) || Object.values(hidden).some(Boolean);
+
+  const axisEl = (
+    <div className="wt-axis" aria-hidden="true">
+      {axis.map((y, i) => (
+        <span key={y} className={i === axis.length - 1 ? "is-last" : undefined} style={{ left: pct(y) }}>
+          {y}
         </span>
       ))}
-      <span className="country-war-timeline__label">{actors.map((a) => a.name).join(", ")}</span>
-    </span>
+    </div>
   );
-}
-
-// Reads ?continent / ?country and hands them to the explorer as its
-// initial filters. useSearchParams makes this part client-rendered, so
-// app/war-timeline/page.js wraps it in <Suspense> with a plain
-// <WarTimelineExplorer> as the fallback — the server HTML still contains
-// the full, unfiltered timeline for crawlers.
-export function WarTimelineFromUrl({ wars, countries, currentYear }) {
-  const params = useSearchParams();
-  const c = params.get("continent");
-  const iso3 = (params.get("country") || "").toUpperCase();
-  return (
-    <WarTimelineExplorer
-      wars={wars}
-      countries={countries}
-      currentYear={currentYear}
-      initialContinent={c && REGION_ORDER.includes(c) ? c : "All"}
-      initialCountry={countries.some((x) => x.iso3 === iso3) ? iso3 : ""}
-    />
-  );
-}
-
-export default function WarTimelineExplorer({
-  wars,
-  countries,
-  currentYear: currentYearProp,
-  initialContinent = "All",
-  initialCountry = "",
-}) {
-  const [continent, setContinent] = useState(initialContinent);
-  const [country, setCountry] = useState(initialCountry);
-  const [view, setView] = useState("poster");
-
-  const countryByIso3 = useMemo(() => new Map(countries.map((c) => [c.iso3, c])), [countries]);
-
-  // Mirror the filters into the URL so a filtered view can be shared.
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (continent === "All") params.delete("continent");
-    else params.set("continent", continent);
-    if (country) params.set("country", country);
-    else params.delete("country");
-    const qs = params.toString();
-    window.history.replaceState(null, "", qs ? `?${qs}` : window.location.pathname);
-  }, [continent, country]);
-
-  const availableRegions = useMemo(() => {
-    const present = new Set(countries.map((c) => c.region || "Other"));
-    return REGION_ORDER.filter((r) => present.has(r));
-  }, [countries]);
-
-  const countryOptions = useMemo(
-    () => (continent === "All" ? countries : countries.filter((c) => (c.region || "Other") === continent)),
-    [countries, continent]
-  );
-
-  function pickContinent(r) {
-    setContinent(r);
-    // Drop a selected country that isn't on the new continent.
-    const sel = countryByIso3.get(country);
-    if (sel && r !== "All" && (sel.region || "Other") !== r) setCountry("");
-  }
-
-  const filtered = useMemo(() => {
-    return wars.filter((w) => {
-      if (country && !w.iso3s.includes(country)) return false;
-      if (continent !== "All" && !w.iso3s.some((iso3) => (countryByIso3.get(iso3)?.region || "Other") === continent))
-        return false;
-      return true;
-    });
-  }, [wars, country, continent, countryByIso3]);
-
-  const currentYear = currentYearProp || new Date().getFullYear();
-
-  // Poster view keeps every bar and dims the non-matching ones; `region`
-  // is the continent column a bar sits in (a war can span several).
-  const isMatch = (w, region) =>
-    (!country || w.iso3s.includes(country)) &&
-    (continent === "All" ||
-      (region
-        ? region === continent
-        : w.iso3s.some((iso3) => (countryByIso3.get(iso3)?.region || "Other") === continent)));
-  const endYear = Math.max(currentYear, ...wars.map((w) => w.end_year || w.start_year));
-  const span = endYear - START_YEAR + 1;
-  const pct = (year) => ((year - START_YEAR) / span) * 100;
-
-  const decades = [];
-  for (let y = 1950; y <= endYear; y += 10) decades.push(y);
-
-  const ongoingCount = filtered.filter((w) => !w.end_year).length;
-  const involvedCount = new Set(filtered.flatMap((w) => w.iso3s)).size;
-  const usedTypes = [...new Set(filtered.map((w) => w.type_of_conflict).filter(Boolean))];
-  const selected = countryByIso3.get(country);
-  const hasFilters = continent !== "All" || Boolean(country);
 
   return (
-    <div className="war-explorer">
-      <div className="war-explorer__filters">
-        <div className="ranking-filters">
-          <span className="ranking-filters__label">Continent</span>
-          <div className="ranking-region-tabs" role="tablist" aria-label="Filter by continent">
-            {["All", ...availableRegions].map((r) => (
-              <button
-                key={r}
-                type="button"
-                role="tab"
-                aria-selected={r === continent}
-                className={"ranking-region-tab" + (r === continent ? " is-active" : "")}
-                onClick={() => pickContinent(r)}
-              >
-                {r}
-              </button>
-            ))}
+    <div className="wt">
+      <div className="wt-filters">
+        <div className="wt-filters__group">
+          <span className="wt-eyebrow">Continent</span>
+          {["All", ...WAR_CONTINENTS].map((c) => (
+            <button
+              key={c}
+              type="button"
+              aria-pressed={continent === c}
+              className={"wt-pill" + (continent === c ? " is-active" : "")}
+              onClick={() => setContinent(c)}
+            >
+              {c}
+            </button>
+          ))}
+        </div>
+        <div className="wt-filters__group">
+          <span className="wt-eyebrow">Type</span>
+          {TYPE_ORDER.map((t) => (
+            <button
+              key={t}
+              type="button"
+              aria-pressed={!hidden[t]}
+              title="Show or hide this type"
+              className={"wt-type" + (hidden[t] ? " is-hidden" : "")}
+              onClick={() => setHidden((h) => ({ ...h, [t]: !h[t] }))}
+            >
+              <span className="wt-type__swatch" style={{ background: TYPES[t].color }} />
+              {TYPES[t].label}
+            </button>
+          ))}
+        </div>
+        <div className="wt-filters__group">
+          <label className="wt-eyebrow" htmlFor={actorListId + "-input"}>
+            Country or group
+          </label>
+          <div className="wt-search">
+            <span className="wt-search__icon" aria-hidden="true">
+              ⌕
+            </span>
+            <input
+              id={actorListId + "-input"}
+              type="search"
+              list={actorListId}
+              placeholder="e.g. France, FARC, IS…"
+              autoComplete="off"
+              value={actor}
+              onChange={(e) => setActor(e.target.value)}
+            />
+            <datalist id={actorListId}>
+              {actorOptions.map(([name, n]) => (
+                <option key={name} value={name}>
+                  {n} war{n === 1 ? "" : "s"}
+                </option>
+              ))}
+            </datalist>
           </div>
         </div>
-
-        <div className="ranking-filters">
-          <label className="ranking-filters__label" htmlFor="war-country">
-            Country
-          </label>
-          <select
-            id="war-country"
-            className="war-explorer__select"
-            value={country}
-            onChange={(e) => setCountry(e.target.value)}
-          >
-            <option value="">All countries ({countryOptions.length})</option>
-            {countryOptions.map((c) => (
-              <option key={c.iso3} value={c.iso3}>
-                {c.flag} {c.name} · {c.warCount}
-              </option>
-            ))}
-          </select>
-          {hasFilters && (
-            <button
-              type="button"
-              className="btn-text"
-              onClick={() => {
-                setContinent("All");
-                setCountry("");
-              }}
-            >
-              ↺ Clear filters
-            </button>
-          )}
-        </div>
-      </div>
-
-      <div className="ranking-filters">
-        <span className="ranking-filters__label">View</span>
-        <div className="ranking-region-tabs" role="tablist" aria-label="Choose a view">
-          {[
-            ["poster", "Poster"],
-            ["list", "List"],
-          ].map(([key, label]) => (
+        <div className="wt-filters__group">
+          <span className="wt-eyebrow">Sort</span>
+          {SORTS.map(([key, label]) => (
             <button
               key={key}
               type="button"
-              role="tab"
-              aria-selected={view === key}
-              className={"ranking-tab" + (view === key ? " is-active" : "")}
-              onClick={() => setView(key)}
+              aria-pressed={sort === key}
+              className={"wt-pill" + (sort === key ? " is-active" : "")}
+              onClick={() => setSort(key)}
             >
               {label}
             </button>
           ))}
         </div>
-      </div>
-
-      <div className="war-explorer__stats" aria-live="polite">
-        <div className="war-explorer__stat">
-          <span className="war-explorer__stat-number">{filtered.length}</span>
-          <span className="war-explorer__stat-label">war{filtered.length === 1 ? "" : "s"}</span>
-        </div>
-        <div className="war-explorer__stat">
-          <span className="war-explorer__stat-number">{involvedCount}</span>
-          <span className="war-explorer__stat-label">countr{involvedCount === 1 ? "y" : "ies"} involved</span>
-        </div>
-        <div className="war-explorer__stat">
-          <span className="war-explorer__stat-number">{ongoingCount}</span>
-          <span className="war-explorer__stat-label">ongoing</span>
-        </div>
-        {selected?.slug && (
-          <Link className="war-explorer__country-link" href={`/country/${selected.slug}`}>
-            {selected.flag} Open {selected.name}&apos;s country page →
-          </Link>
+        <button
+          type="button"
+          aria-pressed={ongoingOnly}
+          className={"wt-pill wt-pill--ongoing" + (ongoingOnly ? " is-active" : "")}
+          onClick={() => setOngoingOnly((v) => !v)}
+        >
+          <span className="wt-pill__dot" />
+          Only ongoing
+        </button>
+        {hasFilters && (
+          <button
+            type="button"
+            className="btn-text"
+            onClick={() => {
+              setContinent("All");
+              setHidden({});
+              setActor("");
+              setOngoingOnly(false);
+            }}
+          >
+            ↺ Clear filters
+          </button>
         )}
       </div>
 
-      {view === "poster" ? (
-        <section className="war-explorer__card war-explorer__card--poster" aria-label="War timeline poster">
-          <WarPoster
-            wars={wars}
-            countries={countries}
-            currentYear={currentYear}
-            isMatch={isMatch}
-            onPickCountry={(iso3) => {
-              const c = countryByIso3.get(iso3);
-              setCountry((prev) => (prev === iso3 ? "" : iso3));
-              if (c && continent !== "All" && (c.region || "Other") !== continent) setContinent("All");
-            }}
-          />
-        </section>
-      ) : (
-        <section className="war-explorer__card" aria-label="War timeline">
-          {filtered.length === 0 ? (
-            <p className="war-explorer__empty">No wars match these filters.</p>
-          ) : (
-            <>
-              <div className="war-explorer__axis" aria-hidden="true">
-                {decades.map((d) => (
-                  <span key={d} style={{ left: `${pct(d)}%` }}>
-                    {d}
-                  </span>
+      <section className="wt-card" aria-label="Overview">
+        <div className="wt-card__top">
+          <div className="wt-stat">
+            <div className="wt-stat__number">{visible.length}</div>
+            <div className="wt-stat__label">war{visible.length === 1 ? "" : "s"}</div>
+          </div>
+          <div className="wt-stat">
+            <div className="wt-stat__number wt-stat__number--ongoing">{ongoingCount}</div>
+            <div className="wt-stat__label">still ongoing</div>
+          </div>
+          <div className="wt-stat">
+            <div className="wt-stat__number">{overview.peak}</div>
+            <div className="wt-stat__label">at once, at the peak in {overview.peakYear}</div>
+          </div>
+        </div>
+
+        <div className="wt-eyebrow">Wars active each year</div>
+
+        <div className="wt-chart">
+          {EVENTS.map(([year, label, row]) => (
+            <div
+              key={year}
+              className={"wt-chart__event" + (row ? " wt-chart__event--low" : "")}
+              style={{ left: pct(year + 0.5) }}
+            >
+              <div className="wt-chart__event-label">
+                <b>{year}</b> <span>{label}</span>
+              </div>
+            </div>
+          ))}
+          <div className="wt-chart__bars" role="img" aria-label="Number of wars active in each year since 1946">
+            {overview.years.map((y) => (
+              <div
+                key={y.year}
+                className="wt-chart__col"
+                title={`${y.year} · ${y.total} ${y.total === 1 ? "war" : "wars"}`}
+              >
+                {TYPE_ORDER.filter((t) => y.counts[t]).map((t) => (
+                  <div
+                    key={t}
+                    className="wt-chart__seg"
+                    style={{ height: `${(y.counts[t] * overview.scale).toFixed(2)}%`, background: TYPES[t].color }}
+                  />
                 ))}
               </div>
-              <ul className="country-war-timeline__list">
-                {filtered.map((w) => {
-                  const meta = typeMeta(w.type_of_conflict);
-                  const barEnd = w.end_year || currentYear;
-                  const left = pct(w.start_year);
-                  const width = Math.max(0.9, pct(barEnd + 1) - left);
-                  const sideA = warSideActors(w.side_a);
-                  const sideB = warSideActors(w.side_b);
-                  const years =
-                    w.start_year === w.end_year ? String(w.start_year) : `${w.start_year}–${w.end_year || "present"}`;
-                  return (
-                    <li className="country-war-timeline__row" key={w.id}>
-                      <div className="country-war-timeline__row-top">
-                        <SideChips actors={sideA} />
-                        {sideB.length > 0 && (
-                          <>
-                            <span className="country-war-timeline__vs">vs</span>
-                            <SideChips actors={sideB} />
-                          </>
-                        )}
-                        <span className="country-war-timeline__meta">
-                          {!w.end_year && <span className="war-explorer__ongoing">Ongoing</span>}
-                          {years} · {meta.label}
-                        </span>
-                      </div>
-                      <div className="country-war-timeline__track">
-                        <div
-                          className="country-war-timeline__fill"
-                          style={{ left: `${left.toFixed(2)}%`, width: `${width.toFixed(2)}%`, background: meta.color }}
-                        />
-                      </div>
-                      <div className="war-explorer__involved">
-                        {w.iso3s.map((iso3) => {
-                          const c = countryByIso3.get(iso3);
-                          if (!c) return null;
-                          return (
-                            <button
-                              key={iso3}
-                              type="button"
-                              className={"war-explorer__country-chip" + (iso3 === country ? " is-active" : "")}
-                              onClick={() => {
-                                setCountry(iso3 === country ? "" : iso3);
-                                if (continent !== "All" && (c.region || "Other") !== continent) setContinent("All");
-                              }}
-                              title={iso3 === country ? "Show all countries" : `Show only ${c.name}'s wars`}
-                            >
-                              {c.flag} {c.name}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-              <div className="country-war-timeline__legend">
-                {usedTypes.map((t) => {
-                  const m = typeMeta(t);
-                  return (
-                    <span className="country-war-timeline__legend-item" key={t}>
-                      <span className="country-war-timeline__legend-swatch" style={{ background: m.color }} />
-                      {m.label}
-                    </span>
-                  );
-                })}
+            ))}
+          </div>
+        </div>
+        <div
+          className="wt-eras"
+          style={{
+            gridTemplateColumns: `minmax(0, ${COLD_WAR_END - START}fr) minmax(0, ${now + 1 - COLD_WAR_END}fr)`,
+          }}
+        >
+          <div className="wt-eras__era wt-eras__era--cold">Cold War · 1946–1991</div>
+          <div className="wt-eras__era">Post–Cold War</div>
+        </div>
+      </section>
+
+      <section className="wt-list" aria-label="All wars">
+        <div className="wt-list__head">
+          <span className="wt-eyebrow">War</span>
+          {axisEl}
+        </div>
+
+        {groups.length === 0 && <div className="wt-list__empty">No wars match these filters.</div>}
+
+        {groups.map((g) => (
+          <div className="wt-group" key={g.title}>
+            <div className="wt-group__head">
+              <h2 className="wt-group__title">{g.title}</h2>
+              <span className="wt-group__count">
+                {g.rows.length} war{g.rows.length === 1 ? "" : "s"}
+              </span>
+            </div>
+            <div className="wt-group__body">
+              <div className="wt-group__grid" aria-hidden="true">
+                {axis.map((y) => (
+                  <div key={y} style={{ left: pct(y) }} />
+                ))}
+                <div className="wt-group__coldwar" style={{ left: pct(COLD_WAR_END) }} />
               </div>
-            </>
-          )}
-        </section>
-      )}
+              {g.rows.map((w) => (
+                <div className="wt-row" key={w.id} title={w.title}>
+                  <div className="wt-row__name">
+                    <span className="wt-row__title">{w.name}</span>
+                    {w.also && <span className="wt-row__also">+{w.also}</span>}
+                    <span className="wt-row__years-inline">{w.label}</span>
+                  </div>
+                  <div className="wt-row__track">
+                    <div className={"wt-row__bar" + (w.ongoing ? " is-ongoing" : "")} style={w.barStyle} />
+                    {w.ongoing && <div className="wt-row__ongoing" />}
+                    <span className="wt-row__years" style={w.tagStyle}>
+                      {w.label}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </section>
     </div>
   );
 }
