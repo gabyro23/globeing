@@ -1309,13 +1309,6 @@ path.country.is-dimmed {
   color: var(--accent-deep);
 }
 
-.pictogram-row__legend {
-  margin: 4px 0 0;
-  color: var(--muted);
-  font-size: 0.8rem;
-  text-align: center;
-}
-
 .pictogram-stats {
   margin: 4px 0 0;
   display: flex;
@@ -1419,14 +1412,29 @@ path.country.is-dimmed {
   background: var(--sage-light);
 }
 
+/* One shared footer style for every "Compare by" view's legend (density,
+   GDP, GDP per capita, Unemployment) so it doesn't change shape depending
+   on which indicator is active. The divider is a centered 80%-width line
+   (::before) rather than a full-width border-top. */
 .compare-modal__legend {
+  position: relative;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
-  padding: 14px 24px;
-  border-top: 1px solid var(--divider);
+  padding: 20px 24px 14px;
   color: var(--muted);
   font-size: 0.82rem;
+}
+
+.compare-modal__legend::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 80%;
+  transform: translateX(-50%);
+  border-top: 1px solid var(--divider);
 }
 
 .compare-modal__legend-icon {
@@ -1442,7 +1450,6 @@ path.country.is-dimmed {
 }
 
 .compare-modal__legend--split {
-  justify-content: center;
   flex-wrap: wrap;
   gap: 18px;
 }

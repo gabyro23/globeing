@@ -271,9 +271,6 @@ export default function CompareResults({ countries }) {
                       />
                     ))}
                   </div>
-                  <p className="pictogram-row__legend">
-                    💰 Each bag represents {formatIndicatorValue(gdpIconValue, "US$")} of GDP.
-                  </p>
                 </div>
               )}
 
@@ -289,9 +286,6 @@ export default function CompareResults({ countries }) {
                       />
                     ))}
                   </div>
-                  <p className="pictogram-row__legend">
-                    💰 Each bag represents {formatIndicatorValue(gdpPerCapitaIconValue, "US$")} of GDP per capita.
-                  </p>
                 </div>
               )}
 
@@ -322,6 +316,24 @@ export default function CompareResults({ countries }) {
               Each icon represents {formatNumber(iconValue)} people. Size scale based on the real area
               of {largestCountry?.name} (the largest in the group).
             </span>
+          </footer>
+        )}
+
+        {activeView.key === "gdp_usd" && (
+          <footer className="compare-modal__legend">
+            <span className="compare-modal__legend-icon" aria-hidden="true">
+              💰
+            </span>
+            <span>Each bag represents {formatIndicatorValue(gdpIconValue, "US$")} of GDP.</span>
+          </footer>
+        )}
+
+        {activeView.key === "gdp_per_capita_usd" && (
+          <footer className="compare-modal__legend">
+            <span className="compare-modal__legend-icon" aria-hidden="true">
+              💰
+            </span>
+            <span>Each bag represents {formatIndicatorValue(gdpPerCapitaIconValue, "US$")} of GDP per capita.</span>
           </footer>
         )}
 
