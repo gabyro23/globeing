@@ -112,7 +112,7 @@ const SOURCES = [
   },
   {
     title: "War history",
-    where: "Used on each indexed country page's war history section.",
+    where: "Used on the War Timeline page and on each indexed country page's war history section.",
     body: (
       <>
         <p>

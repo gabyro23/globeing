@@ -45,6 +45,7 @@ const NAV_HREFS = [
   "/compare/fill-the-country",
   "/country",
   "/random-facts",
+  "/war-timeline",
   "/crosswords",
   "/guess-the-country",
   "/contact",
@@ -79,6 +80,7 @@ export default function SiteHeader() {
         <Link href="/country" {...nav("/country")}>Countries</Link>
         {/* "By Years" hidden for now — not built yet, re-enable when it is. */}
         <Link href="/random-facts" {...nav("/random-facts")}>Random Facts</Link>
+        <Link href="/war-timeline" {...nav("/war-timeline")}>War Timeline</Link>
 
         <div className="site-header__nav-item">
           <button type="button" className={`site-header__nav-trigger${playActive ? " is-active" : ""}`} aria-haspopup="menu">

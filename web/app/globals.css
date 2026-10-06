@@ -39,7 +39,12 @@
   --war-interstate: var(--accent);
   --war-intrastate: var(--sage);
   --war-intl-intrastate: #c1834f;
-  --war-extrastate: #5b7c99;
+  --war-extrastate: #8a6f9e;
+  --war-ongoing: #c4473a;
+  --war-era: #efe7dd;
+  --war-era-soft: #f6f0e9;
+  --war-row-hover: #f5eee6;
+  --war-event-line: #b9b0a5;
   /* Logo wordmark colors — fixed brand pair per the "Logo Globeing" spec,
      not tied to --ink/--accent so the logo can't drift when the general UI
      accent hue changes (as it does in dark mode). */
@@ -106,7 +111,12 @@
     --highlight: #3fb6c2;
     --highlight-ink: #0c1f22;
     --war-intl-intrastate: #d9a06a;
-    --war-extrastate: #8fb3cc;
+    --war-extrastate: #b39fc4;
+    --war-ongoing: #e0685b;
+    --war-era: #2a3638;
+    --war-era-soft: #232e30;
+    --war-row-hover: #243033;
+    --war-event-line: #5c696b;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.6);
     --background: var(--bg);
     --foreground: var(--ink);
@@ -6351,4 +6361,448 @@ path.country.is-dimmed {
 
 .news-country-body__empty {
   padding: 8px 0;
+}
+
+/* --- War Timeline page (/war-timeline) ---
+   Layout from the "War Timeline" design in the project (filters, an
+   overview card with wars active each year, one bar per war on a shared
+   1946–today axis, grouped by continent), dressed in the site's own
+   values per "Estructura de páginas" / "Guía de estilos": standard
+   .app-hero, the clamp(16px, 4vw, 40px) gutter with no max-width of its
+   own, Rankings-style filter labels and chips, 14px cards with
+   var(--shadow).
+   See app/war-timeline/page.js and components/WarTimelineExplorer.jsx. */
+.wt-page {
+  --wt-name-col: 320px;
+}
+.wt {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 8px clamp(16px, 4vw, 40px) 0;
+}
+.wt-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* filters */
+.wt-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 24px;
+}
+.wt-filters__group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.wt-filters__group .wt-eyebrow {
+  margin-right: 6px;
+}
+.wt-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-chip);
+  color: var(--muted);
+  padding: 6px 14px;
+  font-size: 12.5px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+.wt-pill:hover {
+  border-color: var(--sage);
+  color: var(--sage);
+}
+.wt-pill.is-active {
+  background: var(--sage);
+  border-color: var(--sage);
+  color: var(--accent-ink);
+}
+.wt-pill__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--war-ongoing);
+}
+
+/* overview card */
+.wt-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px;
+}
+.wt-card__top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px 40px;
+}
+.wt-stat__number {
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+}
+.wt-stat__number--ongoing {
+  color: var(--war-ongoing);
+}
+.wt-stat__label {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.wt-search {
+  position: relative;
+  width: 220px;
+  max-width: 100%;
+}
+.wt-search__icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: 13px;
+  pointer-events: none;
+}
+.wt-search input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 7px 10px 7px 30px;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 13px;
+  font-family: inherit;
+}
+.wt-search input::placeholder {
+  color: var(--muted);
+}
+.wt-search input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.wt-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-chip);
+  color: var(--ink);
+  padding: 6px 14px;
+  font-size: 12.5px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s, opacity 0.15s;
+}
+.wt-type:hover {
+  border-color: var(--sage);
+}
+.wt-type.is-hidden {
+  opacity: 0.45;
+  text-decoration: line-through;
+}
+.wt-type__swatch {
+  width: 16px;
+  height: 8px;
+  border-radius: 4px;
+}
+.wt-chart {
+  position: relative;
+  padding-top: 34px;
+}
+.wt-chart__bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 150px;
+  border-bottom: 1px solid var(--border);
+}
+.wt-chart__col {
+  flex: 1;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 1px;
+  height: 100%;
+  min-width: 0;
+}
+.wt-chart__col:hover {
+  filter: brightness(0.9);
+}
+.wt-chart__seg {
+  border-radius: 1px;
+  flex: none;
+}
+.wt-chart__event {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 1;
+  border-left: 1px dashed var(--war-event-line);
+  pointer-events: none;
+}
+.wt-chart__event--low {
+  top: 16px;
+}
+.wt-chart__event-label {
+  position: absolute;
+  top: -2px;
+  left: 6px;
+  white-space: nowrap;
+  font-size: 11px;
+  line-height: 1.2;
+  color: var(--muted);
+}
+.wt-chart__event-label b {
+  color: var(--ink);
+}
+.wt-eras {
+  display: grid;
+  gap: 4px;
+}
+.wt-eras__era {
+  background: var(--war-era-soft);
+  border-radius: 4px;
+  padding: 7px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wt-eras__era--cold {
+  background: var(--war-era);
+}
+
+/* the list */
+.wt-list {
+  display: flex;
+  flex-direction: column;
+}
+.wt-list__head {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: var(--wt-name-col) minmax(0, 1fr);
+  background: var(--bg);
+  border-bottom: 1px solid var(--border-strong);
+  padding: 12px 0 9px;
+}
+.wt-axis {
+  position: relative;
+  height: 11px;
+}
+.wt-axis span {
+  position: absolute;
+  font-family: ui-monospace, "SF Mono", monospace;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--muted);
+}
+.wt-axis span.is-last {
+  transform: translateX(-100%);
+}
+.wt-list__empty {
+  padding: 48px 0;
+  font-size: 15px;
+  color: var(--muted);
+}
+.wt-group {
+  display: flex;
+  flex-direction: column;
+  padding-top: 24px;
+}
+.wt-group__head {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding-bottom: 10px;
+}
+.wt-group__title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--ink);
+}
+.wt-group__count {
+  font-size: 13px;
+  color: var(--muted);
+}
+.wt-group__body {
+  position: relative;
+}
+.wt-group__grid {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--wt-name-col);
+  right: 0;
+  pointer-events: none;
+}
+.wt-group__grid > div {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-left: 1px solid var(--divider);
+}
+.wt-group__grid > .wt-group__coldwar {
+  border-left: 1px dashed var(--war-event-line);
+  opacity: 0.7;
+}
+.wt-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--wt-name-col) minmax(0, 1fr);
+  align-items: center;
+  min-height: 30px;
+  border-bottom: 1px solid var(--divider);
+}
+.wt-row:hover {
+  background: var(--war-row-hover);
+}
+.wt-row__name {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  min-width: 0;
+  padding: 6px 16px 6px 0;
+}
+.wt-row__title {
+  font-size: 13.5px;
+  line-height: 1.3;
+  font-weight: 700;
+  text-wrap: pretty;
+}
+.wt-row__also {
+  flex: none;
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--muted);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-chip);
+  padding: 3px 7px;
+}
+.wt-row__years-inline {
+  display: none;
+  font-family: ui-monospace, "SF Mono", monospace;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.wt-row__track {
+  position: relative;
+  height: 30px;
+}
+.wt-row__bar {
+  position: absolute;
+  top: 10px;
+  height: 10px;
+  border-radius: 5px;
+}
+.wt-row__bar.is-ongoing {
+  border-radius: 5px 0 0 5px;
+}
+.wt-row__ongoing {
+  position: absolute;
+  top: 9px;
+  right: -4px;
+  width: 12px;
+  height: 12px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  background: var(--war-ongoing);
+  border: 2px solid var(--bg);
+}
+.wt-row__years {
+  position: absolute;
+  top: 9px;
+  padding: 0 8px;
+  font-family: ui-monospace, "SF Mono", monospace;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.wt-source {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 760px;
+  padding: 24px clamp(16px, 4vw, 40px) 40px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.wt-source a {
+  color: var(--accent);
+}
+
+@media (max-width: 860px) {
+  .wt-page {
+    --wt-name-col: 200px;
+  }
+}
+@media (max-width: 600px) {
+  .wt-page {
+    --wt-name-col: 44vw;
+  }
+  .wt-card {
+    padding: 16px;
+  }
+  .wt-stat__number {
+    font-size: 32px;
+  }
+  .wt-search {
+    width: 100%;
+  }
+  /* The year tag doesn't fit beside a short track — show it under the
+     war's name instead. */
+  .wt-row__years {
+    display: none;
+  }
+  .wt-row__years-inline {
+    display: inline;
+  }
+  .wt-row__name {
+    padding-right: 10px;
+  }
+  /* Keep every other decade, and drop the one that would sit under the
+     right-aligned last label. */
+  .wt-axis span:nth-child(even):not(.is-last),
+  .wt-axis span:nth-last-child(3) {
+    display: none;
+  }
+  /* Only the year fits above the chart at this width. */
+  .wt-chart__event-label span {
+    display: none;
+  }
 }

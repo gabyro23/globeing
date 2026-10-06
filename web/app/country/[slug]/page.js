@@ -386,6 +386,9 @@ export default async function CountryPage({ params }) {
                     </a>
                     .
                   </p>
+                  <Link className="country-compare-cta" href="/war-timeline">
+                    See every war since 1946 on the War Timeline →
+                  </Link>
                 </section>
               )}
 

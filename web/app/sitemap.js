@@ -9,6 +9,7 @@ const ROUTES = [
   { path: "/compare/fill-the-country", changeFrequency: "monthly", priority: 0.6 },
   { path: "/rankings", changeFrequency: "weekly", priority: 0.8 },
   { path: "/random-facts", changeFrequency: "daily", priority: 0.7 },
+  { path: "/war-timeline", changeFrequency: "monthly", priority: 0.7 },
   { path: "/crosswords", changeFrequency: "monthly", priority: 0.6 },
   { path: "/guess-the-country", changeFrequency: "monthly", priority: 0.6 },
   { path: "/country", changeFrequency: "weekly", priority: 0.8 },
