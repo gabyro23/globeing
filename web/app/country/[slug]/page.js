@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import CountryHeroPictogram from "../../../components/CountryHeroPictogram";
 import CountryWarTimeline from "../../../components/CountryWarTimeline";
+import CountryEnergyMix from "../../../components/CountryEnergyMix";
 import CountryPageIndex from "../../../components/CountryPageIndex";
 import {
   formatArea,
@@ -70,7 +71,7 @@ export default async function CountryPage({ params }) {
   const data = iso3 ? await getCountryPageData(iso3) : null;
   if (!data) notFound();
 
-  const { country, profile, rankings, neighbors, comparisons, facts, outline, wars, inGuessRoster } = data;
+  const { country, profile, rankings, neighbors, comparisons, facts, outline, wars, energyMix, inGuessRoster } = data;
   const year = new Date().getFullYear();
   const updatedLabel = new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" });
 
@@ -389,6 +390,24 @@ export default async function CountryPage({ params }) {
                   <Link className="country-compare-cta" href="/war-timeline">
                     See every war since 1946 on the War Timeline →
                   </Link>
+                </section>
+              )}
+
+              {energyMix && (
+                <section className="country-section country-section--plain" aria-labelledby="energy-heading">
+                  <h2 id="energy-heading" className="country-section__title">
+                    {country.name}&apos;s energy mix
+                  </h2>
+                  <CountryEnergyMix energyMix={energyMix} />
+                  <p className="country-source-note">
+                    Share of {country.name}&apos;s own electricity generation by source, {energyMix.energy_mix_year}.
+                    Source:{" "}
+                    <a href="https://github.com/owid/energy-data" target="_blank" rel="noreferrer">
+                      Our World in Data
+                    </a>{" "}
+                    (Ember Yearly Electricity Data and the Energy Institute Statistical Review of World
+                    Energy).
+                  </p>
                 </section>
               )}
 

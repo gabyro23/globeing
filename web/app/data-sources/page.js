@@ -141,6 +141,38 @@ const SOURCES = [
     ),
   },
   {
+    title: "Energy mix",
+    where: "Used on each indexed country page's energy mix section.",
+    body: (
+      <>
+        <p>
+          The share of each country&apos;s own electricity generation that comes from coal, oil, gas,
+          nuclear, hydropower, wind, solar, bioenergy and other renewables comes from{" "}
+          <a href="https://github.com/owid/energy-data" target="_blank" rel="noreferrer">
+            Our World in Data&apos;s energy dataset
+          </a>
+          , which combines{" "}
+          <a href="https://ember-energy.org/data/yearly-electricity-data/" target="_blank" rel="noreferrer">
+            Ember&apos;s Yearly Electricity Data
+          </a>{" "}
+          with the{" "}
+          <a href="https://www.energyinst.org/statistical-review" target="_blank" rel="noreferrer">
+            Energy Institute&apos;s Statistical Review of World Energy
+          </a>{" "}
+          (the direct successor to the BP Statistical Review). Each country&apos;s numbers are a
+          snapshot of its single most recent reported year, not a time series — the year is shown
+          alongside the percentages since it varies a lot by country.
+        </p>
+        <p>
+          A country missing this section entirely has no data in the source at all (mostly small
+          states/territories without their own standalone electricity grid) — it&apos;s a genuine
+          coverage gap, not a claim that the country generates no electricity. Where a country does
+          have data, a real 0% for one fuel is shown as 0%, not left out.
+        </p>
+      </>
+    ),
+  },
+  {
     title: "Random & daily facts",
     where: "Used on the homepage and the Random Facts page.",
     body: (

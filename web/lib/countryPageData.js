@@ -68,6 +68,28 @@ export function getAllWars() {
   return allWarsPromise;
 }
 
+let allEnergyMixPromise = null;
+
+// One row per country (iso3 is the primary key) from country_energy_mix
+// — see docs/data/energy_mix_README.md. A country with no row here
+// genuinely has no data in the source (mostly small states/territories
+// without their own electricity grid) — it's not the same as "0% of
+// everything," so callers should treat a missing row as "don't render
+// this section," not as zeros. Small table (~200 rows), same
+// whole-table-then-filter caching as getAllWars.
+function getAllEnergyMix() {
+  if (!allEnergyMixPromise) {
+    allEnergyMixPromise = supabase
+      .from("country_energy_mix")
+      .select("*")
+      .then(({ data, error }) => {
+        if (error) throw new Error(error.message);
+        return data;
+      });
+  }
+  return allEnergyMixPromise;
+}
+
 function rankFor(countries, key, iso3) {
   const indicator = INDICATORS.find((i) => i.key === key);
   const dir = indicator?.betterWhen === "low" ? 1 : -1;
@@ -195,6 +217,17 @@ export async function getCountryPageData(iso3) {
     wars = [];
   }
 
+  // Same best-effort treatment, and same "absence is a real coverage
+  // gap" rule as wars: energyMix stays null (not an object full of
+  // zeros) when this country has no row in country_energy_mix at all.
+  let energyMix = null;
+  try {
+    const allEnergyMix = await getAllEnergyMix();
+    energyMix = allEnergyMix.find((e) => e.iso3 === iso3) || null;
+  } catch {
+    energyMix = null;
+  }
+
   return {
     country,
     profile: buildProfile(country, iso3),
@@ -205,6 +238,7 @@ export async function getCountryPageData(iso3) {
     facts,
     outline,
     wars,
+    energyMix,
     inGuessRoster: GUESS_COUNTRY_NAMES.has(country.name.toUpperCase()),
     slug: slugForIso3(iso3),
   };
